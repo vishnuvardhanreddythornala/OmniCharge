@@ -1,0 +1,68 @@
+# ===== Environment Secrets =====
+.env
+!.env.example
+
+# ===== Local Project Files & Docs =====
+docs/
+scripts/
+*.md
+!README.md
+*.docx
+*.postman_collection.json
+*.backup
+
+# ===== Build Outputs (Multi-Module Support) =====
+**/target/
+target/
+*.jar
+*.war
+*.ear
+!.mvn/wrapper/maven-wrapper.jar
+
+# ===== Logs =====
+**/logs/
+logs/
+*.log
+
+# ===== IDE & Editors =====
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+.classpath
+.project
+.settings/
+.factorypath
+*.sublime-workspace
+*.sublime-project
+
+# ===== Spring Tool Suite =====
+.apt_generated
+.springBeans
+.sts4-cache
+
+# ===== NetBeans =====
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+**/build/
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# ===== Maven =====
+.mvn/wrapper/maven-wrapper.jar
+
+# ===== Database/Docker/Other =====
+*.sql
+!databaseQuery.sql
+docker-compose.override.yml
+*.bak
+*.swp
+*.swo
+*~
