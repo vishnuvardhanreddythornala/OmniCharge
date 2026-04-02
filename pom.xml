@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.omnicharge</groupId>
+	<artifactId>omnicharge-parent</artifactId>
+	<version>1.0.0</version>
+	<packaging>pom</packaging>
+	<name>OmniCharge Parent</name>
+	<description>Root parent POM for OmniCharge Microservices Ecosystem</description>
+
+	<modules>
+		<module>omnicharge-common</module>
+		<module>config-server</module>
+		<module>discovery-server</module>
+		<module>api-gateway</module>
+		<module>user-service</module>
+		<module>operator-service</module>
+		<module>recharge-service</module>
+		<module>payment-service</module>
+		<module>notification-service</module>
+		<module>logging-service</module>
+	</modules>
+
+	<properties>
+		<java.version>21</java.version>
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
+		<!-- Blank out release to prevent Spring Boot parent from injecting it -->
+		<maven.compiler.release></maven.compiler.release>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	</properties>
+
+</project>
