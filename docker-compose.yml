@@ -1,0 +1,446 @@
+name: omnicharge
+
+
+networks:
+  omnicharge-net:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  rabbitmq_data:
+  redis_data:
+  elasticsearch_data:
+  prometheus_data:
+  grafana_data:
+
+services:
+  # ==========================================
+  # INFRASTRUCTURE SERVICES
+  # ==========================================
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: omnicharge_user_db
+      TZ: Asia/Kolkata
+    networks:
+      - omnicharge-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    env_file:
+      - .env
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      TZ: Asia/Kolkata
+    networks:
+      - omnicharge-net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.0-alpine
+    container_name: redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    env_file:
+      - .env
+    networks:
+      - omnicharge-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================
+  # OBSERVABILITY STACK
+  # ==========================================
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+    container_name: elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - TZ=Asia/Kolkata
+    ports:
+      - "127.0.0.1:9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - omnicharge-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.10.2
+    container_name: logstash
+    restart: unless-stopped
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
+      - ./logging-service/logs:/logs
+    environment:
+      - TZ=Asia/Kolkata
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - omnicharge-net
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.10.2
+    container_name: kibana
+    restart: unless-stopped
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - TZ=Asia/Kolkata
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - omnicharge-net
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.0
+    container_name: cadvisor
+    restart: unless-stopped
+    ports:
+      - "8088:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    networks:
+      - omnicharge-net
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - omnicharge-net
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - TZ=Asia/Kolkata
+    depends_on:
+      - prometheus
+    networks:
+      - omnicharge-net
+
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: zipkin
+    restart: unless-stopped
+    ports:
+      - "9411:9411"
+    environment:
+      - TZ=Asia/Kolkata
+    networks:
+      - omnicharge-net
+
+  # ==========================================
+  # CORE MICROSERVICES
+  # ==========================================
+  config-server:
+    build: ./config-server
+    container_name: config-server
+    restart: on-failure
+    volumes:
+      - ./logging-service/logs:/logs
+      - ./config-repo:/config-repo
+    env_file:
+      - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=native
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
+      - RABBITMQ_HOST=rabbitmq
+      - TZ=Asia/Kolkata
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Kolkata
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - omnicharge-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8888/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  eureka-server:
+    build: ./discovery-server
+    container_name: eureka-server
+    restart: on-failure
+    volumes:
+      - ./logging-service/logs:/logs
+    env_file:
+      - .env
+    environment:
+      - CONFIG_SERVER_URL=http://config-server:8888
+      - RABBITMQ_HOST=rabbitmq
+      - TZ=Asia/Kolkata
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Kolkata
+    depends_on:
+      config-server:
+        condition: service_healthy
+    networks:
+      - omnicharge-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8761/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./logging-service/logs:/logs
+    env_file:
+      - .env
+    environment:
+      - CONFIG_SERVER_URL=http://config-server:8888
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
+      - REDIS_HOST=redis
+      - RABBITMQ_HOST=rabbitmq
+      - TZ=Asia/Kolkata
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Kolkata
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - omnicharge-net
+
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    restart: on-failure
+    volumes:
+      - ./logging-service/logs:/logs
+    env_file:
+      - .env
+    environment:
+      - CONFIG_SERVER_URL=http://config-server:8888
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
+      - MYSQL_HOST=mysql
+      - REDIS_HOST=redis
+      - RABBITMQ_HOST=rabbitmq
+      - TZ=Asia/Kolkata
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Kolkata
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - omnicharge-net
+
+  operator-service:
+    build: ./operator-service
+    container_name: operator-service
+    restart: on-failure
+    volumes:
+      - ./logging-service/logs:/logs
+    env_file:
+      - .env
+    environment:
+      - CONFIG_SERVER_URL=http://config-server:8888
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
+      - MYSQL_HOST=mysql
+      - REDIS_HOST=redis
+      - RABBITMQ_HOST=rabbitmq
+      - TZ=Asia/Kolkata
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Kolkata
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - omnicharge-net
+
+  recharge-service:
+    build: ./recharge-service
+    container_name: recharge-service
+    restart: on-failure
+    volumes:
+      - ./logging-service/logs:/logs
+    env_file:
+      - .env
+    environment:
+      - CONFIG_SERVER_URL=http://config-server:8888
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
+      - MYSQL_HOST=mysql
+      - REDIS_HOST=redis
+      - RABBITMQ_HOST=rabbitmq
+      - TZ=Asia/Kolkata
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Kolkata
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - omnicharge-net
+
+  payment-service:
+    build: ./payment-service
+    container_name: payment-service
+    restart: on-failure
+    volumes:
+      - ./logging-service/logs:/logs
+    env_file:
+      - .env
+    environment:
+      - CONFIG_SERVER_URL=http://config-server:8888
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
+      - MYSQL_HOST=mysql
+      - RABBITMQ_HOST=rabbitmq
+      - TZ=Asia/Kolkata
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Kolkata
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - omnicharge-net
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    restart: on-failure
+    volumes:
+      - ./logging-service/logs:/logs
+    env_file:
+      - .env
+    environment:
+      - CONFIG_SERVER_URL=http://config-server:8888
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
+      - MYSQL_HOST=mysql
+      - RABBITMQ_HOST=rabbitmq
+      - TZ=Asia/Kolkata
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Kolkata
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - omnicharge-net
+
+  logging-service:
+    build: ./logging-service
+    container_name: logging-service
+    restart: on-failure
+    volumes:
+      - ./logging-service/logs:/logs
+    env_file:
+      - .env
+    environment:
+      - CONFIG_SERVER_URL=http://config-server:8888
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
+      - MYSQL_HOST=mysql
+      - RABBITMQ_HOST=rabbitmq
+      - TZ=Asia/Kolkata
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Kolkata
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - omnicharge-net
