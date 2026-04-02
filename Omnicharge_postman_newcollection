@@ -1,0 +1,775 @@
+{
+  "info": {
+    "name": "Omnicharge_postman_collection",
+    "description": "Comprehensive Postman Collection covering all OmniCharge flows: User Registration, Google Auth, Profile Completion Enforcement, Operator/Plan Browsing, Recharge, Payment (Razorpay), Notifications, and Admin operations.\n\nRun requests sequentially from top to bottom. Variables are auto-populated via test scripts.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Flow A: Standard Registration & Login",
+      "item": [
+        {
+          "name": "1. Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Postman Test User\",\n  \"email\": \"testuser@omnicharge.com\",\n  \"password\": \"SecurePass123!\",\n  \"mobileNumber\": \"9876543210\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "2. Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data) {",
+                  "    pm.collectionVariables.set('jwt_token', jsonData.data.accessToken);",
+                  "    pm.collectionVariables.set('refresh_token', jsonData.data.refreshToken);",
+                  "    pm.collectionVariables.set('user_id', jsonData.data.fullName ? '' : '');",
+                  "    pm.collectionVariables.set('is_profile_complete', jsonData.data.isProfileComplete);",
+                  "",
+                  "    var payload = JSON.parse(atob(jsonData.data.accessToken.split('.')[1]));",
+                  "    pm.collectionVariables.set('user_id', payload.userId);",
+                  "",
+                  "    console.log('Login OK | userId=' + payload.userId + ' | profileComplete=' + jsonData.data.isProfileComplete);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"testuser@omnicharge.com\",\n  \"password\": \"SecurePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Flow B: Google Auth + Profile Completion",
+      "item": [
+        {
+          "name": "1. Google Auth Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data) {",
+                  "    pm.collectionVariables.set('jwt_token', jsonData.data.accessToken);",
+                  "    pm.collectionVariables.set('refresh_token', jsonData.data.refreshToken);",
+                  "    pm.collectionVariables.set('is_profile_complete', jsonData.data.isProfileComplete);",
+                  "",
+                  "    var payload = JSON.parse(atob(jsonData.data.accessToken.split('.')[1]));",
+                  "    pm.collectionVariables.set('user_id', payload.userId);",
+                  "",
+                  "    console.log('Google Auth OK | profileComplete=' + jsonData.data.isProfileComplete);",
+                  "",
+                  "    pm.test('Response has isProfileComplete flag', function () {",
+                  "        pm.expect(jsonData.data).to.have.property('isProfileComplete');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idToken\": \"PASTE_YOUR_GOOGLE_ID_TOKEN_HERE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/google",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "google"]
+            }
+          }
+        },
+        {
+          "name": "2. [BLOCKED] Try Recharge Without Mobile (Expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Should be blocked with 403 Forbidden', function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "console.log('Gateway correctly blocked incomplete profile from business API.');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "X-User-Id", "value": "{{user_id}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobileNumber\": \"9876543210\",\n  \"operatorId\": 1,\n  \"planId\": 1,\n  \"paymentMethod\": \"RAZORPAY\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/recharges",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "recharges"]
+            }
+          }
+        },
+        {
+          "name": "3. Complete Profile (Add Mobile Number)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Profile updated successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "console.log('Profile updated with mobile number. Now refresh token to get isProfileComplete=true.');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Amit Sen\",\n  \"mobileNumber\": \"9876543210\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "profile"]
+            }
+          }
+        },
+        {
+          "name": "4. Refresh Token (Get New JWT with isProfileComplete=true)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data) {",
+                  "    pm.collectionVariables.set('jwt_token', jsonData.data.accessToken);",
+                  "    pm.collectionVariables.set('refresh_token', jsonData.data.refreshToken);",
+                  "    pm.collectionVariables.set('is_profile_complete', jsonData.data.isProfileComplete);",
+                  "",
+                  "    var payload = JSON.parse(atob(jsonData.data.accessToken.split('.')[1]));",
+                  "    pm.collectionVariables.set('user_id', payload.userId);",
+                  "",
+                  "    pm.test('isProfileComplete should now be true', function () {",
+                  "        pm.expect(jsonData.data.isProfileComplete).to.be.true;",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh-token",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "refresh-token"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Flow C: Browse Operators & Plans",
+      "item": [
+        {
+          "name": "1. Get Active Operators",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/operators/active",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "operators", "active"]
+            }
+          }
+        },
+        {
+          "name": "2. Detect Operator by Mobile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/operators/detect?mobileNumber=9876543210",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "operators", "detect"],
+              "query": [
+                { "key": "mobileNumber", "value": "9876543210" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "3. Search Plans by Operator",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/plans/search?operatorId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "plans", "search"],
+              "query": [
+                { "key": "operatorId", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "4. Get Plan by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/plans/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "plans", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Flow D: Recharge + Payment (Saga)",
+      "item": [
+        {
+          "name": "1. Initiate Recharge",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data) {",
+                  "    pm.collectionVariables.set('recharge_id', jsonData.data.rechargeId);",
+                  "    pm.collectionVariables.set('recharge_amount', jsonData.data.amount || '299.00');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobileNumber\": \"9876543210\",\n  \"operatorId\": 1,\n  \"planId\": 1,\n  \"paymentMethod\": \"RAZORPAY\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/recharges",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "recharges"]
+            }
+          }
+        },
+        {
+          "name": "2. Process Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rechargeId\": \"{{recharge_id}}\",\n  \"userId\": {{user_id}},\n  \"amount\": {{recharge_amount}},\n  \"paymentMethod\": \"RAZORPAY\",\n  \"userEmail\": \"testuser@omnicharge.com\",\n  \"userMobile\": \"9876543210\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/process",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "process"]
+            }
+          }
+        },
+        {
+          "name": "3. Poll Recharge Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/recharges/status/{{recharge_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "recharges", "status", "{{recharge_id}}"]
+            }
+          }
+        },
+        {
+          "name": "4. Get Recharge Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/recharges/{{recharge_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "recharges", "{{recharge_id}}"]
+            }
+          }
+        },
+        {
+          "name": "5. Get Recharge History",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/recharges/history?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "recharges", "history"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Flow E: Payment History",
+      "item": [
+        {
+          "name": "1. Get Payment History",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/history?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "history"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Flow F: Notifications",
+      "item": [
+        {
+          "name": "1. Get User Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "2. Get Unread Notification Count",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/unread-count",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", "unread-count"]
+            }
+          }
+        },
+        {
+          "name": "3. Mark Notification as Read",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/1/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", "1", "read"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Flow G: User Profile & Auth",
+      "item": [
+        {
+          "name": "1. Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "profile"]
+            }
+          }
+        },
+        {
+          "name": "2. Update My Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Updated Name\",\n  \"mobileNumber\": \"9876543210\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "profile"]
+            }
+          }
+        },
+        {
+          "name": "3. Change Password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"SecurePass123!\",\n  \"newPassword\": \"NewSecurePass456!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "change-password"]
+            }
+          }
+        },
+        {
+          "name": "4. Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"testuser@omnicharge.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "forgot-password"]
+            }
+          }
+        },
+        {
+          "name": "5. Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"testuser@omnicharge.com\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/verify-otp",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "verify-otp"]
+            }
+          }
+        },
+        {
+          "name": "6. Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"testuser@omnicharge.com\",\n  \"otp\": \"123456\",\n  \"newPassword\": \"ResetPass789!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "reset-password"]
+            }
+          }
+        },
+        {
+          "name": "7. Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data) {",
+                  "    pm.collectionVariables.set('jwt_token', jsonData.data.accessToken);",
+                  "    pm.collectionVariables.set('refresh_token', jsonData.data.refreshToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh-token",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "refresh-token"]
+            }
+          }
+        },
+        {
+          "name": "8. Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Flow H: Admin Operations",
+      "item": [
+        {
+          "name": "1. Admin - List All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "2. Admin - List All Operators",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/operators",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "operators"]
+            }
+          }
+        },
+        {
+          "name": "3. Admin - Create Operator",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Operator\",\n  \"code\": \"TESTOP\",\n  \"type\": \"PREPAID\",\n  \"description\": \"Test Operator for Postman\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/operators",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "operators"]
+            }
+          }
+        },
+        {
+          "name": "4. Admin - Create Plan for Operator",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planName\": \"Test Unlimited Plan\",\n  \"price\": 299.00,\n  \"validityDays\": 28,\n  \"dataLimit\": \"2GB/day\",\n  \"callBenefit\": \"Unlimited\",\n  \"smsBenefit\": \"100/day\",\n  \"additionalBenefits\": \"Free OTT subscription\",\n  \"category\": \"POPULAR\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/operators/1/plans",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "operators", "1", "plans"]
+            }
+          }
+        },
+        {
+          "name": "5. Admin - Get All Recharges",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/recharges?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "recharges"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "6. Admin - Get Recharge Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/recharges/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "recharges", "stats"]
+            }
+          }
+        },
+        {
+          "name": "7. Admin - Get Payment Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/payments/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "payments", "stats"]
+            }
+          }
+        },
+        {
+          "name": "8. Admin - Rebuild Redis Cache",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/system/rebuild-cache",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "system", "rebuild-cache"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "jwt_token", "value": "" },
+    { "key": "refresh_token", "value": "" },
+    { "key": "user_id", "value": "" },
+    { "key": "recharge_id", "value": "" },
+    { "key": "recharge_amount", "value": "299.00" },
+    { "key": "is_profile_complete", "value": "" }
+  ]
+}

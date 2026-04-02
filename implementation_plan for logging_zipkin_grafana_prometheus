@@ -1,0 +1,307 @@
+# OmniCharge Centralized Logging, Monitoring & Tracing — Final Plan
+
+---
+
+## 1. Current Implementation Analysis
+
+### What We Have Today
+
+```mermaid
+graph LR
+    subgraph "Current Logging = Terminal Only"
+        US["user-service<br/>@Slf4j → console"]
+        OS["operator-service<br/>@Slf4j → console"]
+        RS["recharge-service<br/>@Slf4j → console"]
+        PS["payment-service<br/>@Slf4j → console"]
+        NS["notification-service<br/>@Slf4j → console"]
+        GW["api-gateway<br/>System.out → console"]
+    end
+    US & OS & RS & PS & NS & GW --> X["❌ Logs vanish on restart<br/>❌ No files, no search<br/>❌ No traceId<br/>❌ No metrics"]
+```
+
+| What Works ✅ | What's Missing ❌ |
+|---|---|
+| All business services use `@Slf4j` correctly | No log files — lost on restart |
+| 100+ `log.info/error/warn` calls already in place | No distributed traceId across services |
+| RabbitMQ Saga orchestration fully functional | No metrics (CPU, memory, request rate) |
+| Resilience4J circuit breakers active | No dashboards (Grafana) |
+| | No API documentation (Swagger) |
+| | [JwtAuthenticationFilter](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/api-gateway/src/main/java/com/omnicharge/gateway/filter/JwtAuthenticationFilter.java#24-160) uses `System.out` (16 lines) |
+
+> [!IMPORTANT]
+> **Terminal logging stays untouched.** We are NOT modifying any existing `log.info()` or console output. We are ADDING a parallel path that captures logs and stores them in files.
+
+---
+
+## 2. Why RabbitMQ for Log Transport? And What If It's Down?
+
+### Why RabbitMQ?
+
+| Approach | How It Works | Problem |
+|---|---|---|
+| ❌ Direct HTTP | Each service POSTs logs to logging-service via REST | **Synchronous** — if logging-service is slow, it slows down your payment/recharge APIs |
+| ❌ Shared filesystem | All services write to same folder | Doesn't work if services run on different machines |
+| ❌ Polling/scraping | Logging-service reads each service's console | Unreliable, no structured data |
+| ✅ **RabbitMQ** | Each service publishes log events to a queue; logging-service consumes asynchronously | **Non-blocking, decoupled, already in your stack** |
+
+RabbitMQ is the right choice because:
+1. **Already running** in your infrastructure (no new tool to install)
+2. **Async/non-blocking** — publishing a log event takes <1ms, doesn't slow down business APIs
+3. **Durable queues** — if logging-service restarts, messages wait in the queue
+4. **Your Saga already uses it** — proven reliable in your architecture
+
+### What If RabbitMQ Is Down? → Local File Fallback
+
+```mermaid
+graph TD
+    A["Service generates log event"] --> B{"Is RabbitMQ<br/>available?"}
+    B -->|"YES (99.9% of the time)"| C["Publish to<br/>logging.events.queue"]
+    C --> D["logging-service<br/>consumes & writes files"]
+    B -->|"NO (RabbitMQ down)"| E["Write to local<br/>fallback file:<br/>logs/fallback-buffer.log"]
+    E --> F["On RabbitMQ recovery:<br/>background thread reads<br/>fallback file and<br/>republishes to queue"]
+    F --> D
+```
+
+Each service has a **dual-write strategy**:
+- **Primary**: Publish `LogEvent` to RabbitMQ → logging-service writes to organized files
+- **Fallback**: If RabbitMQ publish fails → write to local `logs/fallback-buffer.log`
+- **Recovery**: A scheduled task in each service checks the fallback file every 30s; when RabbitMQ is back, it replays buffered events to the queue
+
+> This means **zero log loss** even during RabbitMQ downtime.
+
+### What About RabbitMQ's Own Logs?
+
+We will NOT store RabbitMQ internal logs (those are managed by RabbitMQ itself at `%APPDATA%\RabbitMQ\log\`). We WILL log all **RabbitMQ-related business events** (message published, message consumed, connection errors) via the existing `log.info/error` calls — which our system will capture automatically.
+
+---
+
+## 3. Complete Architecture
+
+```mermaid
+graph TB
+    subgraph "Client"
+        CL["Postman / Angular"]
+    end
+
+    subgraph "Edge"
+        GW["API Gateway :8080"]
+    end
+
+    subgraph "Business Services"
+        US["User :8081"]
+        OS["Operator :8082"]
+        RS["Recharge :8083"]
+        PS["Payment :8084"]
+        NS["Notification :8085"]
+    end
+
+    subgraph "NEW: Centralized Logging & Monitoring"
+        LS["logging-service :8086"]
+        LDB[("omnicharge_logging_db")]
+        LF["logs/ directory<br/>per-service files"]
+    end
+
+    subgraph "Observability Stack"
+        ZK["Zipkin :9411<br/>Distributed Tracing"]
+        PM["Prometheus :9090<br/>Metrics Scraping"]
+        GF["Grafana :3000<br/>Dashboards"]
+    end
+
+    subgraph "Infrastructure"
+        DS["Eureka :8761"]
+        CS["Config Server :8888"]
+        RMQ["RabbitMQ :5672"]
+        RD["Redis :6379"]
+    end
+
+    CL --> GW --> US & OS & RS & PS & NS
+
+    US & OS & RS & PS & NS & GW -->|"LogEvent via RabbitMQ"| RMQ
+    RMQ -->|"logging.events.queue"| LS
+    LS --> LDB
+    LS --> LF
+
+    US & OS & RS & PS & NS & GW -->|"trace spans (auto)"| ZK
+    PM -->|"scrapes /actuator/prometheus"| US & OS & RS & PS & NS & GW & LS
+    GF -->|"queries"| PM
+
+    style LS fill:#2d6a4f,stroke:#1b4332,color:#fff
+    style ZK fill:#0077b6,stroke:#023e8a,color:#fff
+    style PM fill:#e85d04,stroke:#dc2f02,color:#fff
+    style GF fill:#7b2cbf,stroke:#5a189a,color:#fff
+```
+
+---
+
+## 4. Exactly What Goes Where
+
+### Placement Matrix
+
+| Component | Where It Goes | Why There |
+|---|---|---|
+| `LogEvent.java` DTO | `omnicharge-common` | Shared by producers (all services) AND consumer (logging-service) |
+| `LoggingConstants.java` | `omnicharge-common` | Queue/exchange names referenced by all |
+| `LogEventPublisher.java` | `omnicharge-common` | Reusable bean auto-configured in every service |
+| `FallbackLogWriter.java` | `omnicharge-common` | Fallback file writer when RabbitMQ is down |
+| Micrometer Tracing deps | `omnicharge-common` pom.xml | Inherited by all services |
+| Prometheus registry dep | `omnicharge-common` pom.xml | Inherited by all services |
+| Zipkin, Prometheus, Actuator properties | `config-server/config/application.properties` | Global — one place, all services inherit |
+| `logging-service.properties` | `config-server/config/` | DB config for the new service |
+| Swagger dep (`springdoc`) | Each service's own [pom.xml](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/api-gateway/pom.xml) | MVC vs WebFlux variant differs |
+| [OpenApiConfig.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/omnicharge-common/src/main/java/com/omnicharge/common/config/OpenApiConfig.java) | Each service individually | Different title/description per service |
+| `logback-spring.xml` | **NOT NEEDED** in business services | Terminal stays untouched; log capture is via code |
+| Log file writing logic | `logging-service` only | Centralized — that's the whole point |
+| RabbitMQ logging exchange/queue | `logging-service` RabbitMQConfig | Consumer declares its own queue |
+| System.out cleanup | `api-gateway` + `user-service` | Fix only the 2 files with System.out |
+| `@Slf4j` on GlobalExceptionHandler | `omnicharge-common` | So server errors are logged |
+
+### What Does NOT Change
+
+| Unchanged | Reason |
+|---|---|
+| Terminal/console log output | User explicitly requested this stays |
+| Existing `log.info/error/warn` calls (100+) | They continue on console; we capture them in parallel |
+| Existing RabbitMQ Saga queues | Logging uses a **separate exchange** (`omnicharge.logging.exchange`) |
+| Redis CQRS read model | Not touched |
+| Any business logic | Zero impact |
+
+---
+
+## 5. Log File Structure (Inside `logging-service`)
+
+```
+logging-service/logs/
+├── api-gateway/
+│   ├── api-gateway.log                    ← Current active (rolling)
+│   ├── api-gateway-2026-03-24.0.log       ← Archived by date
+│   └── api-gateway-2026-03-25.0.log
+├── user-service/
+│   ├── user-service.log
+│   └── user-service-2026-03-25.0.log
+├── operator-service/
+│   └── operator-service.log
+├── recharge-service/
+│   └── recharge-service.log
+├── payment-service/
+│   └── payment-service.log
+├── notification-service/
+│   └── notification-service.log
+└── all-services.log                       ← Combined feed, searchable
+```
+
+**Rolling policy**: 10MB per file, 30 days retention, 500MB max total per service.
+
+---
+
+## 6. Proposed Changes — File by File
+
+### A. `omnicharge-common` (Revert + New Shared Code)
+
+| Action | File |
+|---|---|
+| REVERT | [pom.xml](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/api-gateway/pom.xml) — remove premature Swagger dep; keep/add only Micrometer + Zipkin + Prometheus |
+| DELETE | [config/OpenApiConfig.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/omnicharge-common/src/main/java/com/omnicharge/common/config/OpenApiConfig.java) |
+| ADD `@Slf4j` | [GlobalExceptionHandler.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/omnicharge-common/src/main/java/com/omnicharge/common/exception/GlobalExceptionHandler.java) — log server errors |
+| NEW | `dto/LogEvent.java` |
+| NEW | `logging/LoggingConstants.java` |
+| NEW | `logging/LogEventPublisher.java` — publishes to RabbitMQ with fallback |
+| NEW | `logging/FallbackLogWriter.java` — writes to local file when RabbitMQ unavailable |
+| NEW | `logging/LogCaptureFilter.java` — servlet filter that captures request/response logs |
+
+### B. `config-server`
+
+| Action | File |
+|---|---|
+| RECREATE | [config/application.properties](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/config-server/src/main/resources/config/application.properties) — Zipkin + Prometheus + Actuator + Swagger globals |
+| NEW | `config/logging-service.properties` — port 8086, DB config |
+
+### C. `api-gateway` (Revert + Fix)
+
+| Action | File |
+|---|---|
+| REVERT | [pom.xml](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/api-gateway/pom.xml) — remove premature exclusions/deps |
+| ADD | [pom.xml](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/api-gateway/pom.xml) — `springdoc-openapi-starter-webflux-ui` + Micrometer + Prometheus |
+| FIX | [JwtAuthenticationFilter.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/api-gateway/src/main/java/com/omnicharge/gateway/filter/JwtAuthenticationFilter.java) — replace 16 System.out/err with `@Slf4j` |
+| NEW | [config/OpenApiConfig.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/omnicharge-common/src/main/java/com/omnicharge/common/config/OpenApiConfig.java) (WebFlux variant) |
+
+### D. Each Business Service (user, operator, recharge, payment, notification)
+
+| Action | File |
+|---|---|
+| ADD | [pom.xml](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/api-gateway/pom.xml) — `springdoc-openapi-starter-webmvc-ui` |
+| FIX | [JwtUtil.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/user-service/src/main/java/com/omnicharge/user/util/JwtUtil.java) (user-service only) — remove secret-printing System.out |
+| NEW | [config/OpenApiConfig.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/omnicharge-common/src/main/java/com/omnicharge/common/config/OpenApiConfig.java) — service-specific Swagger config |
+
+### E. `logging-service` (BRAND NEW)
+
+| File | Purpose |
+|---|---|
+| [pom.xml](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/api-gateway/pom.xml) | Spring Boot + AMQP + JPA + MySQL + Web + Eureka + Config + Common |
+| `LoggingServiceApplication.java` | Main class |
+| [config/RabbitMQConfig.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/payment-service/src/main/java/com/omnicharge/payment/config/RabbitMQConfig.java) | Declares `omnicharge.logging.exchange` + `logging.events.queue` |
+| `config/SecurityConfig.java` | Permit all (internal service) |
+| `entity/LogEntry.java` | JPA entity → MySQL |
+| `repository/LogEntryRepository.java` | Spring Data JPA |
+| `consumer/LogEventConsumer.java` | `@RabbitListener` — receives log events |
+| `service/LogPersistenceService.java` | Saves to MySQL |
+| `service/LogFileWriterService.java` | Writes to per-service log files with rolling |
+| `controller/AdminLogController.java` | REST APIs for querying logs |
+| `logback-spring.xml` | logging-service's own logs |
+
+---
+
+## 7. Observability Stack Setup
+
+### Zipkin (Distributed Tracing)
+```bash
+docker run -d -p 9411:9411 --name zipkin openzipkin/zipkin
+```
+- Auto-configured via Micrometer Tracing deps + config properties
+- Each service sends trace spans automatically — zero code changes
+- View at `http://localhost:9411`
+
+### Prometheus (Metrics Scraping)
+```bash
+docker run -d -p 9090:9090 --name prometheus -v prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus
+```
+`prometheus.yml`:
+```yaml
+scrape_configs:
+  - job_name: 'omnicharge'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+    static_configs:
+      - targets:
+        - 'host.docker.internal:8080'   # gateway
+        - 'host.docker.internal:8081'   # user
+        - 'host.docker.internal:8082'   # operator
+        - 'host.docker.internal:8083'   # recharge
+        - 'host.docker.internal:8084'   # payment
+        - 'host.docker.internal:8085'   # notification
+        - 'host.docker.internal:8086'   # logging
+```
+
+### Grafana (Dashboards)
+```bash
+docker run -d -p 3000:3000 --name grafana grafana/grafana
+```
+- Add Prometheus as data source → `http://host.docker.internal:9090`
+- Import Spring Boot dashboard (ID: `12900`) for instant JVM/HTTP metrics
+- View at `http://localhost:3000` (admin/admin)
+
+---
+
+## 8. Verification Plan
+
+| Step | What to Check |
+|---|---|
+| `mvn clean compile` all 8 services | No build errors |
+| Start all 9 services + Docker containers | Clean boot |
+| Fire recharge flow via Postman | Saga completes |
+| Check `logging-service/logs/` | Per-service files exist with content |
+| Check `omnicharge_logging_db.log_entries` | Rows with traceId |
+| Open `http://localhost:9411` | Zipkin trace spanning all services |
+| Open `http://localhost:3000` | Grafana dashboard with JVM metrics |
+| Open `http://localhost:8081/swagger-ui.html` | Swagger UI with JWT auth |
+| Kill RabbitMQ → fire request → restart RabbitMQ | Fallback file created → replayed on recovery |
+| Grep all logs for "jwt.secret" | **ZERO results** (security verified) |

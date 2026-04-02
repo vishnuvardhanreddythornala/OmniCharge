@@ -1,0 +1,72 @@
+# OmniCharge Enterprise Upgrade Implementation Plan
+
+## Goal Description
+Upgrade the OmniCharge platform architecture by implementing an Event-Driven Saga Pattern using **RabbitMQ** (replacing synchronous inter-service HTTP calls), adopting the **CQRS Pattern** with **Redis** for read-model scaling, and integrating **Razorpay** for production-ready payment processing.
+
+---
+
+## Proposed Changes
+
+### 1. Common Library (`omnicharge-common`)
+We will create structured event classes for the Saga pattern and update dependencies to support Razorpay.
+#### [MODIFY] `pom.xml`
+- No major changes here unless we lift DTOs.
+#### [NEW] `src/main/java/com/omnicharge/common/event/saga/*`
+- `RechargeInitiatedEvent.java`
+- `PaymentApprovedEvent.java`
+- `PaymentRejectedEvent.java`
+- `RefundPaymentCommand.java`
+
+### 2. Payment Service (Razorpay Integration & Saga Participant)
+Transition the service from exposing a synchronous REST endpoint to consuming RabbitMQ messages, and replace Stripe with Razorpay.
+#### [MODIFY] `pom.xml`
+- Add `razorpay-java` dependency.
+#### [NEW] `src/main/java/com/omnicharge/payment/service/RazorpayPaymentService.java`
+- Logic to integrate with Razorpay: `razorpayClient.orders.create(...)` and handle payment intent.
+#### [MODIFY] `src/main/java/com/omnicharge/payment/consumer/PaymentSagaConsumer.java`
+- Listen to RabbitMQ queue `saga.payment.process`.
+- Read `RechargeInitiatedEvent`, process Razorpay order, save Transaction logic.
+- Publish `PaymentApprovedEvent` or `PaymentRejectedEvent` to RabbitMQ.
+#### [MODIFY] `src/main/java/com/omnicharge/payment/config/RabbitMQConfig.java`
+- Declare routing keys and topic bindings for `saga.payment.*` arrays.
+
+### 3. Recharge Service (Saga Orchestrator)
+Remove synchronous Feign coupling and implement Orchestrator state limits via messaging.
+#### [MODIFY] `src/main/java/com/omnicharge/recharge/service/RechargeService.java`
+- Remove `PaymentServiceClient` feign call.
+- Upon recharge, save status as `PENDING` and publish `RechargeInitiatedEvent` to RabbitMQ.
+#### [NEW] `src/main/java/com/omnicharge/recharge/consumer/RechargeSagaConsumer.java`
+- Listen to `saga.recharge.approved` and `saga.recharge.rejected`.
+- **Approved**: Transition recharge status to `SUCCESS` in DB, publish `RechargeCompletedEvent` for Notification Svc.
+- **Rejected**: Transition to `FAILED`.
+#### [MODIFY] `src/main/java/com/omnicharge/recharge/client/PaymentServiceClient.java`
+- Removed.
+
+### 4. Operator Service (CQRS with Redis)
+Decouple commands from queries.
+#### [MODIFY] `src/main/java/com/omnicharge/operator/service/PlanService.java` -> `PlanCommandService`
+- Handle writes (MySQL save) and broadcast `PlanUpdatedEvent` over RabbitMQ.
+#### [NEW] `src/main/java/com/omnicharge/operator/service/PlanQueryService.java`
+- Reads entirely from Redis.
+#### [NEW] `src/main/java/com/omnicharge/operator/consumer/RedisProjector.java`
+- Listens to `PlanUpdatedEvent` and instantly syncs JSON to Redis schemas.
+
+### 5. Config Server
+Centralize RabbitMQ orchestrator topics.
+#### [MODIFY] configurations 
+- Add `razorpay.key_id` and `razorpay.key_secret` to `payment-service.properties`.
+
+---
+
+## Verification Plan
+
+### Automated Tests
+1. Unit test the `RazorpayPaymentService` mock behaviors.
+2. RabbitMQ template tests: simulate publishing a `RechargeInitiatedEvent` and verify `PaymentService` processes it.
+
+### Manual Verification
+1. Boot all services.
+2. Run a full flow from UI / Postman: Send a Recharge POST request.
+3. Validate that a Razorpay order ID is returned / handled.
+4. Validate that in MQ, `RechargeInitiated` routes perfectly and resolves to `RechargeCompleted` async.
+5. Hit the Operator Service `GET` APIs to verify they completely route through the Redis Projection without hitting MySQL.

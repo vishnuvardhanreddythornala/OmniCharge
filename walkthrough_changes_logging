@@ -1,0 +1,77 @@
+# OmniCharge Centralized Logging & Observability — Walkthrough
+
+## Build Verification ✅
+
+| Module | `mvn clean compile` | Result |
+|--------|---------------------|--------|
+| `omnicharge-common` | ✅ Exit 0 | All 5 new logging classes compile |
+| `logging-service` (NEW) | ✅ Exit 0 | All 12 files compile |
+| `operator-service` | ✅ Exit 0 | Existing service unaffected |
+
+## What Was Changed
+
+### NEW: `logging-service` (12 files)
+Centralized microservice on port 8086 that receives log events via RabbitMQ and writes to per-service log files + MySQL.
+
+| File | Purpose |
+|------|---------|
+| [pom.xml](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/logging-service/pom.xml) | Spring Boot 3.5.11 + AMQP + JPA + Swagger |
+| [LoggingServiceApplication.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/logging-service/src/main/java/com/omnicharge/logging/LoggingServiceApplication.java) | Main class |
+| [RabbitMQConfig.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/logging-service/src/main/java/com/omnicharge/logging/config/RabbitMQConfig.java) | Separate `omnicharge.logging.exchange` |
+| [LogEntry.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/logging-service/src/main/java/com/omnicharge/logging/entity/LogEntry.java) | JPA entity with indexed columns |
+| [LogEntryRepository.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/logging-service/src/main/java/com/omnicharge/logging/repository/LogEntryRepository.java) | Search/filter/stats queries |
+| [LogPersistenceService.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/logging-service/src/main/java/com/omnicharge/logging/service/LogPersistenceService.java) | MySQL persistence |
+| [LogFileWriterService.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/logging-service/src/main/java/com/omnicharge/logging/service/LogFileWriterService.java) | Per-service log files |
+| [LogEventConsumer.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/logging-service/src/main/java/com/omnicharge/logging/consumer/LogEventConsumer.java) | RabbitMQ listener |
+| [AdminLogController.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/logging-service/src/main/java/com/omnicharge/logging/controller/AdminLogController.java) | REST API for querying logs |
+
+### NEW: Shared Logging Classes (5 files in `omnicharge-common/logging/`)
+
+| File | Purpose |
+|------|---------|
+| [LogEvent.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/omnicharge-common/src/main/java/com/omnicharge/common/logging/LogEvent.java) | Shared DTO with traceId/spanId |
+| [LoggingConstants.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/omnicharge-common/src/main/java/com/omnicharge/common/logging/LoggingConstants.java) | Exchange/queue names |
+| [LogEventPublisher.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/omnicharge-common/src/main/java/com/omnicharge/common/logging/LogEventPublisher.java) | RabbitMQ publisher with fallback |
+| [FallbackLogWriter.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/omnicharge-common/src/main/java/com/omnicharge/common/logging/FallbackLogWriter.java) | Local file fallback |
+| [LogCaptureFilter.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/omnicharge-common/src/main/java/com/omnicharge/common/logging/LogCaptureFilter.java) | HTTP request capture |
+
+### Security Fixes
+
+| File | What Changed |
+|------|-------------|
+| [JwtAuthenticationFilter.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/api-gateway/src/main/java/com/omnicharge/gateway/filter/JwtAuthenticationFilter.java) | Replaced 16 `System.out/err` → `@Slf4j`, removed secret printing |
+| [JwtUtil.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/user-service/src/main/java/com/omnicharge/user/util/JwtUtil.java) | Removed 5 lines that printed JWT secret |
+| [GlobalExceptionHandler.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/omnicharge-common/src/main/java/com/omnicharge/common/exception/GlobalExceptionHandler.java) | Added `@Slf4j`, `log.error` for 500s, `log.warn` for 400s |
+
+### Swagger Added to All Services
+
+| Service | Config File |
+|---------|-------------|
+| user-service | [OpenApiConfig.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/user-service/src/main/java/com/omnicharge/user/config/OpenApiConfig.java) |
+| operator-service | [OpenApiConfig.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/operator-service/src/main/java/com/omnicharge/operator/config/OpenApiConfig.java) |
+| recharge-service | [OpenApiConfig.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/recharge-service/src/main/java/com/omnicharge/recharge/config/OpenApiConfig.java) |
+| payment-service | [OpenApiConfig.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/payment-service/src/main/java/com/omnicharge/payment/config/OpenApiConfig.java) |
+| notification-service | [OpenApiConfig.java](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/notification-service/src/main/java/com/omnicharge/notification/config/OpenApiConfig.java) |
+
+## How to Run
+
+### 1. Start Docker containers
+```bash
+docker run -d -p 9411:9411 --name zipkin openzipkin/zipkin
+docker run -d -p 9090:9090 --name prometheus -v C:/Users/vishnu\ vardhan\ reddy/Downloads/OmniCharge/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus
+docker run -d -p 3000:3000 --name grafana grafana/grafana
+```
+
+### 2. Start services in order
+1. `discovery-server` (8761)
+2. `config-server` (8888)
+3. All business services + `logging-service` (8086)
+
+### 3. Access dashboards
+| Dashboard | URL |
+|-----------|-----|
+| Zipkin Tracing | http://localhost:9411 |
+| Prometheus Metrics | http://localhost:9090 |
+| Grafana Dashboards | http://localhost:3000 (admin/admin) |
+| User Service Swagger | http://localhost:8081/swagger-ui.html |
+| Logging Service Swagger | http://localhost:8086/swagger-ui.html |

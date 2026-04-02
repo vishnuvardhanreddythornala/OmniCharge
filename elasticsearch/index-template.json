@@ -1,0 +1,97 @@
+{
+  "index_patterns": ["omnicharge-logs-*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 2,
+      "number_of_replicas": 1,
+      "index.refresh_interval": "5s",
+      "index.max_result_window": 50000,
+      "analysis": {
+        "analyzer": {
+          "log_message_analyzer": {
+            "type": "standard",
+            "stopwords": "_none_"
+          }
+        }
+      }
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date",
+          "format": "strict_date_optional_time||epoch_millis"
+        },
+        "timestamp": {
+          "type": "date",
+          "format": "yyyy-MM-dd HH:mm:ss.SSS"
+        },
+        "level": {
+          "type": "keyword"
+        },
+        "service": {
+          "type": "keyword"
+        },
+        "traceId": {
+          "type": "keyword"
+        },
+        "spanId": {
+          "type": "keyword"
+        },
+        "thread": {
+          "type": "keyword"
+        },
+        "logger": {
+          "type": "keyword"
+        },
+        "log_message": {
+          "type": "text",
+          "analyzer": "log_message_analyzer",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "log_source": {
+          "type": "keyword"
+        },
+        "context": {
+          "type": "object",
+          "dynamic": true,
+          "properties": {
+            "userId": {
+              "type": "keyword"
+            },
+            "transactionId": {
+              "type": "keyword"
+            },
+            "email": {
+              "type": "keyword"
+            },
+            "amount": {
+              "type": "double"
+            },
+            "status": {
+              "type": "keyword"
+            },
+            "operator": {
+              "type": "keyword"
+            },
+            "phoneNumber": {
+              "type": "keyword"
+            },
+            "reason": {
+              "type": "text"
+            }
+          }
+        }
+      }
+    }
+  },
+  "priority": 500,
+  "version": 1,
+  "_meta": {
+    "description": "Index template for OmniCharge centralized logging system"
+  }
+}
