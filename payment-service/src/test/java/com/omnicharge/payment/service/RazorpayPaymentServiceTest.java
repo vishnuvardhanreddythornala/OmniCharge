@@ -111,8 +111,8 @@ class RazorpayPaymentServiceTest {
                     com.razorpay.PaymentClient paymentClientMock = mock(com.razorpay.PaymentClient.class);
                     ReflectionTestUtils.setField(mock, "payments", paymentClientMock);
 
-                    // For void method refund(...)
-                    doNothing().when(paymentClientMock).refund(eq("pay_123"), any(JSONObject.class));
+                    // refund() returns a Payment object, not void
+                    doReturn(null).when(paymentClientMock).refund(eq("pay_123"), any(JSONObject.class));
                 })) {
 
             assertDoesNotThrow(() -> razorpayPaymentService.processRefund("pay_123", new BigDecimal("100.00")));

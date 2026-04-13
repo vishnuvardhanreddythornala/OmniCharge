@@ -349,4 +349,259 @@ class RechargeServiceTest {
         List<ExpiringRechargeResponse> responses = rechargeService.getExpiredToday();
         assertEquals(1, responses.size());
     }
+
+    @Test
+    void initiateRecharge_NullRequest() {
+        assertThrows(NullPointerException.class, () -> {
+            rechargeService.initiateRecharge(1L, null);
+        });
+    }
+
+    @Test
+    void initiateRecharge_EmptyMobileNumber() {
+        validRequest.setMobileNumber("");
+        when(operatorServiceClient.getPlan(10L)).thenReturn(ApiResponse.success(validPlan));
+        when(rechargeRepository.save(any(Recharge.class))).thenAnswer(i -> i.getArgument(0));
+
+        RechargeResponse response = rechargeService.initiateRecharge(1L, validRequest);
+        assertNotNull(response);
+        assertEquals("", response.getMobileNumber());
+    }
+
+    @Test
+    void initiateRecharge_NullMobileNumber() {
+        validRequest.setMobileNumber(null);
+        when(operatorServiceClient.getPlan(10L)).thenReturn(ApiResponse.success(validPlan));
+        when(rechargeRepository.save(any(Recharge.class))).thenAnswer(i -> i.getArgument(0));
+
+        RechargeResponse response = rechargeService.initiateRecharge(1L, validRequest);
+        assertNotNull(response);
+        assertNull(response.getMobileNumber());
+    }
+
+    @Test
+    void getAllRecharges_InitiatedStatus_Success() {
+        Recharge recharge = new Recharge();
+        Page<Recharge> page = new PageImpl<>(List.of(recharge));
+        
+        when(rechargeRepository.findAllWithStatusesAndDateFilters(anyList(), any(), any(), any())).thenReturn(page);
+        
+        Page<RechargeResponse> response = rechargeService.getAllRecharges("INITIATED", null, null, Pageable.unpaged());
+        assertNotNull(response);
+        assertEquals(1, response.getContent().size());
+    }
+
+    @Test
+    void getAllRecharges_FailedStatus_Success() {
+        Recharge recharge = new Recharge();
+        Page<Recharge> page = new PageImpl<>(List.of(recharge));
+        
+        when(rechargeRepository.findAllWithStatusAndDateFilters(eq(RechargeStatus.FAILED), any(), any(), any())).thenReturn(page);
+        
+        Page<RechargeResponse> response = rechargeService.getAllRecharges("FAILED", null, null, Pageable.unpaged());
+        assertNotNull(response);
+        assertEquals(1, response.getContent().size());
+    }
+
+    @Test
+    void getAllRecharges_ExpiredStatus_Success() {
+        Recharge recharge = new Recharge();
+        Page<Recharge> page = new PageImpl<>(List.of(recharge));
+        
+        when(rechargeRepository.findAllWithStatusAndDateFilters(eq(RechargeStatus.EXPIRED), any(), any(), any())).thenReturn(page);
+        
+        Page<RechargeResponse> response = rechargeService.getAllRecharges("EXPIRED", null, null, Pageable.unpaged());
+        assertNotNull(response);
+        assertEquals(1, response.getContent().size());
+    }
+
+    @Test
+    void getAllRecharges_NullStatus_Success() {
+        Recharge recharge = new Recharge();
+        Page<Recharge> page = new PageImpl<>(List.of(recharge));
+        
+        when(rechargeRepository.findAllWithDateFilters(any(), any(), any())).thenReturn(page);
+        
+        Page<RechargeResponse> response = rechargeService.getAllRecharges(null, null, null, Pageable.unpaged());
+        assertNotNull(response);
+        assertEquals(1, response.getContent().size());
+    }
+
+    @Test
+    void getRechargeHistory_WithNullStartDate() {
+        Recharge recharge = new Recharge();
+        Page<Recharge> page = new PageImpl<>(List.of(recharge));
+        when(rechargeRepository.findByUserIdWithDateFilters(eq(1L), any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class)))
+                .thenReturn(page);
+        
+        Page<RechargeResponse> response = rechargeService.getRechargeHistory(1L, null, LocalDateTime.now(), Pageable.unpaged());
+        assertNotNull(response);
+        assertEquals(1, response.getContent().size());
+    }
+
+    @Test
+    void getRechargeHistory_WithNullEndDate() {
+        Recharge recharge = new Recharge();
+        Page<Recharge> page = new PageImpl<>(List.of(recharge));
+        when(rechargeRepository.findByUserIdWithDateFilters(eq(1L), any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class)))
+                .thenReturn(page);
+        
+        Page<RechargeResponse> response = rechargeService.getRechargeHistory(1L, LocalDateTime.now(), null, Pageable.unpaged());
+        assertNotNull(response);
+        assertEquals(1, response.getContent().size());
+    }
+
+    @Test
+    void getRechargeHistory_WithBothDatesNull() {
+        Recharge recharge = new Recharge();
+        Page<Recharge> page = new PageImpl<>(List.of(recharge));
+        when(rechargeRepository.findByUserIdWithDateFilters(eq(1L), any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class)))
+                .thenReturn(page);
+        
+        Page<RechargeResponse> response = rechargeService.getRechargeHistory(1L, null, null, Pageable.unpaged());
+        assertNotNull(response);
+        assertEquals(1, response.getContent().size());
+    }
+
+    @Test
+    void getExpiringRecharges_EmptyList() {
+        when(rechargeRepository.findByStatusAndPlanExpiryDate(eq(RechargeStatus.SUCCESS), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+                
+        List<ExpiringRechargeResponse> responses = rechargeService.getExpiringRecharges(3);
+        assertEquals(0, responses.size());
+    }
+
+    @Test
+    void getExpiredToday_EmptyList() {
+        when(rechargeRepository.findByStatusAndPlanExpiryDate(eq(RechargeStatus.SUCCESS), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+                
+        List<ExpiringRechargeResponse> responses = rechargeService.getExpiredToday();
+        assertEquals(0, responses.size());
+    }
+
+    @Test
+    void getRechargeStats_NoSuccessfulRecharges() {
+        when(rechargeRepository.count()).thenReturn(10L);
+        when(rechargeRepository.countByStatus(RechargeStatus.SUCCESS)).thenReturn(0L);
+        when(rechargeRepository.countByStatus(RechargeStatus.FAILED)).thenReturn(10L);
+        when(rechargeRepository.findByCreatedDateBetween(any(), any())).thenReturn(Collections.emptyList());
+        
+        RechargeStatsResponse response = rechargeService.getRechargeStats();
+        assertNotNull(response);
+        assertEquals(10L, response.getTotalRecharges());
+        assertEquals(BigDecimal.ZERO, response.getTotalAmount());
+    }
+
+    @Test
+    void getRechargeStats_MixedStatuses() {
+        when(rechargeRepository.count()).thenReturn(100L);
+        when(rechargeRepository.countByStatus(RechargeStatus.SUCCESS)).thenReturn(80L);
+        when(rechargeRepository.countByStatus(RechargeStatus.FAILED)).thenReturn(20L);
+        
+        Recharge success1 = new Recharge();
+        success1.setStatus(RechargeStatus.SUCCESS);
+        success1.setAmount(new BigDecimal("100"));
+        
+        Recharge success2 = new Recharge();
+        success2.setStatus(RechargeStatus.SUCCESS);
+        success2.setAmount(new BigDecimal("200"));
+        
+        Recharge failed = new Recharge();
+        failed.setStatus(RechargeStatus.FAILED);
+        failed.setAmount(new BigDecimal("50"));
+
+        when(rechargeRepository.findByCreatedDateBetween(any(), any())).thenReturn(List.of(success1, success2, failed));
+        
+        RechargeStatsResponse response = rechargeService.getRechargeStats();
+        assertNotNull(response);
+        assertEquals(100L, response.getTotalRecharges());
+        assertEquals(new BigDecimal("300"), response.getTotalAmount());
+    }
+
+    @Test
+    void initiateRecharge_UserServiceReturnsNull() {
+        when(operatorServiceClient.getPlan(10L)).thenReturn(ApiResponse.success(validPlan));
+        when(rechargeRepository.save(any(Recharge.class))).thenAnswer(i -> i.getArgument(0));
+        when(userServiceClient.getUserById(1L)).thenReturn(null);
+
+        RechargeResponse response = rechargeService.initiateRecharge(1L, validRequest);
+        assertNotNull(response);
+    }
+
+    @Test
+    void initiateRecharge_UserServiceReturnsError() {
+        when(operatorServiceClient.getPlan(10L)).thenReturn(ApiResponse.success(validPlan));
+        when(rechargeRepository.save(any(Recharge.class))).thenAnswer(i -> i.getArgument(0));
+        when(userServiceClient.getUserById(1L)).thenReturn(ApiResponse.error("User service error"));
+
+        RechargeResponse response = rechargeService.initiateRecharge(1L, validRequest);
+        assertNotNull(response);
+    }
+
+    @Test
+    void initiateRecharge_UserServiceReturnsNullData() {
+        when(operatorServiceClient.getPlan(10L)).thenReturn(ApiResponse.success(validPlan));
+        when(rechargeRepository.save(any(Recharge.class))).thenAnswer(i -> i.getArgument(0));
+        
+        ApiResponse<UserProfileResponse> nullDataResponse = new ApiResponse<>();
+        nullDataResponse.setSuccess(true);
+        nullDataResponse.setData(null);
+        when(userServiceClient.getUserById(1L)).thenReturn(nullDataResponse);
+
+        RechargeResponse response = rechargeService.initiateRecharge(1L, validRequest);
+        assertNotNull(response);
+    }
+
+    @Test
+    void initiateRecharge_UserEmailNotVerified() {
+        when(operatorServiceClient.getPlan(10L)).thenReturn(ApiResponse.success(validPlan));
+        when(rechargeRepository.save(any(Recharge.class))).thenAnswer(i -> i.getArgument(0));
+
+        UserProfileResponse userProfile = new UserProfileResponse();
+        userProfile.setEmail("user@example.com");
+        userProfile.setIsEmailVerified(false);
+        userProfile.setMobileNumber("9876543210");
+        when(userServiceClient.getUserById(1L)).thenReturn(ApiResponse.success(userProfile));
+
+        RechargeResponse response = rechargeService.initiateRecharge(1L, validRequest);
+        assertNotNull(response);
+    }
+
+    @Test
+    void mapToExpiringResponse_UserServiceReturnsNullData() {
+        Recharge recharge = new Recharge();
+        recharge.setUserId(1L);
+        recharge.setRechargeId("REC-123");
+        recharge.setAmount(new BigDecimal("100"));
+        
+        when(rechargeRepository.findByStatusAndPlanExpiryDate(eq(RechargeStatus.SUCCESS), any(LocalDate.class)))
+                .thenReturn(List.of(recharge));
+        
+        ApiResponse<UserProfileResponse> nullDataResponse = new ApiResponse<>();
+        nullDataResponse.setSuccess(true);
+        nullDataResponse.setData(null);
+        when(userServiceClient.getUserById(1L)).thenReturn(nullDataResponse);
+        
+        List<ExpiringRechargeResponse> responses = rechargeService.getExpiringRecharges(3);
+        assertEquals(1, responses.size());
+        assertNull(responses.get(0).getUserEmail());
+    }
+
+    @Test
+    void mapToExpiringResponse_UserServiceReturnsError() {
+        Recharge recharge = new Recharge();
+        recharge.setUserId(1L);
+        recharge.setRechargeId("REC-123");
+        
+        when(rechargeRepository.findByStatusAndPlanExpiryDate(eq(RechargeStatus.SUCCESS), any(LocalDate.class)))
+                .thenReturn(List.of(recharge));
+        
+        when(userServiceClient.getUserById(1L)).thenReturn(ApiResponse.error("Service error"));
+        
+        List<ExpiringRechargeResponse> responses = rechargeService.getExpiringRecharges(3);
+        assertEquals(1, responses.size());
+        assertNull(responses.get(0).getUserEmail());
+    }
 }

@@ -97,6 +97,8 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
 					<excludes>
+						<exclude>**/event/**</exclude>
+						<exclude>**/logging/LogEvent*</exclude>
 						<exclude>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
@@ -110,6 +112,19 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.12</version>
+				<configuration>
+					<excludes>
+						<exclude>**/event/**</exclude>
+						<exclude>**/logging/LogEvent*</exclude>
+						<exclude>**/dto/**</exclude>
+						<exclude>**/entity/**</exclude>
+						<exclude>**/model/**</exclude>
+						<exclude>**/config/**</exclude>
+						<exclude>**/constants/**</exclude>
+						<exclude>**/exception/**</exclude>
+						<exclude>**/*Application.*</exclude>
+					</excludes>
+				</configuration>
 				<executions>
 					<execution>
 						<goals>

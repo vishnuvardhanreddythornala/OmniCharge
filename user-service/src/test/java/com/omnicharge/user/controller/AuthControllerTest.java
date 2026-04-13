@@ -174,6 +174,153 @@ class AuthControllerTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.success").value(false));
     }
+
+    @Test
+    void googleAuth_Success() throws Exception {
+        GoogleAuthRequest req = new GoogleAuthRequest();
+        req.setIdToken("google_id_token_123");
+
+        when(authService.authenticateWithGoogle(any(GoogleAuthRequest.class), anyString()))
+                .thenReturn(mockAuthResponse);
+
+        mockMvc.perform(post("/api/auth/google")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.accessToken").value("mock_access_token"));
+    }
+
+    @Test
+    void refreshToken_Success() throws Exception {
+        RefreshTokenRequest req = new RefreshTokenRequest();
+        req.setRefreshToken("old_refresh_token");
+
+        when(authService.refreshToken(any(RefreshTokenRequest.class)))
+                .thenReturn(mockAuthResponse);
+
+        mockMvc.perform(post("/api/auth/refresh-token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.accessToken").value("mock_access_token"));
+    }
+
+    @Test
+    void sendEmailLoginOtp_Success() throws Exception {
+        SendEmailOtpRequest req = new SendEmailOtpRequest();
+        req.setEmail("user@example.com");
+
+        doNothing().when(authService).sendEmailOtp(any(SendEmailOtpRequest.class), anyString());
+
+        mockMvc.perform(post("/api/auth/email/send-login-otp")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
+    void verifyEmailLoginOtp_Success() throws Exception {
+        VerifyEmailOtpRequest req = new VerifyEmailOtpRequest();
+        req.setEmail("user@example.com");
+        req.setOtp("123456");
+
+        when(authService.verifyEmailOtp(any(VerifyEmailOtpRequest.class)))
+                .thenReturn(mockAuthResponse);
+
+        mockMvc.perform(post("/api/auth/email/verify-login-otp")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.accessToken").value("mock_access_token"));
+    }
+
+    @Test
+    void verifyAdmin2fa_Success() throws Exception {
+        VerifyEmailOtpRequest req = new VerifyEmailOtpRequest();
+        req.setEmail("admin@omnicharge.com");
+        req.setOtp("123456");
+
+        when(authService.verifyAdmin2fa(any(VerifyEmailOtpRequest.class), anyString()))
+                .thenReturn(mockAuthResponse);
+
+        mockMvc.perform(post("/api/auth/admin/verify-2fa")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.accessToken").value("mock_access_token"));
+    }
+
+    @Test
+    void logout_Success() throws Exception {
+        doNothing().when(authService).logout(anyString());
+
+        mockMvc.perform(post("/api/auth/logout")
+                .header("Authorization", "Bearer mock_token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
+    void logout_WithRefreshToken() throws Exception {
+        RefreshTokenRequest req = new RefreshTokenRequest();
+        req.setRefreshToken("refresh_token_123");
+
+        doNothing().when(authService).logout(anyString());
+        doNothing().when(authService).logoutByRefreshToken(anyString());
+
+        mockMvc.perform(post("/api/auth/logout")
+                .header("Authorization", "Bearer mock_token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
+    void sendEmailVerification_Success() throws Exception {
+        io.jsonwebtoken.Claims claims = mock(io.jsonwebtoken.Claims.class);
+        when(claims.get("userId", String.class)).thenReturn("1");
+        when(jwtUtil.validateToken(anyString())).thenReturn(claims);
+        doNothing().when(emailVerificationService).sendVerificationOtp(anyLong(), anyString());
+
+        mockMvc.perform(post("/api/auth/email/send-verification")
+                .header("Authorization", "Bearer mock_token")
+                .param("email", "test@example.com"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
+    void verifyEmail_Success() throws Exception {
+        io.jsonwebtoken.Claims claims = mock(io.jsonwebtoken.Claims.class);
+        when(claims.get("userId", String.class)).thenReturn("1");
+        when(jwtUtil.validateToken(anyString())).thenReturn(claims);
+        doNothing().when(emailVerificationService).verifyEmail(anyLong(), anyString());
+
+        mockMvc.perform(post("/api/auth/email/verify")
+                .header("Authorization", "Bearer mock_token")
+                .param("otp", "123456"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
+    void login_WithForwardedIp() throws Exception {
+        LoginRequest req = new LoginRequest();
+        req.setEmail("admin@omnicharge.com");
+        req.setPassword("pass");
+
+        AdminLoginInitResponse initResponse = AdminLoginInitResponse.builder()
+                .requires2fa(true).email("admin@omnicharge.com").build();
+        when(authService.login(any(LoginRequest.class), anyString())).thenReturn(initResponse);
+
+        mockMvc.perform(post("/api/auth/login")
+                .header("X-Forwarded-For", "192.168.1.1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk());
+    }
 }
-
-
