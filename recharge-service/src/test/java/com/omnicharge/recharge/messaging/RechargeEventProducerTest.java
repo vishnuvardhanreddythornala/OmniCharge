@@ -1,7 +1,9 @@
 package com.omnicharge.recharge.messaging;
 
-import com.omnicharge.common.event.RechargeCompletedEvent;
-import com.omnicharge.common.event.saga.RechargeInitiatedEvent;
+import com.omnicharge.recharge.common.event.RechargeCompletedEvent;
+import com.omnicharge.recharge.common.event.saga.RechargeInitiatedEvent;
+import com.omnicharge.recharge.common.logging.LogEvent;
+import com.omnicharge.recharge.common.logging.LogEventPublisher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,8 +12,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -21,7 +24,7 @@ class RechargeEventProducerTest {
     private RabbitTemplate rabbitTemplate;
 
     @Mock
-    private com.omnicharge.common.logging.LogEventPublisher logEventPublisher;
+    private LogEventPublisher logEventPublisher;
 
     @InjectMocks
     private RechargeEventProducer rechargeEventProducer;
@@ -29,53 +32,58 @@ class RechargeEventProducerTest {
     @Test
     void publishRechargeCompleted_Success() {
         RechargeCompletedEvent event = RechargeCompletedEvent.builder()
-                .rechargeId("OMNI-A1B2C3D4")
+                .rechargeId("REC-123")
                 .userId(1L)
-                .amount(new BigDecimal("299.00"))
                 .status("SUCCESS")
-                .transactionId("TRX_777")
-                .timestamp(LocalDateTime.now())
                 .build();
 
         rechargeEventProducer.publishRechargeCompleted(event);
 
-        verify(rabbitTemplate, times(1)).convertAndSend(
-                eq("omnicharge.exchange"), 
-                eq("recharge.completed"), 
-                eq(event)
-        );
+        verify(rabbitTemplate, times(1)).convertAndSend(eq("omnicharge.exchange"), eq("recharge.completed"), eq(event));
+        verify(logEventPublisher, times(1)).publish(argThat(logEvent -> logEvent.getEventType().equals("SAGA_EVENT_PUBLISHED")));
+    }
+
+    @Test
+    void publishRechargeCompleted_Failure() {
+        RechargeCompletedEvent event = RechargeCompletedEvent.builder()
+                .rechargeId("REC-123")
+                .build();
+
+        doThrow(new RuntimeException("Rabbit MQ down")).when(rabbitTemplate)
+                .convertAndSend(anyString(), anyString(), any(Object.class));
+
+        rechargeEventProducer.publishRechargeCompleted(event);
+
+        verify(rabbitTemplate, times(1)).convertAndSend(anyString(), anyString(), eq(event));
+        verify(logEventPublisher, times(1)).publish(argThat(logEvent -> logEvent.getEventType().equals("SAGA_EVENT_PUBLISH_FAILED")));
     }
 
     @Test
     void publishRechargeInitiated_Success() {
         RechargeInitiatedEvent event = RechargeInitiatedEvent.builder()
-                .rechargeId("OMNI-P9O8I7U6")
-                .userId(2L)
+                .rechargeId("REC-123")
                 .amount(new BigDecimal("199.00"))
-                .paymentMethod("CREDIT_CARD")
-                .timestamp(LocalDateTime.now())
+                .userId(1L)
+                .paymentMethod("UPI")
                 .build();
 
         rechargeEventProducer.publishRechargeInitiated(event);
 
-        verify(rabbitTemplate, times(1)).convertAndSend(
-                eq("omnicharge.exchange"), 
-                eq("saga.recharge.initiated"), 
-                eq(event)
-        );
+        verify(rabbitTemplate, times(1)).convertAndSend(eq("omnicharge.exchange"), eq("saga.recharge.initiated"), eq(event));
+        verify(logEventPublisher, times(1)).publish(argThat(logEvent -> logEvent.getEventType().equals("SAGA_EVENT_PUBLISHED")));
     }
 
     @Test
-    void publishes_ExceptionSwallowedSafely() {
-        // Assume rabbit is completely down
-        doThrow(new RuntimeException("RabbitMQ connection refused!"))
-                .when(rabbitTemplate).convertAndSend(anyString(), anyString(), any(Object.class));
+    void publishRechargeInitiated_Failure() {
+        RechargeInitiatedEvent event = RechargeInitiatedEvent.builder()
+                .rechargeId("REC-123")
+                .build();
 
-        RechargeCompletedEvent event = RechargeCompletedEvent.builder().rechargeId("SWALLOW-ERR").build();
+        doThrow(new RuntimeException("Connection closed")).when(rabbitTemplate)
+                .convertAndSend(anyString(), anyString(), any(Object.class));
 
-        // The producer class wraps publishes in a try-catch to log.error, so an exception should not propagate and crash the caller.
-        rechargeEventProducer.publishRechargeCompleted(event);
+        rechargeEventProducer.publishRechargeInitiated(event);
 
-        verify(rabbitTemplate, times(1)).convertAndSend(anyString(), anyString(), any(Object.class));
+        verify(logEventPublisher, times(1)).publish(argThat(logEvent -> logEvent.getEventType().equals("SAGA_EVENT_PUBLISH_FAILED")));
     }
 }

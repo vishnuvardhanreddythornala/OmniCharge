@@ -1,7 +1,7 @@
 package com.omnicharge.gateway.filter;
 
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.gateway.common.logging.LogEvent;
+import com.omnicharge.gateway.common.logging.LogEventPublisher;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -61,11 +61,25 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             "/api/auth/forgot-password",
             "/api/auth/verify-otp",
             "/api/auth/reset-password",
+            "/api/auth/mobile",
+            "/api/auth/admin/verify-2fa",
+            "/api/auth/email/send-login-otp",
+            "/api/auth/email/verify-login-otp",
             "/api/operators/detect",
             "/api/operators/active",
             "/api/operators/",
             "/api/plans/",
             "/actuator"
+    );
+    
+    private static final List<String> PROFILE_INCOMPLETE_ALLOWED_PATHS = Arrays.asList(
+            "/api/users/profile",
+            "/api/users/mobile-otp/send",
+            "/api/users/mobile-otp/verify",
+            "/api/recharges/history",
+            "/api/payments/user",
+            "/api/notifications",
+            "/api/auth/logout"
     );
 
     @Override
@@ -112,10 +126,10 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
             // Profile Completion Enforcement
             Boolean isProfileComplete = claims.get(JWT_CLAIM_PROFILE_COMPLETE, Boolean.class);
-            if (Boolean.FALSE.equals(isProfileComplete) && !path.equals("/api/users/profile")) {
+            if (Boolean.FALSE.equals(isProfileComplete) && !isProfileIncompleteAllowedPath(path)) {
                 log.debug("Blocked access: incomplete profile for path: {}", path);
                 logAuthenticationFailure(path, "INCOMPLETE_PROFILE", 
-                    "User profile is incomplete. Access restricted to /api/users/profile only.", 
+                    "User profile is incomplete. Access restricted to profile completion endpoints only.", 
                     sanitizeTokenForLogging(token, userId, email));
                 exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
                 return exchange.getResponse().setComplete();
@@ -135,11 +149,6 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
                         // Token is valid, add user info to headers for downstream services
                         ServerHttpRequest modifiedRequest = request.mutate()
-                                .headers(headers -> {
-                                    headers.remove("X-User-Id");
-                                    headers.remove("X-User-Role");
-                                    headers.remove("X-User-Email");
-                                })
                                 .header("X-User-Id", claims.get(JWT_CLAIM_USER_ID, String.class))
                                 .header("X-User-Role", claims.get(JWT_CLAIM_ROLE, String.class))
                                 .header("X-User-Email", claims.get(JWT_CLAIM_EMAIL, String.class))
@@ -154,11 +163,6 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                         // Redis error - allow request to proceed (fail open)
                         log.warn("Redis error during blacklist check, allowing request: {}", e.getMessage());
                         ServerHttpRequest modifiedRequest = request.mutate()
-                                .headers(headers -> {
-                                    headers.remove("X-User-Id");
-                                    headers.remove("X-User-Role");
-                                    headers.remove("X-User-Email");
-                                })
                                 .header("X-User-Id", claims.get(JWT_CLAIM_USER_ID, String.class))
                                 .header("X-User-Role", claims.get(JWT_CLAIM_ROLE, String.class))
                                 .header("X-User-Email", claims.get(JWT_CLAIM_EMAIL, String.class))
@@ -178,6 +182,10 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     private boolean isPublicPath(String path) {
         return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
+    }
+    
+    private boolean isProfileIncompleteAllowedPath(String path) {
+        return PROFILE_INCOMPLETE_ALLOWED_PATHS.stream().anyMatch(path::startsWith);
     }
 
     @Override

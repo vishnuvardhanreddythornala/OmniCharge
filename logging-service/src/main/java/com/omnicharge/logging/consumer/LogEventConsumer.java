@@ -1,7 +1,7 @@
 package com.omnicharge.logging.consumer;
 
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LoggingConstants;
+import com.omnicharge.logging.common.logging.LogEvent;
+import com.omnicharge.logging.common.logging.LoggingConstants;
 import com.omnicharge.logging.service.LogFileWriterService;
 import com.omnicharge.logging.service.LogPersistenceService;
 import lombok.RequiredArgsConstructor;

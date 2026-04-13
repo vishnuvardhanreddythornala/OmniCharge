@@ -32,6 +32,7 @@ public interface IPlanService {
             Long operatorId,
             PlanCategory category,
             Boolean isActive,
+            String search,
             Pageable pageable
     );
     

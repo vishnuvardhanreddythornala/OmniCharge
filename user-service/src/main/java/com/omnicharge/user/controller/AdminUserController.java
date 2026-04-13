@@ -1,7 +1,7 @@
 package com.omnicharge.user.controller;
 
-import com.omnicharge.common.dto.ApiResponse;
-import com.omnicharge.common.dto.PagedResponse;
+import com.omnicharge.user.common.dto.ApiResponse;
+import com.omnicharge.user.common.dto.PagedResponse;
 import com.omnicharge.user.dto.UserProfileResponse;
 import com.omnicharge.user.service.IUserService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,9 @@ public class AdminUserController {
     private final IUserService userService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<PagedResponse<UserProfileResponse>>> getAllUsers(
+    public ResponseEntity<ApiResponse<Page<UserProfileResponse>>> getAllUsers(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
@@ -32,17 +34,9 @@ public class AdminUserController {
                 Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
         
-        Page<UserProfileResponse> usersPage = userService.getAllUsers(pageable);
+        Page<UserProfileResponse> usersPage = userService.getAllUsers(search, status, pageable);
         
-        PagedResponse<UserProfileResponse> pagedResponse = new PagedResponse<>(
-                usersPage.getContent(),
-                usersPage.getNumber(),
-                usersPage.getSize(),
-                usersPage.getTotalElements(),
-                usersPage.getTotalPages()
-        );
-        
-        return ResponseEntity.ok(ApiResponse.success("Users retrieved successfully", pagedResponse));
+        return ResponseEntity.ok(ApiResponse.success("Users retrieved successfully", usersPage));
     }
 
     @GetMapping("/{id}")

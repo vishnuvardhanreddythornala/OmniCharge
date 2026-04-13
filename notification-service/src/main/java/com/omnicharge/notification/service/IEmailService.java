@@ -1,7 +1,7 @@
 package com.omnicharge.notification.service;
 
-import com.omnicharge.common.event.PaymentCompletedEvent;
-import com.omnicharge.common.event.RechargeCompletedEvent;
+import com.omnicharge.notification.common.event.PaymentCompletedEvent;
+import com.omnicharge.notification.common.event.RechargeCompletedEvent;
 
 public interface IEmailService {
 

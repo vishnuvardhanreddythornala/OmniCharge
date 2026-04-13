@@ -1,10 +1,10 @@
 package com.omnicharge.payment.service;
 
-import com.omnicharge.common.event.PaymentCompletedEvent;
-import com.omnicharge.common.exception.BadRequestException;
-import com.omnicharge.common.exception.ResourceNotFoundException;
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.payment.common.event.PaymentCompletedEvent;
+import com.omnicharge.payment.common.exception.BadRequestException;
+import com.omnicharge.payment.common.exception.ResourceNotFoundException;
+import com.omnicharge.payment.common.logging.LogEvent;
+import com.omnicharge.payment.common.logging.LogEventPublisher;
 import com.omnicharge.payment.dto.PaymentRequest;
 import com.omnicharge.payment.dto.PaymentResponse;
 import com.omnicharge.payment.dto.PaymentStatsResponse;
@@ -39,6 +39,14 @@ import java.util.Map;
 @Slf4j
 public class PaymentService implements IPaymentService {
 
+    private static final String SERVICE_NAME = "payment-service";
+    private static final String CTX_TRANSACTION_ID = "transactionId";
+    private static final String CTX_RECHARGE_ID = "rechargeId";
+    private static final String CTX_USER_ID = "userId";
+    private static final String CTX_AMOUNT = "amount";
+    private static final String CTX_PAYMENT_METHOD = "paymentMethod";
+    private static final String CTX_FAILURE_REASON = "failureReason";
+
     private final TransactionRepository transactionRepository;
     private final IRazorpayPaymentService razorpayPaymentService;
     private final PaymentEventProducer paymentEventProducer;
@@ -53,14 +61,14 @@ public class PaymentService implements IPaymentService {
         
         // Log business operation: PAYMENT_PROCESSING_START
         Map<String, Object> startContext = new HashMap<>();
-        startContext.put("transactionId", transactionId);
-        startContext.put("rechargeId", request.getRechargeId());
-        startContext.put("userId", request.getUserId().toString());
-        startContext.put("amount", request.getAmount().toString());
-        startContext.put("paymentMethod", request.getPaymentMethod());
+        startContext.put(CTX_TRANSACTION_ID, transactionId);
+        startContext.put(CTX_RECHARGE_ID, request.getRechargeId());
+        startContext.put(CTX_USER_ID, request.getUserId().toString());
+        startContext.put(CTX_AMOUNT, request.getAmount().toString());
+        startContext.put(CTX_PAYMENT_METHOD, request.getPaymentMethod());
         
         logEventPublisher.publish(LogEvent.builder()
-                .serviceName("payment-service")
+                .serviceName(SERVICE_NAME)
                 .level("INFO")
                 .message("Payment processing started")
                 .eventType("PAYMENT_PROCESSING_START")
@@ -96,14 +104,14 @@ public class PaymentService implements IPaymentService {
 
         // Log business operation: RAZORPAY_GATEWAY_INTERACTION
         Map<String, Object> gatewayContext = new HashMap<>();
-        gatewayContext.put("transactionId", transactionId);
-        gatewayContext.put("rechargeId", request.getRechargeId());
+        gatewayContext.put(CTX_TRANSACTION_ID, transactionId);
+        gatewayContext.put(CTX_RECHARGE_ID, request.getRechargeId());
         gatewayContext.put("razorpayOrderId", paymentResponse.getRazorpayOrderId());
         gatewayContext.put("responseStatus", paymentResponse.getStatus());
-        gatewayContext.put("amount", request.getAmount().toString());
+        gatewayContext.put(CTX_AMOUNT, request.getAmount().toString());
         
         logEventPublisher.publish(LogEvent.builder()
-                .serviceName("payment-service")
+                .serviceName(SERVICE_NAME)
                 .level("INFO")
                 .message("Razorpay gateway interaction completed")
                 .eventType("RAZORPAY_GATEWAY_INTERACTION")
@@ -120,15 +128,15 @@ public class PaymentService implements IPaymentService {
             
             // Log business operation: PAYMENT_SUCCESS
             Map<String, Object> successContext = new HashMap<>();
-            successContext.put("transactionId", transactionId);
-            successContext.put("rechargeId", request.getRechargeId());
-            successContext.put("userId", request.getUserId().toString());
-            successContext.put("amount", request.getAmount().toString());
+            successContext.put(CTX_TRANSACTION_ID, transactionId);
+            successContext.put(CTX_RECHARGE_ID, request.getRechargeId());
+            successContext.put(CTX_USER_ID, request.getUserId().toString());
+            successContext.put(CTX_AMOUNT, request.getAmount().toString());
             successContext.put("razorpayOrderId", paymentResponse.getRazorpayOrderId());
-            successContext.put("paymentMethod", request.getPaymentMethod());
+            successContext.put(CTX_PAYMENT_METHOD, request.getPaymentMethod());
             
             logEventPublisher.publish(LogEvent.builder()
-                    .serviceName("payment-service")
+                    .serviceName(SERVICE_NAME)
                     .level("INFO")
                     .message("Payment completed successfully")
                     .eventType("PAYMENT_SUCCESS")
@@ -141,13 +149,13 @@ public class PaymentService implements IPaymentService {
             
             // Log business operation: PAYMENT_PENDING
             Map<String, Object> pendingContext = new HashMap<>();
-            pendingContext.put("transactionId", transactionId);
-            pendingContext.put("rechargeId", request.getRechargeId());
-            pendingContext.put("userId", request.getUserId().toString());
+            pendingContext.put(CTX_TRANSACTION_ID, transactionId);
+            pendingContext.put(CTX_RECHARGE_ID, request.getRechargeId());
+            pendingContext.put(CTX_USER_ID, request.getUserId().toString());
             pendingContext.put("razorpayOrderId", paymentResponse.getRazorpayOrderId());
             
             logEventPublisher.publish(LogEvent.builder()
-                    .serviceName("payment-service")
+                    .serviceName(SERVICE_NAME)
                     .level("INFO")
                     .message("Payment is pending confirmation")
                     .eventType("PAYMENT_PENDING")
@@ -161,15 +169,15 @@ public class PaymentService implements IPaymentService {
             
             // Log business operation: PAYMENT_FAILED
             Map<String, Object> failedContext = new HashMap<>();
-            failedContext.put("transactionId", transactionId);
-            failedContext.put("rechargeId", request.getRechargeId());
-            failedContext.put("userId", request.getUserId().toString());
-            failedContext.put("amount", request.getAmount().toString());
-            failedContext.put("failureReason", "Razorpay payment failed");
-            failedContext.put("paymentMethod", request.getPaymentMethod());
+            failedContext.put(CTX_TRANSACTION_ID, transactionId);
+            failedContext.put(CTX_RECHARGE_ID, request.getRechargeId());
+            failedContext.put(CTX_USER_ID, request.getUserId().toString());
+            failedContext.put(CTX_AMOUNT, request.getAmount().toString());
+            failedContext.put(CTX_FAILURE_REASON, "Razorpay payment failed");
+            failedContext.put(CTX_PAYMENT_METHOD, request.getPaymentMethod());
             
             logEventPublisher.publish(LogEvent.builder()
-                    .serviceName("payment-service")
+                    .serviceName(SERVICE_NAME)
                     .level("WARN")
                     .message("Payment failed")
                     .eventType("PAYMENT_FAILED")
@@ -208,23 +216,25 @@ public class PaymentService implements IPaymentService {
 
         String previousStatus = transaction.getStatus().name();
         transaction.setStatus(PaymentStatus.SUCCESS);
-        transaction.setRazorpayOrderId(razorpayPaymentId);
+        // Store the Razorpay payment ID (NOT in razorpayOrderId — that holds the order_id)
+        transaction.setRazorpayPaymentId(razorpayPaymentId);
         transaction = transactionRepository.save(transaction);
         
-        log.info("Payment confirmed successfully for transaction: {}", transactionId);
+        log.info("Payment confirmed successfully for transaction: {} (razorpayPaymentId: {}, razorpayOrderId: {})", 
+                transactionId, razorpayPaymentId, transaction.getRazorpayOrderId());
 
         // Log business operation: PAYMENT_CONFIRMED
         Map<String, Object> confirmContext = new HashMap<>();
-        confirmContext.put("transactionId", transactionId);
-        confirmContext.put("rechargeId", transaction.getRechargeId());
-        confirmContext.put("userId", transaction.getUserId().toString());
+        confirmContext.put(CTX_TRANSACTION_ID, transactionId);
+        confirmContext.put(CTX_RECHARGE_ID, transaction.getRechargeId());
+        confirmContext.put(CTX_USER_ID, transaction.getUserId().toString());
         confirmContext.put("previousStatus", previousStatus);
         confirmContext.put("currentStatus", "SUCCESS");
         confirmContext.put("razorpayPaymentId", razorpayPaymentId);
-        confirmContext.put("amount", transaction.getAmount().toString());
+        confirmContext.put(CTX_AMOUNT, transaction.getAmount().toString());
         
         logEventPublisher.publish(LogEvent.builder()
-                .serviceName("payment-service")
+                .serviceName(SERVICE_NAME)
                 .level("INFO")
                 .message("Payment confirmed via webhook")
                 .eventType("PAYMENT_CONFIRMED")
@@ -239,7 +249,7 @@ public class PaymentService implements IPaymentService {
         }
         
         // Publish PaymentApprovedEvent for saga orchestrator
-        com.omnicharge.common.event.saga.PaymentApprovedEvent approvedEvent = com.omnicharge.common.event.saga.PaymentApprovedEvent.builder()
+        com.omnicharge.payment.common.event.saga.PaymentApprovedEvent approvedEvent = com.omnicharge.payment.common.event.saga.PaymentApprovedEvent.builder()
                 .rechargeId(transaction.getRechargeId())
                 .transactionId(transaction.getTransactionId())
                 .razorpayOrderId(transaction.getRazorpayOrderId())
@@ -275,6 +285,7 @@ public class PaymentService implements IPaymentService {
     @Override
     public Page<TransactionResponse> getPaymentHistory(
             Long userId, 
+            String transactionId,
             BigDecimal minAmount, 
             BigDecimal maxAmount, 
             PaymentStatus status, 
@@ -283,7 +294,7 @@ public class PaymentService implements IPaymentService {
             Pageable pageable) {
         
         Page<Transaction> transactions = transactionRepository.findByUserIdWithFilters(
-                userId, minAmount, maxAmount, status, startDate, endDate, pageable);
+                userId, minAmount, maxAmount, status, startDate, endDate, transactionId, pageable);
         return transactions.map(this::mapToResponse);
     }
 
@@ -449,4 +460,64 @@ public class PaymentService implements IPaymentService {
                     transaction.getRechargeId(), e);
         }
     }
+
+    /**
+     * SAGA ROLLBACK: Marks a PENDING transaction as FAILED and publishes PaymentRejectedEvent.
+     * Called when the user closes the Razorpay modal or a payment.failed event fires in the frontend.
+     * The RechargeSagaConsumer in recharge-service will listen for this and update Recharge → FAILED.
+     */
+    @Override
+    @Transactional
+    public TransactionResponse failPayment(String transactionId, String failureReason) {
+        Transaction transaction = transactionRepository.findByTransactionId(transactionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with id: " + transactionId));
+
+        // Only fail if currently PENDING — don't overwrite a SUCCESS
+        if (transaction.getStatus() == PaymentStatus.SUCCESS) {
+            log.warn("Cannot fail transaction {} — already marked as SUCCESS", transactionId);
+            return mapToResponse(transaction);
+        }
+        
+        if (transaction.getStatus() == PaymentStatus.FAILED) {
+            log.info("Transaction {} is already marked as FAILED", transactionId);
+            return mapToResponse(transaction);
+        }
+
+        String previousStatus = transaction.getStatus().name();
+        transaction.setStatus(PaymentStatus.FAILED);
+        transaction.setFailureReason(failureReason);
+        transaction = transactionRepository.save(transaction);
+
+        log.warn("Payment marked as FAILED for transaction: {} | Reason: {}", transactionId, failureReason);
+
+        // Log business operation: PAYMENT_FAILED_BY_USER
+        Map<String, Object> failContext = new HashMap<>();
+        failContext.put(CTX_TRANSACTION_ID, transactionId);
+        failContext.put(CTX_RECHARGE_ID, transaction.getRechargeId());
+        failContext.put(CTX_USER_ID, transaction.getUserId().toString());
+        failContext.put("previousStatus", previousStatus);
+        failContext.put("currentStatus", "FAILED");
+        failContext.put(CTX_FAILURE_REASON, failureReason);
+        failContext.put(CTX_AMOUNT, transaction.getAmount().toString());
+
+        logEventPublisher.publish(LogEvent.builder()
+                .serviceName(SERVICE_NAME)
+                .level("WARN")
+                .message("Payment failed/cancelled by user")
+                .eventType("PAYMENT_FAILED_BY_USER")
+                .context(failContext)
+                .timestamp(LocalDateTime.now())
+                .build());
+
+        // Publish PaymentRejectedEvent for SAGA orchestrator → recharge-service updates Recharge to FAILED
+        com.omnicharge.payment.common.event.saga.PaymentRejectedEvent rejectedEvent = com.omnicharge.payment.common.event.saga.PaymentRejectedEvent.builder()
+                .rechargeId(transaction.getRechargeId())
+                .failureReason(failureReason)
+                .timestamp(LocalDateTime.now())
+                .build();
+        paymentEventProducer.publishPaymentRejected(rejectedEvent);
+
+        return mapToResponse(transaction);
+    }
 }
+

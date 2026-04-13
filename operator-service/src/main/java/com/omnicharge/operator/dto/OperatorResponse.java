@@ -19,4 +19,5 @@ public class OperatorResponse {
     private String logoUrl;
     private Boolean isActive;
     private Integer planCount;
+    private java.time.LocalDateTime lastModifiedDate;
 }

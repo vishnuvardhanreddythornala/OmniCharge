@@ -1,14 +1,15 @@
 package com.omnicharge.operator.service;
 
-import com.omnicharge.common.exception.DuplicateResourceException;
-import com.omnicharge.common.exception.ResourceNotFoundException;
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.operator.common.exception.DuplicateResourceException;
+import com.omnicharge.operator.common.exception.ResourceNotFoundException;
+import com.omnicharge.operator.common.logging.LogEvent;
+import com.omnicharge.operator.common.logging.LogEventPublisher;
 import com.omnicharge.operator.dto.OperatorRequest;
 import com.omnicharge.operator.dto.OperatorResponse;
 import com.omnicharge.operator.entity.Operator;
 import com.omnicharge.operator.entity.OperatorCategory;
 import com.omnicharge.operator.entity.Plan;
+import com.omnicharge.operator.messaging.OperatorEventPublisher;
 import com.omnicharge.operator.repository.OperatorRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ public class OperatorService implements IOperatorService {
     private final OperatorRepository operatorRepository;
     private final RedisTemplate<String, String> redisTemplate;
     private final LogEventPublisher logEventPublisher;
+    private final OperatorEventPublisher operatorEventPublisher;
 
     @Override
     public OperatorResponse getOperatorById(Long id) {
@@ -183,6 +185,9 @@ public class OperatorService implements IOperatorService {
 
         // Invalidate cache
         invalidateOperatorCache();
+        
+        // Trigger Redis cache rebuild for this operator's plans
+        operatorEventPublisher.publishPlanUpdatedEvent(id);
     }
 
     @Override
@@ -220,6 +225,9 @@ public class OperatorService implements IOperatorService {
 
         // Invalidate cache
         invalidateOperatorCache();
+        
+        // Trigger Redis cache rebuild for this operator's plans
+        operatorEventPublisher.publishPlanUpdatedEvent(id);
 
         return mapToResponse(operator);
     }
@@ -261,6 +269,9 @@ public class OperatorService implements IOperatorService {
 
         // Invalidate cache
         invalidateOperatorCache();
+        
+        // Trigger Redis cache rebuild for this operator's plans
+        operatorEventPublisher.publishPlanUpdatedEvent(id);
 
         return mapToResponse(operator);
     }
@@ -274,6 +285,7 @@ public class OperatorService implements IOperatorService {
                 .logoUrl(operator.getLogoUrl())
                 .isActive(operator.getIsActive())
                 .planCount(operator.getPlans() != null ? operator.getPlans().size() : 0)
+                .lastModifiedDate(operator.getLastModifiedDate())
                 .build();
     }
 

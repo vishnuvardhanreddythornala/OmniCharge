@@ -2,13 +2,14 @@ package com.omnicharge.operator.messaging;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.operator.common.logging.LogEvent;
+import com.omnicharge.operator.common.logging.LogEventPublisher;
 import com.omnicharge.operator.config.RabbitMQConfig;
 import com.omnicharge.operator.dto.PlanResponse;
 import com.omnicharge.operator.entity.Plan;
 import com.omnicharge.operator.event.PlanUpdatedMessage;
 import com.omnicharge.operator.repository.PlanRepository;
+import com.omnicharge.operator.service.IOperatorDetectionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -32,9 +33,10 @@ public class RedisProjector {
     private final RedisTemplate<String, String> redisTemplate;
     private final ObjectMapper objectMapper;
     private final LogEventPublisher logEventPublisher;
+    private final IOperatorDetectionService operatorDetectionService;
 
     @RabbitListener(queues = RabbitMQConfig.PLAN_UPDATE_QUEUE)
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public void consumePlanUpdatedEvent(PlanUpdatedMessage message) {
         log.info("RedisProjector: Received plan update event {}: for operatorId: {}", message.getEventId(), message.getOperatorId());
         
@@ -69,7 +71,11 @@ public class RedisProjector {
         Long operatorId = message.getOperatorId();
         
         try {
-            List<Plan> plans = planRepository.findByOperatorIdAndIsActive(operatorId, true);
+            // CRITICAL FIX: Only cache plans where BOTH plan.isActive AND operator.isActive are true
+            List<Plan> plans = planRepository.findByOperatorIdAndIsActive(operatorId, true)
+                    .stream()
+                    .filter(p -> p.getOperator().getIsActive()) // Filter out plans from inactive operators
+                    .collect(Collectors.toList());
             List<PlanResponse> planResponses = plans.stream()
                     .map(this::mapToResponse)
                     .collect(Collectors.toList());
@@ -84,6 +90,9 @@ public class RedisProjector {
                 String detailKey = "plan:detail:" + pr.getId();
                 redisTemplate.opsForValue().set(detailKey, objectMapper.writeValueAsString(pr));
             }
+            
+            // CRITICAL FIX: Invalidate the stale detection cache for this operator
+            operatorDetectionService.invalidateDetectionCacheForOperator(operatorId);
             
             // Log successful processing
             Map<String, Object> successContext = new HashMap<>();

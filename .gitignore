@@ -10,7 +10,12 @@ scripts/
 *.docx
 *.postman_collection.json
 *.backup
-
+*-local.properties
+*.py
+*.txt
+*.text
+*.bat
+*.sh
 # ===== Build Outputs (Multi-Module Support) =====
 **/target/
 target/

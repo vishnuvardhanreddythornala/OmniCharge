@@ -2,7 +2,7 @@ package com.omnicharge.logging.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.omnicharge.common.logging.LogEvent;
+import com.omnicharge.logging.common.logging.LogEvent;
 import com.omnicharge.logging.entity.LogEntry;
 import com.omnicharge.logging.repository.LogEntryRepository;
 import lombok.RequiredArgsConstructor;

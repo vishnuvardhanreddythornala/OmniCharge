@@ -1,6 +1,6 @@
 package com.omnicharge.operator.entity;
 
-import com.omnicharge.common.audit.Auditable;
+import com.omnicharge.operator.common.audit.Auditable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

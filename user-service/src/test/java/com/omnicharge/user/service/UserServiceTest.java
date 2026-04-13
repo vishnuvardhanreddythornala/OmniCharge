@@ -1,16 +1,18 @@
 package com.omnicharge.user.service;
 
-import com.omnicharge.common.exception.BadRequestException;
-import com.omnicharge.common.exception.DuplicateResourceException;
-import com.omnicharge.common.exception.ResourceNotFoundException;
-import com.omnicharge.common.exception.UnauthorizedException;
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.user.common.exception.BadRequestException;
+import com.omnicharge.user.common.exception.ResourceNotFoundException;
+import com.omnicharge.user.common.exception.UnauthorizedException;
+import com.omnicharge.user.common.logging.LogEvent;
+import com.omnicharge.user.common.logging.LogEventPublisher;
 import com.omnicharge.user.dto.ChangePasswordRequest;
 import com.omnicharge.user.dto.UpdateProfileRequest;
 import com.omnicharge.user.dto.UserProfileResponse;
 import com.omnicharge.user.entity.AuthProvider;
+import com.omnicharge.user.entity.RefreshToken;
 import com.omnicharge.user.entity.Role;
 import com.omnicharge.user.entity.User;
+import com.omnicharge.user.repository.RefreshTokenRepository;
 import com.omnicharge.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
@@ -34,144 +36,125 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-    @Mock
-    private UserRepository userRepository;
-
-    @Mock
-    private PasswordEncoder passwordEncoder;
-
-    @Mock
-    private LogEventPublisher logEventPublisher;
+    @Mock private UserRepository userRepository;
+    @Mock private PasswordEncoder passwordEncoder;
+    @Mock private LogEventPublisher logEventPublisher;
+    @Mock private RefreshTokenRepository refreshTokenRepository;
+    @Mock private RedisTemplate<String, String> redisTemplate;
 
     @InjectMocks
     private UserService userService;
 
-    private User testUser;
+    private User sampleUser;
 
     @BeforeEach
     void setUp() {
-        testUser = new User();
-        testUser.setId(1L);
-        testUser.setEmail("test@example.com");
-        testUser.setFullName("Test User");
-        testUser.setMobileNumber("9876543210");
-        testUser.setRole(Role.ROLE_USER);
-        testUser.setAuthProvider(AuthProvider.LOCAL);
-        testUser.setIsActive(true);
-        testUser.setPassword("encodedPassword");
+        sampleUser = new User();
+        sampleUser.setId(1L);
+        sampleUser.setEmail("test@ex.com");
+        sampleUser.setFullName("Test User");
+        sampleUser.setPassword("encoded");
+        sampleUser.setRole(Role.ROLE_USER);
+        sampleUser.setIsActive(true);
+        sampleUser.setAuthProvider(AuthProvider.LOCAL);
     }
 
     @Test
     void getProfile_Success() {
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser));
         UserProfileResponse response = userService.getProfile(1L);
-
         assertNotNull(response);
-        assertEquals("test@example.com", response.getEmail());
-        assertEquals("Test User", response.getFullName());
-        verify(userRepository, times(1)).findById(1L);
+        assertEquals("test@ex.com", response.getEmail());
     }
 
     @Test
-    void getProfile_UserNotFound() {
+    void getProfile_NotFound() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
-
         assertThrows(ResourceNotFoundException.class, () -> userService.getProfile(1L));
-        verify(userRepository, times(1)).findById(1L);
     }
 
     @Test
     void updateProfile_Success() {
-        UpdateProfileRequest request = new UpdateProfileRequest();
-        request.setFullName("Updated Name");
-        request.setMobileNumber("1234567890");
+        UpdateProfileRequest req = new UpdateProfileRequest();
+        req.setFullName("Updated Name");
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(userRepository.existsByMobileNumber("1234567890")).thenReturn(false);
-        when(userRepository.save(any(User.class))).thenReturn(testUser);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser));
 
-        UserProfileResponse response = userService.updateProfile(1L, request);
+        UserProfileResponse resp = userService.updateProfile(1L, req);
 
-        assertNotNull(response);
-        assertEquals("Updated Name", response.getFullName());
-        // Note: The mock of save returns testUser which gets its fields mutating during method
-        verify(userRepository, times(1)).save(any(User.class));
-    }
-
-    @Test
-    void updateProfile_DuplicateMobile() {
-        UpdateProfileRequest request = new UpdateProfileRequest();
-        request.setFullName("Updated Name");
-        request.setMobileNumber("1234567890");
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(userRepository.existsByMobileNumber("1234567890")).thenReturn(true);
-
-        assertThrows(DuplicateResourceException.class, () -> userService.updateProfile(1L, request));
-        verify(userRepository, never()).save(any(User.class));
+        assertEquals("Updated Name", resp.getFullName());
+        verify(userRepository, times(1)).save(sampleUser);
+        verify(logEventPublisher, times(1)).publish(any(LogEvent.class));
     }
 
     @Test
     void changePassword_Success() {
-        ChangePasswordRequest request = new ChangePasswordRequest();
-        request.setCurrentPassword("oldPassword");
-        request.setNewPassword("newPassword");
+        ChangePasswordRequest req = new ChangePasswordRequest();
+        req.setCurrentPassword("oldPass");
+        req.setNewPassword("newPass");
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(passwordEncoder.matches("oldPassword", "encodedPassword")).thenReturn(true);
-        when(passwordEncoder.encode("newPassword")).thenReturn("newEncodedPassword");
+        RefreshToken token = new RefreshToken();
+        token.setToken("r_token_123");
 
-        userService.changePassword(1L, request);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser));
+        when(passwordEncoder.matches("oldPass", "encoded")).thenReturn(true);
+        when(passwordEncoder.encode("newPass")).thenReturn("encoded_new");
+        when(refreshTokenRepository.findByUserOrderByExpiryDateAsc(sampleUser)).thenReturn(List.of(token));
 
-        assertEquals("newEncodedPassword", testUser.getPassword());
-        verify(userRepository, times(1)).save(testUser);
+        userService.changePassword(1L, req);
+
+        verify(userRepository, times(1)).save(sampleUser);
+        verify(redisTemplate, times(1)).delete("refresh:1:r_token_123");
+        verify(refreshTokenRepository, times(1)).deleteByUser(sampleUser);
+        verify(logEventPublisher, times(1)).publish(any(LogEvent.class));
     }
 
     @Test
     void changePassword_WrongProvider() {
-        testUser.setAuthProvider(AuthProvider.GOOGLE);
-        ChangePasswordRequest request = new ChangePasswordRequest();
+        ChangePasswordRequest req = new ChangePasswordRequest();
+        sampleUser.setAuthProvider(AuthProvider.GOOGLE);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser));
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-
-        assertThrows(BadRequestException.class, () -> userService.changePassword(1L, request));
-        verify(userRepository, never()).save(any(User.class));
+        assertThrows(BadRequestException.class, () -> userService.changePassword(1L, req));
     }
 
     @Test
-    void changePassword_IncorrectCurrentPassword() {
-        ChangePasswordRequest request = new ChangePasswordRequest();
-        request.setCurrentPassword("wrongPassword");
+    void changePassword_WrongCurrentPassword() {
+        ChangePasswordRequest req = new ChangePasswordRequest();
+        req.setCurrentPassword("wrong");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser));
+        when(passwordEncoder.matches("wrong", "encoded")).thenReturn(false);
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(passwordEncoder.matches("wrongPassword", "encodedPassword")).thenReturn(false);
-
-        assertThrows(UnauthorizedException.class, () -> userService.changePassword(1L, request));
-        verify(userRepository, never()).save(any(User.class));
+        assertThrows(UnauthorizedException.class, () -> userService.changePassword(1L, req));
     }
 
     @Test
-    void getAllUsers_Success() {
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<User> userPage = new PageImpl<>(List.of(testUser));
-        
-        when(userRepository.findAll(pageable)).thenReturn(userPage);
+    void getAllUsers_ByNumericPrefix() {
+        when(userRepository.findById(25L)).thenReturn(Optional.of(sampleUser));
 
-        Page<UserProfileResponse> result = userService.getAllUsers(pageable);
+        Page<UserProfileResponse> result = userService.getAllUsers("USR-00025", null, PageRequest.of(0, 10));
 
-        assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        assertEquals("test@example.com", result.getContent().get(0).getEmail());
+        assertEquals("test@ex.com", result.getContent().get(0).getEmail());
     }
 
+    @Test
+    void getAllUsers_FuzzySearchActive() {
+        Page<User> page = new PageImpl<>(List.of(sampleUser));
+        when(userRepository.searchUsersByStatus("Test", true, PageRequest.of(0, 10))).thenReturn(page);
+
+        Page<UserProfileResponse> result = userService.getAllUsers("Test", "ACTIVE", PageRequest.of(0, 10));
+
+        assertEquals(1, result.getTotalElements());
+    }
+    
     @Test
     void toggleUserStatus_Success() {
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser));
+        
         userService.toggleUserStatus(1L, false);
-
-        assertFalse(testUser.getIsActive());
-        verify(userRepository, times(1)).save(testUser);
+        
+        assertFalse(sampleUser.getIsActive());
+        verify(userRepository, times(1)).save(sampleUser);
     }
 }

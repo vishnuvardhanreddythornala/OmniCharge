@@ -1,19 +1,27 @@
 package com.omnicharge.payment.service;
 
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.payment.common.logging.LogEvent;
+import com.omnicharge.payment.common.logging.LogEventPublisher;
 import com.omnicharge.payment.dto.PaymentRequest;
 import com.omnicharge.payment.dto.PaymentResponse;
+import com.razorpay.Order;
+import com.razorpay.RazorpayClient;
+import com.razorpay.RazorpayException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedConstruction;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class RazorpayPaymentServiceTest {
@@ -26,45 +34,106 @@ class RazorpayPaymentServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(razorpayPaymentService, "keyId", "rzp_test_mock");
-        ReflectionTestUtils.setField(razorpayPaymentService, "keySecret", "mock_secret");
+        ReflectionTestUtils.setField(razorpayPaymentService, "keyId", "rzp_test_123");
+        ReflectionTestUtils.setField(razorpayPaymentService, "keySecret", "rzp_test_secret_123");
     }
 
     @Test
-    void processRazorpayPayment_SimulatedSuccessDevMode() {
+    void processRazorpayPayment_Success() throws Exception {
         PaymentRequest request = new PaymentRequest();
-        request.setRechargeId("OMNI-A1");
-        request.setAmount(new BigDecimal("499.00"));
+        request.setRechargeId("REC123");
+        request.setAmount(new BigDecimal("100.00"));
+        request.setUserId(1L);
 
-        PaymentResponse response = razorpayPaymentService.processRazorpayPayment(request);
+        try (MockedConstruction<RazorpayClient> mockedClient = mockConstruction(RazorpayClient.class,
+                (mock, context) -> {
+                    com.razorpay.OrderClient orderClientMock = mock(com.razorpay.OrderClient.class);
+                    ReflectionTestUtils.setField(mock, "orders", orderClientMock);
 
-        assertNotNull(response);
-        assertEquals("PENDING", response.getStatus()); // Testing dev mode mapping
-        assertTrue(response.getTransactionId().startsWith("TXN-"));
-        assertTrue(response.getRazorpayOrderId().startsWith("order_"));
-        assertEquals(new BigDecimal("499.00"), response.getAmount());
+                    Order mockOrder = new Order(new JSONObject("{\"id\":\"order_123\"}"));
+                    when(orderClientMock.create(any(JSONObject.class))).thenReturn(mockOrder);
+                })) {
+
+            PaymentResponse response = razorpayPaymentService.processRazorpayPayment(request);
+
+            assertNotNull(response);
+            assertEquals("PENDING", response.getStatus());
+            assertEquals("order_123", response.getRazorpayOrderId());
+            assertNotNull(response.getTransactionId());
+            assertEquals(new BigDecimal("100.00"), response.getAmount());
+
+            verify(logEventPublisher, times(1)).publish(any(LogEvent.class));
+        }
     }
 
     @Test
-    void processPaymentFallback_TriggeredOnCircuitBreak() {
+    void processRazorpayPayment_Failure() throws Exception {
         PaymentRequest request = new PaymentRequest();
-        request.setRechargeId("OMNI-A2");
-        request.setAmount(new BigDecimal("199.00"));
+        request.setRechargeId("REC123");
+        request.setAmount(new BigDecimal("100.00"));
 
-        RuntimeException mockException = new RuntimeException("API Timeout");
-        PaymentResponse response = razorpayPaymentService.processPaymentFallback(request, mockException);
+        try (MockedConstruction<RazorpayClient> mockedClient = mockConstruction(RazorpayClient.class,
+                (mock, context) -> {
+                    com.razorpay.OrderClient orderClientMock = mock(com.razorpay.OrderClient.class);
+                    ReflectionTestUtils.setField(mock, "orders", orderClientMock);
+
+                    when(orderClientMock.create(any(JSONObject.class))).thenThrow(new RazorpayException("API Error"));
+                })) {
+
+            PaymentResponse response = razorpayPaymentService.processRazorpayPayment(request);
+
+            assertNotNull(response);
+            assertEquals("FAILED", response.getStatus());
+            assertNull(response.getRazorpayOrderId());
+
+            verify(logEventPublisher, times(1)).publish(argThat(event -> "ERROR".equals(event.getLevel())));
+        }
+    }
+    
+    @Test
+    void processPaymentFallback_Success() {
+        PaymentRequest request = new PaymentRequest();
+        request.setRechargeId("REC123");
+        request.setAmount(new BigDecimal("50.00"));
+
+        PaymentResponse response = razorpayPaymentService.processPaymentFallback(request, new RuntimeException("Fallback Error"));
 
         assertNotNull(response);
         assertEquals("FAILED", response.getStatus());
         assertNull(response.getRazorpayOrderId());
-        assertEquals(new BigDecimal("199.00"), response.getAmount());
+        assertEquals(new BigDecimal("50.00"), response.getAmount());
     }
 
     @Test
-    void processRefund_CapturesExceptionGracefully() {
-        // Due to dev bypass logic missing actual SDK checkout mock, processRefund throws RazorpayException natively wrapped
-        assertDoesNotThrow(() -> {
-            razorpayPaymentService.processRefund("pay_123", new BigDecimal("100.00"));
-        });
+    void processRefund_Success() throws Exception {
+        try (MockedConstruction<RazorpayClient> mockedClient = mockConstruction(RazorpayClient.class,
+                (mock, context) -> {
+                    com.razorpay.PaymentClient paymentClientMock = mock(com.razorpay.PaymentClient.class);
+                    ReflectionTestUtils.setField(mock, "payments", paymentClientMock);
+
+                    // For void method refund(...)
+                    doNothing().when(paymentClientMock).refund(eq("pay_123"), any(JSONObject.class));
+                })) {
+
+            assertDoesNotThrow(() -> razorpayPaymentService.processRefund("pay_123", new BigDecimal("100.00")));
+
+            verify(logEventPublisher, times(1)).publish(argThat(event -> "INFO".equals(event.getLevel())));
+        }
+    }
+
+    @Test
+    void processRefund_Failure() throws Exception {
+        try (MockedConstruction<RazorpayClient> mockedClient = mockConstruction(RazorpayClient.class,
+                (mock, context) -> {
+                    com.razorpay.PaymentClient paymentClientMock = mock(com.razorpay.PaymentClient.class);
+                    ReflectionTestUtils.setField(mock, "payments", paymentClientMock);
+
+                    doThrow(new RazorpayException("Refund Failed")).when(paymentClientMock).refund(eq("pay_fail"), any(JSONObject.class));
+                })) {
+
+            assertDoesNotThrow(() -> razorpayPaymentService.processRefund("pay_fail", new BigDecimal("100.00")));
+
+            verify(logEventPublisher, times(1)).publish(argThat(event -> "ERROR".equals(event.getLevel())));
+        }
     }
 }

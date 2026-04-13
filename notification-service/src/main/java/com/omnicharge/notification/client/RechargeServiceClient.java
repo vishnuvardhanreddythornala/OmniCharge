@@ -1,6 +1,6 @@
 package com.omnicharge.notification.client;
 
-import com.omnicharge.common.dto.ApiResponse;
+import com.omnicharge.notification.common.dto.ApiResponse;
 import com.omnicharge.notification.dto.ExpiringRechargeResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

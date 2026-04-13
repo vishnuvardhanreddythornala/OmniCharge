@@ -1,119 +1,113 @@
 package com.omnicharge.recharge.controller;
 
+import com.omnicharge.recharge.common.dto.ApiResponse;
 import com.omnicharge.recharge.dto.ExpiringRechargeResponse;
+import com.omnicharge.recharge.dto.RechargeResponse;
 import com.omnicharge.recharge.entity.Recharge;
 import com.omnicharge.recharge.entity.RechargeStatus;
 import com.omnicharge.recharge.repository.RechargeRepository;
 import com.omnicharge.recharge.service.IRechargeService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(InternalRechargeController.class)
-@AutoConfigureMockMvc(addFilters = false)
-@MockBean(JpaMetamodelMappingContext.class)
-@MockBean(com.omnicharge.common.logging.LogEventPublisher.class)
+@ExtendWith(MockitoExtension.class)
 class InternalRechargeControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
+    @Mock
     private IRechargeService rechargeService;
 
-    @MockBean
+    @Mock
     private RechargeRepository rechargeRepository;
 
-    @Test
-    void getRechargeByIdInternal_Found() throws Exception {
-        Recharge recharge = new Recharge();
-        recharge.setRechargeId("OMNI-888");
-        recharge.setUserId(2L);
-        recharge.setMobileNumber("5551234");
-        recharge.setOperatorId(5L);
+    @InjectMocks
+    private InternalRechargeController internalRechargeController;
+
+    private Recharge recharge;
+    private ExpiringRechargeResponse expiringResponse;
+
+    @BeforeEach
+    void setUp() {
+        recharge = new Recharge();
+        recharge.setRechargeId("REC123");
+        recharge.setUserId(1L);
+        recharge.setMobileNumber("9876543210");
+        recharge.setOperatorId(2L);
         recharge.setOperatorName("Jio");
-        recharge.setPlanId(99L);
-        recharge.setPlanName("Value Pack");
-        recharge.setAmount(new BigDecimal("149.00"));
+        recharge.setPlanId(3L);
+        recharge.setPlanName("Data Pack");
+        recharge.setAmount(new BigDecimal("100"));
         recharge.setStatus(RechargeStatus.SUCCESS);
 
-        when(rechargeRepository.findByRechargeId("OMNI-888")).thenReturn(Optional.of(recharge));
-
-        mockMvc.perform(get("/api/internal/recharges/OMNI-888"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.operatorName").value("Jio"));
+        expiringResponse = ExpiringRechargeResponse.builder().rechargeId("REC123").build();
     }
 
     @Test
-    void getRechargeByIdInternal_NotFound_ReturnsCustomError() throws Exception {
-        when(rechargeRepository.findByRechargeId("UNKNOWN")).thenReturn(Optional.empty());
+    void getRechargeByIdInternal_Success() {
+        when(rechargeRepository.findByRechargeId("REC123")).thenReturn(Optional.of(recharge));
 
-        mockMvc.perform(get("/api/internal/recharges/UNKNOWN"))
-                .andExpect(status().isOk()) // Internal returns HTTP 200 with error payload explicitly
-                .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("Recharge not found"));
+        ResponseEntity<ApiResponse<RechargeResponse>> response = internalRechargeController.getRechargeByIdInternal("REC123");
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertTrue(response.getBody().isSuccess());
+        assertNotNull(response.getBody().getData());
+        assertEquals("REC123", response.getBody().getData().getRechargeId());
+        assertEquals("Jio", response.getBody().getData().getOperatorName());
     }
 
     @Test
-    void getExpiringRecharges() throws Exception {
-        ExpiringRechargeResponse response = ExpiringRechargeResponse.builder()
-                .rechargeId("OMNI-EXPIRING1")
-                .userId(1L)
-                .userEmail("test@example.com")
-                .mobileNumber("98765")
-                .operatorName("Data")
-                .planName("Weekly")
-                .amount(new BigDecimal("100"))
-                .expiryDate(LocalDate.now().plusDays(5))
-                .build();
+    void getRechargeByIdInternal_NotFound() {
+        when(rechargeRepository.findByRechargeId("REC404")).thenReturn(Optional.empty());
 
-        when(rechargeService.getExpiringRecharges(anyInt())).thenReturn(Collections.singletonList(response));
+        ResponseEntity<ApiResponse<RechargeResponse>> response = internalRechargeController.getRechargeByIdInternal("REC404");
 
-        mockMvc.perform(get("/api/internal/recharges/expiring?daysLeft=5"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data[0].rechargeId").value("OMNI-EXPIRING1"));
+        assertEquals(200, response.getStatusCodeValue());
+        assertFalse(response.getBody().isSuccess());
+        assertEquals("Recharge not found", response.getBody().getMessage());
+        assertNull(response.getBody().getData());
     }
 
     @Test
-    void getExpiredToday() throws Exception {
-        ExpiringRechargeResponse response = ExpiringRechargeResponse.builder()
-                .rechargeId("OMNI-EXPIRED2")
-                .build();
+    void getExpiringRecharges_Success() {
+        when(rechargeService.getExpiringRecharges(5)).thenReturn(List.of(expiringResponse));
 
-        when(rechargeService.getExpiredToday()).thenReturn(Collections.singletonList(response));
+        ResponseEntity<ApiResponse<List<ExpiringRechargeResponse>>> response = internalRechargeController.getExpiringRecharges(5);
 
-        mockMvc.perform(get("/api/internal/recharges/expired-today"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data[0].rechargeId").value("OMNI-EXPIRED2"));
+        assertEquals(200, response.getStatusCodeValue());
+        assertTrue(response.getBody().isSuccess());
+        assertEquals(1, response.getBody().getData().size());
     }
 
     @Test
-    void markAsExpired() throws Exception {
-        doNothing().when(rechargeService).markAsExpired("OMNI-EXPIRED2");
+    void getExpiredToday_Success() {
+        when(rechargeService.getExpiredToday()).thenReturn(List.of(expiringResponse));
 
-        mockMvc.perform(put("/api/internal/recharges/OMNI-EXPIRED2/expire"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("Recharge marked as expired"));
-                
-        verify(rechargeService, times(1)).markAsExpired("OMNI-EXPIRED2");
+        ResponseEntity<ApiResponse<List<ExpiringRechargeResponse>>> response = internalRechargeController.getExpiredToday();
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertTrue(response.getBody().isSuccess());
+        assertEquals(1, response.getBody().getData().size());
+    }
+
+    @Test
+    void markAsExpired_Success() {
+        doNothing().when(rechargeService).markAsExpired("REC123");
+
+        ResponseEntity<ApiResponse<Void>> response = internalRechargeController.markAsExpired("REC123");
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertTrue(response.getBody().isSuccess());
+        verify(rechargeService, times(1)).markAsExpired("REC123");
     }
 }

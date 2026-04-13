@@ -1,0 +1,232 @@
+<div class="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 page-enter">
+  <div class="w-full max-w-md">
+
+    <!-- Header -->
+    <div class="text-center mb-8 animate-slide-up">
+      <h1 class="text-2xl font-display font-bold mb-2">Welcome to OmniCharge</h1>
+      <p class="text-surface-400 text-sm">
+        {{ viewMode() === 'admin' ? 'OmniCharge Administrator Portal' : (viewMode() === 'adminOtp' || viewMode() === 'otp' || viewMode() === 'emailOtp' ? 'Enter verification code' : 'Sign in or create account') }}
+      </p>
+    </div>
+
+    <!-- Login Card -->
+    <div class="glass-card p-6 sm:p-8 animate-slide-up" style="animation-delay: 0.1s">
+
+      @if (errorMessage()) {
+        <div class="mb-5 p-3 rounded-xl bg-accent-rose/10 border border-accent-rose/20 animate-scale-in">
+          <p class="text-sm text-accent-rose">{{ errorMessage() }}</p>
+        </div>
+      }
+
+      <!-- MODE: MOBILE ENTRY -->
+      @if (viewMode() === 'mobile') {
+        <form (ngSubmit)="onRequestOtp()">
+          <div class="mb-5 relative group">
+            <div class="flex items-center justify-between mb-2 px-1">
+              <label for="mobile" class="text-sm font-medium text-surface-300 transition-colors group-focus-within:text-omni-400">Phone Number</label>
+              <span class="text-xs text-omni-400 hover:text-omni-300 font-medium z-10 relative cursor-pointer" (click)="viewMode.set('email')">Use email instead</span>
+            </div>
+            <div class="relative flex items-stretch bg-surface-900/50 border-2 border-white/10 rounded-xl transition-colors focus-within:border-omni-500 hover:border-white/20">
+
+              <div class="relative flex" (click)="$event.stopPropagation()">
+                <span class="flex items-center gap-2 pl-4 pr-3 py-3.5 border-r-2 border-white/10 bg-white/5 hover:bg-white/10 transition-colors rounded-l-[10px] cursor-pointer"
+                      role="combobox" [attr.aria-expanded]="showCountryDropdown()"
+                      tabindex="0" (click)="showCountryDropdown.set(!showCountryDropdown())">
+                  <span class="text-xl leading-none">{{ getSelectedCountry().flag }}</span>
+                  <svg class="w-3.5 h-3.5 text-surface-300 transition-transform duration-200" [class.rotate-180]="showCountryDropdown()" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                </span>
+
+                @if (showCountryDropdown()) {
+                  <div id="country-listbox" class="absolute top-[calc(100%+8px)] left-0 w-[200px] bg-surface-800 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 animate-fade-in origin-top-left">
+                    <div class="max-h-[240px] overflow-y-auto py-2 flex flex-col">
+                      @for (country of currentCountryCodes(); track country.code) {
+                        <div (click)="selectCountry(country.code)"
+                             class="flex items-center gap-3 px-4 py-2.5 text-left hover:bg-white/10 transition-colors cursor-pointer"
+                             [ngClass]="{'bg-omni-500/20': selectedCountryCode() === country.code}">
+                          <span class="text-xl">{{ country.flag }}</span>
+                          <span class="inline-flex flex-col">
+                            <span class="text-sm font-medium text-white">{{ country.label }}</span>
+                            <span class="text-xs text-surface-400">{{ country.code }}</span>
+                          </span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <div class="flex-1 flex items-center px-4 relative bg-transparent">
+                <span class="text-white text-lg font-mono tracking-widest mr-2">{{ selectedCountryCode() }}</span>
+                <input type="tel" id="mobile" name="mobile" [(ngModel)]="mobileNumber" placeholder="9876543210"
+                       class="w-full bg-transparent text-white placeholder-surface-600 py-3.5 text-lg font-mono tracking-widest focus:outline-none focus:ring-0"
+                       maxlength="10" autocomplete="tel" />
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" [disabled]="authService.isLoading() || mobileNumber.length !== 10"
+                  class="btn-primary w-full text-base !py-3.5 flex items-center justify-center gap-2 mb-5 !bg-gradient-to-r !from-[#007BFF] !to-[#E6007E] border-0">
+            @if (loadingAction() === 'mobile') {
+              <span class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block"></span>
+              <span>Sending Code...</span>
+            } @else {
+              <span>Get OTP <span class="ml-1 text-lg font-bold leading-none">&rsaquo;</span></span>
+            }
+          </button>
+        </form>
+      }
+
+      <!-- MODE: EMAIL OTP ENTRY -->
+      @if (viewMode() === 'email') {
+        <form (ngSubmit)="onRequestEmailOtp()">
+          <div class="form-group mb-5">
+            <div class="flex items-center justify-between mb-2 px-1">
+              <label for="publicEmail" class="text-sm font-medium text-surface-300">Email Address</label>
+              <span class="text-xs text-omni-400 hover:text-omni-300 font-medium z-10 relative cursor-pointer" (click)="viewMode.set('mobile')">Use mobile instead</span>
+            </div>
+            <input type="email" id="publicEmail" name="publicEmail" [(ngModel)]="publicEmail" placeholder="you@example.com"
+                   class="input-field" autocomplete="email" />
+          </div>
+
+          <button type="submit" [disabled]="authService.isLoading() || !publicEmail"
+                  class="btn-primary w-full text-base !py-3.5 flex items-center justify-center gap-2 mb-5 border-0">
+            @if (loadingAction() === 'email') {
+              <span class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block"></span>
+              <span>Sending Code...</span>
+            } @else {
+              <span>Get OTP <span class="ml-1 text-lg font-bold leading-none">&rsaquo;</span></span>
+            }
+          </button>
+        </form>
+      }
+
+      <!-- MODE: ADMIN ENTRY -->
+      @if (viewMode() === 'admin') {
+        <form (ngSubmit)="onAdminLogin()">
+          <div class="form-group mb-4">
+            <label for="adminEmail">Administrator Email</label>
+            <input type="email" id="adminEmail" name="adminEmail" [(ngModel)]="adminEmail" placeholder="admin@omnicharge.com"
+                   class="input-field" autocomplete="email" />
+          </div>
+
+          <div class="form-group mb-6">
+            <label for="password">Password</label>
+            <div class="relative">
+              <input [type]="showPassword() ? 'text' : 'password'" id="password" name="password"
+                     [(ngModel)]="password" placeholder="Enter password"
+                     class="input-field !pr-12" autocomplete="current-password" />
+              <span (click)="showPassword.set(!showPassword())"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-surface-500 hover:text-surface-300 transition cursor-pointer">
+                @if (showPassword()) {
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"></path></svg>
+                } @else {
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                }
+              </span>
+            </div>
+          </div>
+
+          <button type="submit" [disabled]="authService.isLoading() || !adminEmail || !password"
+                  class="btn-primary w-full text-base !py-3.5 flex items-center justify-center gap-2 mb-5">
+            @if (loadingAction() === 'admin') {
+              <span class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block"></span>
+              <span>Authenticating...</span>
+            } @else {
+              <span>Continue <span class="ml-1 text-lg font-bold leading-none">&rsaquo;</span></span>
+            }
+          </button>
+        </form>
+      }
+
+      <!-- MODE: OTP VERIFICATION (SHARED UI) -->
+      @if (viewMode() === 'otp' || viewMode() === 'emailOtp' || viewMode() === 'adminOtp') {
+        <form (ngSubmit)="viewMode() === 'otp' ? onVerifyMobileOtp() : (viewMode() === 'emailOtp' ? onVerifyEmailOtp() : onVerifyAdmin2fa())">
+          <div class="text-sm text-center text-surface-400 mb-6">
+            Code sent to 
+            <span class="text-white font-semibold flex items-center justify-center break-all">
+              @if (viewMode() === 'otp') { {{ selectedCountryCode() }} {{ mobileNumber }} }
+              @else if (viewMode() === 'emailOtp') { {{ publicEmail }} }
+              @else { {{ adminEmail }} }
+            </span>
+            <span class="ml-2 text-omni-400 hover:underline cursor-pointer" 
+                  (click)="viewMode.set(viewMode() === 'otp' ? 'mobile' : (viewMode() === 'emailOtp' ? 'email' : 'admin'))">Change</span>
+          </div>
+
+          <div class="flex justify-center gap-3 mb-6">
+            @for (i of otpIndexes; track i) {
+              <input type="text" inputmode="numeric" [id]="'otp-' + i"
+                     [value]="otpDigits()[i]"
+                     (input)="onOtpInput($event, i)"
+                     (keydown)="onOtpKeydown($event, i)"
+                     (paste)="onOtpPaste($event)"
+                     maxlength="1"
+                     class="w-12 h-14 sm:w-14 sm:h-16 rounded-xl bg-white/5 border border-white/10 text-center text-xl sm:text-2xl font-bold font-mono text-white transition-all duration-300 outline-none focus:ring-0 focus:bg-white/10 placeholder:text-surface-600 shadow-[0_4px_30px_rgba(0,0,0,0.1)] backdrop-blur-md"
+                     [ngClass]="otpDigits()[i] ? 'border-omni-400 shadow-[0_0_20px_rgba(20,184,166,0.2)]' : 'hover:border-white/20'"
+                     autocomplete="one-time-code" />
+            }
+          </div>
+
+          <button type="submit" [disabled]="authService.isLoading() || getOtpString().length !== 6"
+                  class="btn-primary w-full text-base !py-3.5 flex items-center justify-center gap-2 mb-5"
+                  [ngClass]="{'!bg-omni-600': viewMode() === 'adminOtp'}">
+            @if (loadingAction() === 'otp' || loadingAction() === 'emailOtp' || loadingAction() === 'adminOtp') {
+              <span class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block"></span>
+              <span>Verifying...</span>
+            } @else {
+              <span>{{ viewMode() === 'adminOtp' ? 'Access Portal' : 'Verify & Log In' }}</span>
+            }
+          </button>
+
+          <div class="text-center">
+            @if (resendTimer() > 0) {
+              <span class="text-xs text-surface-500">Resend code in {{ resendTimer() }}s</span>
+            } @else {
+              <span class="text-xs font-semibold text-omni-400 hover:text-omni-300 cursor-pointer" 
+                    (click)="viewMode() === 'otp' ? onRequestOtp() : (viewMode() === 'emailOtp' ? onRequestEmailOtp() : onAdminLogin())">Resend Code</span>
+            }
+          </div>
+        </form>
+      }
+
+      <!-- Google Auth (Not shown for admin path or otp verification phases) -->
+      @if (viewMode() === 'mobile' || viewMode() === 'email') {
+        <div class="flex items-center gap-3 mb-5 mt-2">
+          <span class="flex-1 h-px bg-white/[0.08]"></span>
+          <span class="text-xs text-surface-500 uppercase tracking-wider">or</span>
+          <span class="flex-1 h-px bg-white/[0.08]"></span>
+        </div>
+
+        <div #googleBtnContainer id="google-signin-btn" style="position:absolute;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none;"></div>
+
+        <button type="button" (click)="triggerGoogleSignIn()"
+                class="w-full flex items-center justify-center gap-3 py-3.5 px-6 rounded-xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-md text-sm font-medium text-surface-200 transition-all duration-300 hover:bg-white/[0.07] hover:border-white/[0.15] hover:shadow-[0_0_30px_rgba(255,255,255,0.04)] active:scale-[0.98] group cursor-pointer">
+          <svg class="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A11.96 11.96 0 001 12c0 1.94.46 3.77 1.18 5.43l3.66-2.84z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          <span class="text-white/80 group-hover:text-white transition-colors">Continue with Google</span>
+        </button>
+
+        <div class="mt-2 text-center text-xs text-surface-500">
+          By continuing, you agree to our Terms of Service
+        </div>
+      }
+    </div>
+
+    <!-- Mode Toggles (Admin Entry Point hidden nicely) -->
+    <div class="text-center mt-6 animate-slide-up" style="animation-delay: 0.2s">
+      @if (viewMode() === 'mobile' || viewMode() === 'email') {
+        <div class="text-xs text-surface-500/50 mt-4 flex justify-center px-2">
+          <span>&copy; 2026 OmniCharge. All rights reserved.</span>
+        </div>
+      } @else if (viewMode() === 'admin' || viewMode() === 'adminOtp') {
+        <div class="text-xs text-surface-500 mt-4">
+          <span (click)="viewMode.set('mobile')" class="text-omni-400 hover:text-omni-300 font-medium transition cursor-pointer">&larr; Back to Public Login</span>
+        </div>
+      }
+    </div>
+
+  </div>
+</div>

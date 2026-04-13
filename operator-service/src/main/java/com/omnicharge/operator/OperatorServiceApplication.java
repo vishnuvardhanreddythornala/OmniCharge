@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication(scanBasePackages = {"com.omnicharge.operator", "com.omnicharge.common"})
 @EnableDiscoveryClient
-@EnableJpaAuditing
 public class OperatorServiceApplication {
 
     public static void main(String[] args) {

@@ -1,8 +1,8 @@
 package com.omnicharge.notification.messaging;
 
-import com.omnicharge.common.event.RechargeCompletedEvent;
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.notification.common.event.RechargeCompletedEvent;
+import com.omnicharge.notification.common.logging.LogEvent;
+import com.omnicharge.notification.common.logging.LogEventPublisher;
 import com.omnicharge.notification.entity.NotificationCategory;
 import com.omnicharge.notification.service.IEmailService;
 import com.omnicharge.notification.service.INotificationService;

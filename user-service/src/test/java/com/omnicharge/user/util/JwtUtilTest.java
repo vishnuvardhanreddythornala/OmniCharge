@@ -24,7 +24,7 @@ class JwtUtilTest {
 
     @Test
     void generateAccessToken_Success() {
-        String token = jwtUtil.generateAccessToken(1L, "test@example.com", "ROLE_USER", true);
+        String token = jwtUtil.generateAccessToken(1L, "test@example.com", "ROLE_USER", true, true, "LOCAL");
         
         assertNotNull(token);
         assertFalse(token.isEmpty());
@@ -32,7 +32,7 @@ class JwtUtilTest {
 
     @Test
     void validateToken_Success() {
-        String token = jwtUtil.generateAccessToken(1L, "test@example.com", "ROLE_USER", true);
+        String token = jwtUtil.generateAccessToken(1L, "test@example.com", "ROLE_USER", true, true, "LOCAL");
         
         Claims claims = jwtUtil.validateToken(token);
         
@@ -45,7 +45,7 @@ class JwtUtilTest {
 
     @Test
     void extractJti_Success() {
-        String token = jwtUtil.generateAccessToken(1L, "test@example.com", "ROLE_USER", true);
+        String token = jwtUtil.generateAccessToken(1L, "test@example.com", "ROLE_USER", true, true, "LOCAL");
 
         String jti = jwtUtil.extractJti(token);
 
@@ -55,7 +55,7 @@ class JwtUtilTest {
 
     @Test
     void getRemainingExpiration_Success() {
-        String token = jwtUtil.generateAccessToken(1L, "test@example.com", "ROLE_USER", true);
+        String token = jwtUtil.generateAccessToken(1L, "test@example.com", "ROLE_USER", true, true, "LOCAL");
 
         Long remainingExp = jwtUtil.getRemainingExpiration(token);
 

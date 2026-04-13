@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -25,6 +27,19 @@ public class OperatorEventPublisher {
                 .timestamp(Instant.now().toEpochMilli())
                 .build();
                 
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    sendEvent(eventId, operatorId, message);
+                }
+            });
+        } else {
+            sendEvent(eventId, operatorId, message);
+        }
+    }
+
+    private void sendEvent(String eventId, Long operatorId, PlanUpdatedMessage message) {
         try {
             rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, "plan.updated", message);
             log.info("Published plan.updated event {} for operatorId: {}", eventId, operatorId);

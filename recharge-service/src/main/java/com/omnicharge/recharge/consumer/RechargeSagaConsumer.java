@@ -1,17 +1,17 @@
 package com.omnicharge.recharge.consumer;
 
-import com.omnicharge.common.event.saga.PaymentApprovedEvent;
-import com.omnicharge.common.event.saga.PaymentRejectedEvent;
-import com.omnicharge.common.event.RechargeCompletedEvent;
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.recharge.common.event.saga.PaymentApprovedEvent;
+import com.omnicharge.recharge.common.event.saga.PaymentRejectedEvent;
+import com.omnicharge.recharge.common.event.RechargeCompletedEvent;
+import com.omnicharge.recharge.common.logging.LogEvent;
+import com.omnicharge.recharge.common.logging.LogEventPublisher;
 import com.omnicharge.recharge.entity.Recharge;
 import com.omnicharge.recharge.entity.RechargeStatus;
 import com.omnicharge.recharge.repository.RechargeRepository;
 import com.omnicharge.recharge.messaging.RechargeEventProducer;
 import com.omnicharge.recharge.client.UserServiceClient;
 import com.omnicharge.recharge.dto.UserProfileResponse;
-import com.omnicharge.common.dto.ApiResponse;
+import com.omnicharge.recharge.common.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -103,6 +103,13 @@ public class RechargeSagaConsumer {
         
         rechargeRepository.findByRechargeId(event.getRechargeId()).ifPresentOrElse(recharge -> {
             String previousStatus = recharge.getStatus().name();
+            
+            // CRITICAL FIX: If the recharge was already marked SUCCESS by a concurrent/previous webhook, 
+            // DO NOT let a delayed "PENDING" transaction sweeper overwrite it back to FAILED!
+            if (recharge.getStatus() == RechargeStatus.SUCCESS) {
+                log.info("Ignoring duplicate PaymentRejectedEvent because recharge {} is ALREADY fully SUCCESS", event.getRechargeId());
+                return;
+            }
             
             recharge.setStatus(RechargeStatus.FAILED);
             recharge.setFailureReason(event.getFailureReason());

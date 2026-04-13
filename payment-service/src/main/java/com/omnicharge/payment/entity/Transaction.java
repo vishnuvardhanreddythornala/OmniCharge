@@ -1,6 +1,6 @@
 package com.omnicharge.payment.entity;
 
-import com.omnicharge.common.audit.Auditable;
+import com.omnicharge.payment.common.audit.Auditable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -46,6 +46,8 @@ public class Transaction extends Auditable {
 
     @Column(unique = true)
     private String razorpayOrderId;
+
+    private String razorpayPaymentId;
 
     // Additional fields to store context for notifications when webhook is called
     private String userEmail;

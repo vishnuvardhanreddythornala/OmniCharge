@@ -1,7 +1,7 @@
 package com.omnicharge.notification.service;
 
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.notification.common.logging.LogEvent;
+import com.omnicharge.notification.common.logging.LogEventPublisher;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;

@@ -1,11 +1,11 @@
 package com.omnicharge.recharge.service;
 
-import com.omnicharge.common.dto.ApiResponse;
-import com.omnicharge.common.event.RechargeCompletedEvent;
-import com.omnicharge.common.exception.BadRequestException;
-import com.omnicharge.common.exception.ResourceNotFoundException;
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.recharge.common.dto.ApiResponse;
+import com.omnicharge.recharge.common.event.RechargeCompletedEvent;
+import com.omnicharge.recharge.common.exception.BadRequestException;
+import com.omnicharge.recharge.common.exception.ResourceNotFoundException;
+import com.omnicharge.recharge.common.logging.LogEvent;
+import com.omnicharge.recharge.common.logging.LogEventPublisher;
 import com.omnicharge.recharge.client.OperatorServiceClient;
 import com.omnicharge.recharge.client.UserServiceClient;
 import com.omnicharge.recharge.dto.*;
@@ -123,7 +123,9 @@ public class RechargeService implements IRechargeService {
         try {
             ApiResponse<UserProfileResponse> userApiResponse = userServiceClient.getUserById(userId);
             if (userApiResponse != null && userApiResponse.isSuccess() && userApiResponse.getData() != null) {
-                userEmail = userApiResponse.getData().getEmail();
+                if (Boolean.TRUE.equals(userApiResponse.getData().getIsEmailVerified())) {
+                    userEmail = userApiResponse.getData().getEmail();
+                }
                 userMobile = userApiResponse.getData().getMobileNumber();
             }
         } catch (Exception e) {
@@ -131,7 +133,7 @@ public class RechargeService implements IRechargeService {
         }
 
         // Publish event asynchronously for saga orchestration
-        com.omnicharge.common.event.saga.RechargeInitiatedEvent sagaEvent = com.omnicharge.common.event.saga.RechargeInitiatedEvent.builder()
+        com.omnicharge.recharge.common.event.saga.RechargeInitiatedEvent sagaEvent = com.omnicharge.recharge.common.event.saga.RechargeInitiatedEvent.builder()
                 .rechargeId(recharge.getRechargeId())
                 .userId(recharge.getUserId())
                 .amount(recharge.getAmount())
@@ -172,6 +174,15 @@ public class RechargeService implements IRechargeService {
     }
 
     @Override
+    public Page<RechargeResponse> getRechargeHistory(Long userId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+        LocalDateTime safeStart = (startDate != null) ? startDate : LocalDateTime.of(1970, 1, 1, 0, 0);
+        LocalDateTime safeEnd = (endDate != null) ? endDate : LocalDateTime.of(9999, 12, 31, 23, 59);
+
+        Page<Recharge> recharges = rechargeRepository.findByUserIdWithDateFilters(userId, safeStart, safeEnd, pageable);
+        return recharges.map(this::mapToResponse);
+    }
+
+    @Override
     public String getRechargeStatus(String rechargeId) {
         Recharge recharge = rechargeRepository.findByRechargeId(rechargeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Recharge not found with id: " + rechargeId));
@@ -181,6 +192,28 @@ public class RechargeService implements IRechargeService {
     @Override
     public Page<RechargeResponse> getAllRecharges(Pageable pageable) {
         Page<Recharge> recharges = rechargeRepository.findAll(pageable);
+        return recharges.map(this::mapToResponse);
+    }
+
+    @Override
+    public Page<RechargeResponse> getAllRecharges(String status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+        LocalDateTime safeStart = (startDate != null) ? startDate : LocalDateTime.of(1970, 1, 1, 0, 0);
+        LocalDateTime safeEnd = (endDate != null) ? endDate : LocalDateTime.of(9999, 12, 31, 23, 59);
+
+        Page<Recharge> recharges;
+        if (status == null || status.isBlank()) {
+            // ALL — no status filter
+            recharges = rechargeRepository.findAllWithDateFilters(safeStart, safeEnd, pageable);
+        } else if ("PROCESSING".equalsIgnoreCase(status) || "INITIATED".equalsIgnoreCase(status)) {
+            // "PROCESSING" tab covers both INITIATED and PROCESSING DB statuses
+            recharges = rechargeRepository.findAllWithStatusesAndDateFilters(
+                    java.util.List.of(RechargeStatus.INITIATED, RechargeStatus.PROCESSING),
+                    safeStart, safeEnd, pageable);
+        } else {
+            // Direct enum match: SUCCESS, FAILED, EXPIRED
+            RechargeStatus enumStatus = RechargeStatus.valueOf(status.toUpperCase());
+            recharges = rechargeRepository.findAllWithStatusAndDateFilters(enumStatus, safeStart, safeEnd, pageable);
+        }
         return recharges.map(this::mapToResponse);
     }
 

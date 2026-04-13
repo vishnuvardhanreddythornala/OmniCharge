@@ -15,7 +15,7 @@ public interface IUserService {
     void changePassword(Long userId, ChangePasswordRequest request);
     
     // Admin methods
-    Page<UserProfileResponse> getAllUsers(Pageable pageable);
+    Page<UserProfileResponse> getAllUsers(String search, String status, Pageable pageable);
     
     UserProfileResponse getUserById(Long id);
     

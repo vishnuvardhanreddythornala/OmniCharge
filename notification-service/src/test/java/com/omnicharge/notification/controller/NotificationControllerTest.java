@@ -1,81 +1,77 @@
 package com.omnicharge.notification.controller;
 
+import com.omnicharge.notification.common.dto.ApiResponse;
 import com.omnicharge.notification.dto.NotificationResponse;
-import com.omnicharge.notification.entity.NotificationCategory;
-import com.omnicharge.notification.entity.NotificationStatus;
-import com.omnicharge.notification.entity.NotificationType;
 import com.omnicharge.notification.service.INotificationService;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@WebMvcTest(NotificationController.class)
-@AutoConfigureMockMvc(addFilters = false)
-@MockBean(JpaMetamodelMappingContext.class)
-@MockBean(com.omnicharge.common.logging.LogEventPublisher.class)
+@ExtendWith(MockitoExtension.class)
 class NotificationControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
+    @Mock
     private INotificationService notificationService;
 
+    @InjectMocks
+    private NotificationController notificationController;
+
     @Test
-    void getUserNotifications_Success() throws Exception {
-        NotificationResponse resp = NotificationResponse.builder()
-                .id(1L).userId(10L).type(NotificationType.EMAIL).category(NotificationCategory.PAYMENT_SUCCESS)
-                .subject("Payment Done").message("Success").status(NotificationStatus.SENT)
-                .referenceId("TXN-1").isRead(false).createdDate(LocalDateTime.now()).build();
-
-        Page<NotificationResponse> page = new PageImpl<>(Collections.singletonList(resp));
-        when(notificationService.getUserNotifications(eq(10L), any(Pageable.class))).thenReturn(page);
-
-        mockMvc.perform(get("/api/notifications")
-                        .header("X-User-Id", "10")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.content[0].referenceId").value("TXN-1"));
+    void getUserNotifications_Desc() {
+        NotificationResponse res = NotificationResponse.builder().id(1L).message("Msg").build();
+        Page<NotificationResponse> page = new PageImpl<>(List.of(res));
+        when(notificationService.getUserNotifications(eq(1L), any(PageRequest.class))).thenReturn(page);
+        
+        ResponseEntity<ApiResponse<Page<NotificationResponse>>> response = notificationController.getUserNotifications(
+                1L, 0, 10, "createdDate", "DESC");
+                
+        assertEquals(200, response.getStatusCodeValue());
+        assertTrue(response.getBody().isSuccess());
     }
 
     @Test
-    void markAsRead_Success() throws Exception {
-        doNothing().when(notificationService).markAsRead(1L, 10L);
-
-        mockMvc.perform(put("/api/notifications/1/read")
-                        .header("X-User-Id", "10")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
+    void getUserNotifications_Asc() {
+        NotificationResponse res = NotificationResponse.builder().id(1L).message("Msg").build();
+        Page<NotificationResponse> page = new PageImpl<>(List.of(res));
+        when(notificationService.getUserNotifications(eq(1L), any(PageRequest.class))).thenReturn(page);
+        
+        ResponseEntity<ApiResponse<Page<NotificationResponse>>> response = notificationController.getUserNotifications(
+                1L, 0, 10, "createdDate", "ASC");
+                
+        assertEquals(200, response.getStatusCodeValue());
+        assertTrue(response.getBody().isSuccess());
     }
 
     @Test
-    void getUnreadCount_Success() throws Exception {
-        when(notificationService.getUnreadCount(10L)).thenReturn(7L);
+    void markAsRead() {
+        doNothing().when(notificationService).markAsRead(10L, 1L);
+        ResponseEntity<ApiResponse<Void>> response = notificationController.markAsRead(10L, 1L);
+        assertEquals(200, response.getStatusCodeValue());
+        verify(notificationService, times(1)).markAsRead(10L, 1L);
+    }
 
-        mockMvc.perform(get("/api/notifications/unread-count")
-                        .header("X-User-Id", "10")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data").value(7));
+    @Test
+    void getUnreadCount() {
+        when(notificationService.getUnreadCount(1L)).thenReturn(5L);
+        ResponseEntity<ApiResponse<Long>> response = notificationController.getUnreadCount(1L);
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(5L, response.getBody().getData());
     }
 }

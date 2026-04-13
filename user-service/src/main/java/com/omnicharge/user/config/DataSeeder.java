@@ -6,6 +6,7 @@ import com.omnicharge.user.entity.User;
 import com.omnicharge.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,12 @@ public class DataSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Value("${app.seed.admin-password}")
+    private String adminPassword;
+
+    @Value("${app.seed.demo-password}")
+    private String demoPassword;
+
     @Override
     public void run(String... args) {
         seedAdminUser();
@@ -25,24 +32,34 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedAdminUser() {
-        String adminEmail = "admin@omnicharge.com";
+        String adminEmail = "vishnuvardhanreddythornala@gmail.com";
         
         if (userRepository.existsByEmail(adminEmail)) {
-            log.info("Admin user already exists");
+            // Always update password to ensure correct bcrypt hash (Flyway seed uses a dummy hash)
+            userRepository.findByEmail(adminEmail).ifPresent(admin -> {
+                admin.setPassword(passwordEncoder.encode(adminPassword));
+                userRepository.save(admin);
+                log.info("Admin user password updated: {}", adminEmail);
+            });
             return;
         }
 
         User admin = new User();
         admin.setEmail(adminEmail);
         admin.setFullName("Admin User");
-        admin.setPassword(passwordEncoder.encode("Admin@123"));
-        admin.setMobileNumber("9999999999");
+        admin.setPassword(passwordEncoder.encode(adminPassword));
+        admin.setMobileNumber("+919999999999");
         admin.setAuthProvider(AuthProvider.LOCAL);
         admin.setRole(Role.ROLE_ADMIN);
         admin.setIsActive(true);
+        admin.setIsMobileVerified(true);
 
-        userRepository.save(admin);
-        log.info("Admin user created: {}", adminEmail);
+        try {
+            userRepository.save(admin);
+            log.info("Admin user created: {}", adminEmail);
+        } catch (Exception e) {
+            log.warn("Failed to create admin user (possibly duplicate mobile constraint): {}", e.getMessage());
+        }
     }
 
     private void seedDemoUser() {
@@ -56,13 +73,18 @@ public class DataSeeder implements CommandLineRunner {
         User demoUser = new User();
         demoUser.setEmail(demoEmail);
         demoUser.setFullName("Demo User");
-        demoUser.setPassword(passwordEncoder.encode("User@123"));
-        demoUser.setMobileNumber("9876543210");
+        demoUser.setPassword(passwordEncoder.encode(demoPassword));
+        demoUser.setMobileNumber("+919876543210");
         demoUser.setAuthProvider(AuthProvider.LOCAL);
         demoUser.setRole(Role.ROLE_USER);
         demoUser.setIsActive(true);
+        demoUser.setIsMobileVerified(true);
 
-        userRepository.save(demoUser);
-        log.info("Demo user created: {}", demoEmail);
+        try {
+            userRepository.save(demoUser);
+            log.info("Demo user created: {}", demoEmail);
+        } catch (Exception e) {
+            log.warn("Failed to create demo user (possibly duplicate mobile constraint): {}", e.getMessage());
+        }
     }
 }

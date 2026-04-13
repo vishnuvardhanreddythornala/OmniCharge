@@ -1,8 +1,8 @@
 package com.omnicharge.notification.messaging;
 
-import com.omnicharge.common.event.PaymentCompletedEvent;
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.notification.common.event.PaymentCompletedEvent;
+import com.omnicharge.notification.common.logging.LogEvent;
+import com.omnicharge.notification.common.logging.LogEventPublisher;
 import com.omnicharge.notification.entity.NotificationCategory;
 import com.omnicharge.notification.service.IEmailService;
 import com.omnicharge.notification.service.INotificationService;
@@ -19,6 +19,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class PaymentEventConsumer {
+    private static final String START_PAYMENT_LOG = "[Payment] Starting payment processing for Transaction: {}";
+    private static final String ERROR_PAYMENT_LOG = "[Payment] Processing failed for Transaction: {} - Error: {}";
+
+    private static final String SERVICE_NAME = "notification-service";
 
     private final IEmailService emailService;
     private final ISmsService smsService;
@@ -147,3 +151,4 @@ public class PaymentEventConsumer {
         }
     }
 }
+

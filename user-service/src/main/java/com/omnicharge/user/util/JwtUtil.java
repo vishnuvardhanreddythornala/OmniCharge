@@ -37,13 +37,15 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateAccessToken(Long userId, String email, String role, boolean isProfileComplete) {
+    public String generateAccessToken(Long userId, String email, String role, boolean isProfileComplete, boolean isMobileVerified, String provider) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId.toString());
         claims.put("email", email);
         claims.put("role", role);
         claims.put("jti", UUID.randomUUID().toString());
         claims.put("isProfileComplete", isProfileComplete);
+        claims.put("isMobileVerified", isMobileVerified);
+        claims.put("provider", provider);
 
         return Jwts.builder()
                 .claims(claims)

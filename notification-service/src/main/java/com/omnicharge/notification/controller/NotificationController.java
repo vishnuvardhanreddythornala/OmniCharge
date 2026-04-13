@@ -1,6 +1,6 @@
 package com.omnicharge.notification.controller;
 
-import com.omnicharge.common.dto.ApiResponse;
+import com.omnicharge.notification.common.dto.ApiResponse;
 import com.omnicharge.notification.dto.NotificationResponse;
 import com.omnicharge.notification.service.INotificationService;
 import lombok.RequiredArgsConstructor;

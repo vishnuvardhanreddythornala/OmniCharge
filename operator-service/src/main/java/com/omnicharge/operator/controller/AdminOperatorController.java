@@ -1,6 +1,6 @@
 package com.omnicharge.operator.controller;
 
-import com.omnicharge.common.dto.ApiResponse;
+import com.omnicharge.operator.common.dto.ApiResponse;
 import com.omnicharge.operator.dto.OperatorRequest;
 import com.omnicharge.operator.dto.OperatorResponse;
 import com.omnicharge.operator.dto.PlanRequest;
@@ -79,7 +79,9 @@ public class AdminOperatorController {
         
         Boolean isActive = parseStatus(status);
         List<PlanResponse> plans = planService.getPlansByOperatorAndStatus(operatorId, isActive);
-        return ResponseEntity.ok(ApiResponse.success("Plans retrieved successfully", plans));
+        return ResponseEntity.ok()
+                .cacheControl(org.springframework.http.CacheControl.noCache())
+                .body(ApiResponse.success("Plans retrieved successfully", plans));
     }
 
     @PostMapping("/{operatorId}/plans")
@@ -122,6 +124,7 @@ public class AdminOperatorController {
             @RequestParam(required = false) Long operatorId,
             @RequestParam(required = false) PlanCategory category,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "price") String sortBy,
@@ -132,7 +135,7 @@ public class AdminOperatorController {
                 Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
         
-        Page<PlanResponse> plans = planService.searchPlansWithStatus(operatorId, category, isActive, pageable);
+        Page<PlanResponse> plans = planService.searchPlansWithStatus(operatorId, category, isActive, search, pageable);
         return ResponseEntity.ok(ApiResponse.success("Plans retrieved successfully", plans));
     }
 

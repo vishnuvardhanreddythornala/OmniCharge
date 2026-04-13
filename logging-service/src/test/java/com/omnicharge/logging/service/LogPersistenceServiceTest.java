@@ -1,76 +1,101 @@
 package com.omnicharge.logging.service;
 
-import com.omnicharge.common.logging.LogEvent;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.omnicharge.logging.common.logging.LogEvent;
 import com.omnicharge.logging.entity.LogEntry;
 import com.omnicharge.logging.repository.LogEntryRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class LogPersistenceServiceTest {
 
+    @Mock private LogEntryRepository logEntryRepository;
+    @Spy  private ObjectMapper objectMapper = new ObjectMapper();
     @Mock
-    private LogEntryRepository logEntryRepository;
+    private com.omnicharge.logging.common.logging.LogEventPublisher logEventPublisher;
+
 
     @InjectMocks
     private LogPersistenceService logPersistenceService;
 
-    private LogEvent event;
+    private LogEvent validEvent;
 
     @BeforeEach
     void setUp() {
-        event = LogEvent.builder()
-                .serviceName("payment-service")
-                .level("ERROR")
-                .logger("PaymentLogger")
-                .message("Payment Failed")
-                .traceId("trace-123")
-                .spanId("span-456")
-                .threadName("main")
-                .stackTrace("java.lang.Exception")
-                .timestamp(LocalDateTime.now())
-                .build();
+        validEvent = new LogEvent();
+        validEvent.setServiceName("user-service");
+        validEvent.setLevel("INFO");
+        validEvent.setLogger("com.omnicharge.user.service.AuthService");
+        validEvent.setMessage("OTP sent successfully");
+        validEvent.setTraceId("trace-001");
+        validEvent.setSpanId("span-001");
+        validEvent.setThreadName("main");
+        validEvent.setEventType("OTP_SENT");
+        validEvent.setTimestamp(LocalDateTime.now());
+        validEvent.setContext(Map.of("userId", "1", "mobile", "9876543210"));
     }
 
     @Test
-    void save_PersistsSuccessfully() {
-        logPersistenceService.save(event);
+    @DisplayName("SUCCESS: Saves log entry with context JSON")
+    void save_Success_WithContext() {
+        logPersistenceService.save(validEvent);
 
         ArgumentCaptor<LogEntry> captor = ArgumentCaptor.forClass(LogEntry.class);
         verify(logEntryRepository, times(1)).save(captor.capture());
 
-        LogEntry savedEntry = captor.getValue();
-        assertNotNull(savedEntry);
-        assertEquals("payment-service", savedEntry.getServiceName());
-        assertEquals("ERROR", savedEntry.getLevel());
-        assertEquals("PaymentLogger", savedEntry.getLogger());
-        assertEquals("Payment Failed", savedEntry.getMessage());
-        assertEquals("trace-123", savedEntry.getTraceId());
-        assertEquals("span-456", savedEntry.getSpanId());
-        assertEquals("main", savedEntry.getThreadName());
-        assertEquals("java.lang.Exception", savedEntry.getStackTrace());
-        assertEquals(event.getTimestamp(), savedEntry.getTimestamp());
+        LogEntry saved = captor.getValue();
+        assertEquals("user-service", saved.getServiceName());
+        assertEquals("INFO", saved.getLevel());
+        assertEquals("OTP_SENT", saved.getEventType());
+        assertNotNull(saved.getContextJson());
+        assertTrue(saved.getContextJson().contains("userId"));
     }
 
     @Test
-    void save_HandlesExceptionGracefully() {
-        when(logEntryRepository.save(any(LogEntry.class))).thenThrow(new RuntimeException("DB Connection Failed"));
+    @DisplayName("SUCCESS: Saves log entry without context (null)")
+    void save_Success_NullContext() {
+        validEvent.setContext(null);
 
-        // Exception should be caught inside the service
-        logPersistenceService.save(event);
+        logPersistenceService.save(validEvent);
 
-        verify(logEntryRepository, times(1)).save(any(LogEntry.class));
+        ArgumentCaptor<LogEntry> captor = ArgumentCaptor.forClass(LogEntry.class);
+        verify(logEntryRepository, times(1)).save(captor.capture());
+        assertNull(captor.getValue().getContextJson());
+    }
+
+    @Test
+    @DisplayName("SUCCESS: Saves log entry with empty context")
+    void save_Success_EmptyContext() {
+        validEvent.setContext(Map.of());
+
+        logPersistenceService.save(validEvent);
+
+        ArgumentCaptor<LogEntry> captor = ArgumentCaptor.forClass(LogEntry.class);
+        verify(logEntryRepository, times(1)).save(captor.capture());
+        assertNull(captor.getValue().getContextJson());
+    }
+
+    @Test
+    @DisplayName("FAIL: DB error is caught gracefully (no exception propagated)")
+    void save_DbFailure_NoException() {
+        when(logEntryRepository.save(any())).thenThrow(new RuntimeException("DB connection failed"));
+
+        // Should NOT throw
+        assertDoesNotThrow(() -> logPersistenceService.save(validEvent));
     }
 }

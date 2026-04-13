@@ -1,11 +1,13 @@
 package com.omnicharge.payment.service;
 
-import com.omnicharge.common.event.PaymentCompletedEvent;
-import com.omnicharge.common.event.saga.PaymentApprovedEvent;
-import com.omnicharge.common.exception.BadRequestException;
-import com.omnicharge.common.exception.ResourceNotFoundException;
-import com.omnicharge.common.logging.LogEventPublisher;
-import com.omnicharge.payment.dto.*;
+import com.omnicharge.payment.common.exception.BadRequestException;
+import com.omnicharge.payment.common.exception.ResourceNotFoundException;
+import com.omnicharge.payment.common.logging.LogEvent;
+import com.omnicharge.payment.common.logging.LogEventPublisher;
+import com.omnicharge.payment.dto.PaymentRequest;
+import com.omnicharge.payment.dto.PaymentResponse;
+import com.omnicharge.payment.dto.PaymentStatsResponse;
+import com.omnicharge.payment.dto.TransactionResponse;
 import com.omnicharge.payment.entity.PaymentMethod;
 import com.omnicharge.payment.entity.PaymentStatus;
 import com.omnicharge.payment.entity.Transaction;
@@ -22,18 +24,19 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -58,183 +61,232 @@ class PaymentServiceTest {
     @InjectMocks
     private PaymentService paymentService;
 
-    private PaymentRequest paymentRequest;
+    private PaymentRequest validRequest;
     private Transaction pendingTransaction;
 
     @BeforeEach
     void setUp() {
-        paymentRequest = new PaymentRequest();
-        paymentRequest.setRechargeId("OMNI-1234");
-        paymentRequest.setUserId(1L);
-        paymentRequest.setAmount(new BigDecimal("299.00"));
-        paymentRequest.setPaymentMethod("CREDIT_CARD");
-        paymentRequest.setUserEmail("test@test.com");
-        paymentRequest.setUserMobile("9876543210");
-        paymentRequest.setMobileNumber("9876543210");
-        paymentRequest.setOperatorName("Jio");
-        paymentRequest.setPlanName("Ultimate 5G");
+        validRequest = new PaymentRequest();
+        validRequest.setRechargeId("OMNI-RECHARGE-123");
+        validRequest.setUserId(1L);
+        validRequest.setAmount(new BigDecimal("199.00"));
+        validRequest.setPaymentMethod("UPI");
+        validRequest.setUserEmail("test@example.com");
+        validRequest.setUserMobile("9876543210");
+        validRequest.setMobileNumber("9876543210");
+        validRequest.setOperatorName("Airtel");
+        validRequest.setPlanName("Basic Plan");
 
         pendingTransaction = new Transaction();
         pendingTransaction.setId(100L);
-        pendingTransaction.setTransactionId("TXN-XXXXXX");
-        pendingTransaction.setRechargeId("OMNI-1234");
+        pendingTransaction.setTransactionId("TXN-ASDFGHJKL");
+        pendingTransaction.setRechargeId("OMNI-RECHARGE-123");
         pendingTransaction.setUserId(1L);
-        pendingTransaction.setAmount(new BigDecimal("299.00"));
-        pendingTransaction.setPaymentMethod(PaymentMethod.CREDIT_CARD);
+        pendingTransaction.setAmount(new BigDecimal("199.00"));
+        pendingTransaction.setPaymentMethod(PaymentMethod.UPI);
         pendingTransaction.setStatus(PaymentStatus.PENDING);
-        pendingTransaction.setUserEmail("test@test.com");
+        pendingTransaction.setUserEmail("test@example.com");
     }
 
     @Test
-    void processPayment_ReturnsSuccess() {
-        PaymentResponse mockResponse = PaymentResponse.builder()
+    void processPayment_SuccessFlow() {
+        PaymentResponse mockRazorpayResponse = PaymentResponse.builder()
                 .status("SUCCESS")
-                .razorpayOrderId("order_123")
-                .amount(new BigDecimal("299.00"))
+                .razorpayOrderId("order_abc123")
                 .build();
 
-        when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> {
-            Transaction t = invocation.getArgument(0);
-            t.setId(1L);
-            return t;
-        });
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
+        when(razorpayPaymentService.processRazorpayPayment(any(PaymentRequest.class))).thenReturn(mockRazorpayResponse);
 
-        when(razorpayPaymentService.processRazorpayPayment(any(PaymentRequest.class))).thenReturn(mockResponse);
-
-        PaymentResponse response = paymentService.processPayment(paymentRequest);
+        PaymentResponse response = paymentService.processPayment(validRequest);
 
         assertNotNull(response);
         assertEquals("SUCCESS", response.getStatus());
-        assertEquals("order_123", response.getRazorpayOrderId());
-        verify(transactionRepository, times(2)).save(any(Transaction.class));
-        verify(paymentEventProducer, times(1)).publishPaymentCompleted(any(PaymentCompletedEvent.class));
+        assertEquals("order_abc123", response.getRazorpayOrderId());
+        verify(logEventPublisher, atLeastOnce()).publish(any(LogEvent.class));
+        verify(paymentEventProducer, times(1)).publishPaymentCompleted(any());
     }
 
     @Test
-    void processPayment_ReturnsPending() {
-        PaymentResponse mockResponse = PaymentResponse.builder()
+    void processPayment_PendingFlow() {
+        PaymentResponse mockRazorpayResponse = PaymentResponse.builder()
                 .status("PENDING")
-                .razorpayOrderId("order_999")
+                .razorpayOrderId("order_abc123")
                 .build();
 
-        when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(razorpayPaymentService.processRazorpayPayment(any(PaymentRequest.class))).thenReturn(mockResponse);
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
+        when(razorpayPaymentService.processRazorpayPayment(any(PaymentRequest.class))).thenReturn(mockRazorpayResponse);
 
-        PaymentResponse response = paymentService.processPayment(paymentRequest);
+        PaymentResponse response = paymentService.processPayment(validRequest);
 
+        assertNotNull(response);
         assertEquals("PENDING", response.getStatus());
-        verify(transactionRepository, times(2)).save(any(Transaction.class));
-        // Should NOT publish completed event for PENDING
+        assertEquals("order_abc123", response.getRazorpayOrderId());
         verify(paymentEventProducer, never()).publishPaymentCompleted(any());
     }
 
     @Test
-    void processPayment_ReturnsFailed() {
-        PaymentResponse mockResponse = PaymentResponse.builder().status("FAILED").build();
+    void processPayment_FailedFlow() {
+        PaymentResponse mockRazorpayResponse = PaymentResponse.builder()
+                .status("FAILED")
+                .build();
 
-        when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(razorpayPaymentService.processRazorpayPayment(any(PaymentRequest.class))).thenReturn(mockResponse);
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
+        when(razorpayPaymentService.processRazorpayPayment(any(PaymentRequest.class))).thenReturn(mockRazorpayResponse);
 
-        PaymentResponse response = paymentService.processPayment(paymentRequest);
+        PaymentResponse response = paymentService.processPayment(validRequest);
 
+        assertNotNull(response);
         assertEquals("FAILED", response.getStatus());
-        verify(paymentEventProducer, times(1)).publishPaymentCompleted(any(PaymentCompletedEvent.class));
+        verify(paymentEventProducer, times(1)).publishPaymentCompleted(any()); // Triggered on failure terminal states
     }
 
     @Test
-    void confirmPayment_Success() {
-        when(transactionRepository.findByTransactionId("TXN-XXXXXX")).thenReturn(Optional.of(pendingTransaction));
-        when(transactionRepository.save(any(Transaction.class))).thenReturn(pendingTransaction);
+    void confirmPayment_SuccessWithMissingMetadataFetch() {
+        Transaction missingDataTxn = new Transaction();
+        missingDataTxn.setTransactionId("TXN-123");
+        missingDataTxn.setRechargeId("OMNI-123");
+        missingDataTxn.setUserId(1L);
+        missingDataTxn.setStatus(PaymentStatus.PENDING);
+        missingDataTxn.setAmount(BigDecimal.TEN);
 
-        TransactionResponse response = paymentService.confirmPayment("TXN-XXXXXX", "rzp_999", "sig_999");
+        when(transactionRepository.findByTransactionId("TXN-123")).thenReturn(Optional.of(missingDataTxn));
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
+
+        // Mock rest template response since mobileNumber etc is null
+        Map<String, Object> dataMap = Map.of("mobileNumber", "9876543210", "operatorName", "Jio", "planName", "Pro");
+        Map<String, Object> bodyMap = Map.of("success", true, "data", dataMap);
+        ResponseEntity<Map<String, Object>> responseEntity = ResponseEntity.ok(bodyMap);
+
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), eq(null), any(ParameterizedTypeReference.class)))
+                .thenReturn(responseEntity);
+
+        TransactionResponse response = paymentService.confirmPayment("TXN-123", "pay_webhook_id", "sign_abc");
 
         assertEquals(PaymentStatus.SUCCESS, response.getStatus());
-        verify(paymentEventProducer, times(1)).publishPaymentApproved(any(PaymentApprovedEvent.class));
-        verify(paymentEventProducer, times(1)).publishPaymentCompleted(any(PaymentCompletedEvent.class));
+        assertEquals("9876543210", response.getMobileNumber());
+        verify(restTemplate, times(1)).exchange(anyString(), eq(HttpMethod.GET), eq(null), any(ParameterizedTypeReference.class));
+        verify(paymentEventProducer, times(1)).publishPaymentApproved(any());
     }
 
     @Test
-    void confirmPayment_AlreadyConfirmed() {
-        pendingTransaction.setStatus(PaymentStatus.SUCCESS);
-        when(transactionRepository.findByTransactionId("TXN-XXXXXX")).thenReturn(Optional.of(pendingTransaction));
+    void confirmPayment_IdempotencyCheck() {
+        Transaction successTxn = new Transaction();
+        successTxn.setTransactionId("TXN-123");
+        successTxn.setStatus(PaymentStatus.SUCCESS);
 
-        TransactionResponse response = paymentService.confirmPayment("TXN-XXXXXX", "rzp_999", "sig_999");
+        when(transactionRepository.findByTransactionId("TXN-123")).thenReturn(Optional.of(successTxn));
+
+        TransactionResponse response = paymentService.confirmPayment("TXN-123", "pay_webhook_id", "sign_abc");
 
         assertEquals(PaymentStatus.SUCCESS, response.getStatus());
         verify(transactionRepository, never()).save(any());
+        verify(paymentEventProducer, never()).publishPaymentApproved(any());
     }
 
     @Test
-    void confirmPayment_MissingMetadata_FetchesFromRechargeService() {
-        // Remove metadata
-        pendingTransaction.setMobileNumber(null);
-        pendingTransaction.setOperatorName(null);
-        pendingTransaction.setPlanName(null);
+    void failPayment_Success() {
+        when(transactionRepository.findByTransactionId(pendingTransaction.getTransactionId()))
+                .thenReturn(Optional.of(pendingTransaction));
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
 
-        when(transactionRepository.findByTransactionId("TXN-XXXXXX")).thenReturn(Optional.of(pendingTransaction));
-        when(transactionRepository.save(any(Transaction.class))).thenReturn(pendingTransaction);
+        TransactionResponse response = paymentService.failPayment(pendingTransaction.getTransactionId(), "User Cancelled");
 
-        // Mock RestTemplate response
-        Map<String, Object> body = new HashMap<>();
-        body.put("success", true);
-        Map<String, Object> data = new HashMap<>();
-        data.put("mobileNumber", "1234567890");
-        data.put("operatorName", "MockOperator");
-        data.put("planName", "MockPlan");
-        body.put("data", data);
-
-        ResponseEntity<Map<String, Object>> responseEntity = ResponseEntity.ok(body);
-        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(), any(ParameterizedTypeReference.class)))
-                .thenReturn(responseEntity);
-
-        paymentService.confirmPayment("TXN-XXXXXX", "rzp_999", "sig_999");
-
-        assertEquals("1234567890", pendingTransaction.getMobileNumber());
-        assertEquals("MockOperator", pendingTransaction.getOperatorName());
-        assertEquals("MockPlan", pendingTransaction.getPlanName());
-        verify(restTemplate, times(1)).exchange(anyString(), any(), any(), any(ParameterizedTypeReference.class));
+        assertEquals(PaymentStatus.FAILED, response.getStatus());
+        verify(paymentEventProducer, times(1)).publishPaymentRejected(any());
     }
 
     @Test
-    void getTransaction_ValidMatch() {
-        when(transactionRepository.findByTransactionId("TXN-XXXXXX")).thenReturn(Optional.of(pendingTransaction));
-        TransactionResponse response = paymentService.getTransaction("TXN-XXXXXX", 1L);
-        assertEquals(100L, response.getId());
+    void failPayment_AlreadyFailedIdempotency() {
+        pendingTransaction.setStatus(PaymentStatus.FAILED);
+        when(transactionRepository.findByTransactionId(pendingTransaction.getTransactionId()))
+                .thenReturn(Optional.of(pendingTransaction));
+
+        TransactionResponse response = paymentService.failPayment(pendingTransaction.getTransactionId(), "Duplicate Cancel");
+
+        assertEquals(PaymentStatus.FAILED, response.getStatus());
+        verify(transactionRepository, never()).save(any());
+        verify(paymentEventProducer, never()).publishPaymentRejected(any());
+    }
+
+    @Test
+    void failPayment_NotAllowedIfSuccess() {
+        pendingTransaction.setStatus(PaymentStatus.SUCCESS);
+        when(transactionRepository.findByTransactionId(pendingTransaction.getTransactionId()))
+                .thenReturn(Optional.of(pendingTransaction));
+
+        TransactionResponse response = paymentService.failPayment(pendingTransaction.getTransactionId(), "Late Cancel Call");
+
+        assertEquals(PaymentStatus.SUCCESS, response.getStatus());
+        verify(transactionRepository, never()).save(any());
+        verify(paymentEventProducer, never()).publishPaymentRejected(any());
+    }
+
+    @Test
+    void getTransaction_Success() {
+        when(transactionRepository.findByTransactionId(pendingTransaction.getTransactionId()))
+                .thenReturn(Optional.of(pendingTransaction));
+
+        TransactionResponse response = paymentService.getTransaction(pendingTransaction.getTransactionId(), 1L);
+
+        assertEquals(pendingTransaction.getTransactionId(), response.getTransactionId());
     }
 
     @Test
     void getTransaction_Unauthorized() {
-        when(transactionRepository.findByTransactionId("TXN-XXXXXX")).thenReturn(Optional.of(pendingTransaction));
-        assertThrows(BadRequestException.class, () -> paymentService.getTransaction("TXN-XXXXXX", 2L));
+        when(transactionRepository.findByTransactionId(pendingTransaction.getTransactionId()))
+                .thenReturn(Optional.of(pendingTransaction));
+
+        assertThrows(BadRequestException.class, () -> {
+            paymentService.getTransaction(pendingTransaction.getTransactionId(), 999L);
+        });
     }
 
     @Test
     void getTransaction_NotFound() {
-        when(transactionRepository.findByTransactionId("TXN-XXXXXX")).thenReturn(Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> paymentService.getTransaction("TXN-XXXXXX", 1L));
-    }
+        when(transactionRepository.findByTransactionId("MISSING")).thenReturn(Optional.empty());
 
+        assertThrows(ResourceNotFoundException.class, () -> {
+            paymentService.getTransaction("MISSING", 1L);
+        });
+    }
+    
     @Test
     void getPaymentHistory_Success() {
-        Page<Transaction> page = new PageImpl<>(Collections.singletonList(pendingTransaction));
-        when(transactionRepository.findByUserIdWithFilters(anyLong(), any(), any(), any(), any(), any(), any(Pageable.class)))
+        Page<Transaction> page = new PageImpl<>(List.of(pendingTransaction));
+        when(transactionRepository.findByUserIdWithFilters(anyLong(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(page);
-
-        Page<TransactionResponse> result = paymentService.getPaymentHistory(1L, null, null, null, null, null, PageRequest.of(0, 10));
-
-        assertFalse(result.isEmpty());
-        assertEquals("TXN-XXXXXX", result.getContent().get(0).getTransactionId());
+                
+        Page<TransactionResponse> result = paymentService.getPaymentHistory(1L, null, null, null, null, null, null, PageRequest.of(0, 10));
+        
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
     }
-
+    
     @Test
-    void getPaymentStats_CheckNullDaysFallback() {
-        when(transactionRepository.count()).thenReturn(150L);
-        when(transactionRepository.countByStatus(any())).thenReturn(100L);
-        when(transactionRepository.sumAmountByStatus(any())).thenReturn(new BigDecimal("5000"));
-
-        PaymentStatsResponse stats = paymentService.getPaymentStats(null);
-
-        assertEquals(150L, stats.getTotalTransactions());
-        assertEquals(new BigDecimal("5000"), stats.getTotalRevenue());
+    void getAllTransactions_Success() {
+        Page<Transaction> page = new PageImpl<>(List.of(pendingTransaction));
+        when(transactionRepository.findAllWithFilters(any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(page);
+                
+        Page<TransactionResponse> result = paymentService.getAllTransactions(null, null, null, null, null, null, null, PageRequest.of(0, 10));
+        
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+    }
+    
+    @Test
+    void getPaymentStats_Success() {
+        when(transactionRepository.count()).thenReturn(100L);
+        when(transactionRepository.countByStatus(PaymentStatus.SUCCESS)).thenReturn(80L);
+        when(transactionRepository.sumAmountByStatus(PaymentStatus.SUCCESS)).thenReturn(new BigDecimal("15000"));
+        when(transactionRepository.findRevenueByDate(any(), any())).thenReturn(Collections.emptyList());
+        when(transactionRepository.findTopUsersByRevenue(any(), any())).thenReturn(Collections.emptyList());
+        
+        PaymentStatsResponse stats = paymentService.getPaymentStats(30);
+        
+        assertNotNull(stats);
+        assertEquals(100L, stats.getTotalTransactions());
+        assertEquals(new BigDecimal("15000"), stats.getTotalRevenue());
     }
 }

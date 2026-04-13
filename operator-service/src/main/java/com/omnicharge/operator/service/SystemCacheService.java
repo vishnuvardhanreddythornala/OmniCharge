@@ -46,9 +46,22 @@ public class SystemCacheService {
     public void rebuildRedisCache() {
         log.info("Starting full Redis cache rebuild for Operator Service...");
         
+        // Clear detection cache
+        try {
+            java.util.Set<String> keys = redisTemplate.keys("operator:detect:*");
+            if (keys != null && !keys.isEmpty()) {
+                redisTemplate.delete(keys);
+                log.info("Cleared {} operator detection cache keys", keys.size());
+            }
+        } catch (Exception e) {
+            log.warn("Failed to clear detection cache", e);
+        }
+        
+        // CRITICAL FIX: Only cache plans where BOTH plan.isActive AND operator.isActive are true
         List<Plan> allActivePlans = planRepository.findAll()
                 .stream()
                 .filter(Plan::getIsActive)
+                .filter(p -> p.getOperator().getIsActive()) // Filter out plans from inactive operators
                 .collect(Collectors.toList());
 
         // Group by operatorId

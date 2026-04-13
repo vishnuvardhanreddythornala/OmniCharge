@@ -1,31 +1,45 @@
 package com.omnicharge.user.controller;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.omnicharge.common.dto.ApiResponse;
+import com.omnicharge.user.common.exception.BadRequestException;
+import com.omnicharge.user.common.exception.ForbiddenException;
+import com.omnicharge.user.common.exception.UnauthorizedException;
 import com.omnicharge.user.dto.*;
-import com.omnicharge.user.entity.AuthProvider;
-import com.omnicharge.user.entity.Role;
+import com.omnicharge.user.service.EmailVerificationService;
 import com.omnicharge.user.service.IAuthService;
-import com.omnicharge.user.service.IPasswordResetService;
-import com.omnicharge.common.logging.LogEventPublisher;
-import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import com.omnicharge.user.util.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = AuthController.class)
+@WebMvcTest(controllers = AuthController.class, excludeAutoConfiguration = {JpaRepositoriesAutoConfiguration.class, DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 @AutoConfigureMockMvc(addFilters = false) // Disables Spring Security filters for pure unit testing
 class AuthControllerTest {
+    @org.springframework.test.context.bean.override.mockito.MockitoBean
+    private org.springframework.data.jpa.mapping.JpaMetamodelMappingContext jpaMappingContext;
+
+    @MockitoBean(name="logEventPublisher")
+    private com.omnicharge.user.common.logging.LogEventPublisher logEventPublisher;
+
 
     @Autowired
     private MockMvc mockMvc;
@@ -33,105 +47,133 @@ class AuthControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private IAuthService authService;
 
-    @MockBean
-    private IPasswordResetService passwordResetService;
+    @MockitoBean
+    private EmailVerificationService emailVerificationService;
 
-    @MockBean
-    private LogEventPublisher logEventPublisher;
+    @MockitoBean
+    private JwtUtil jwtUtil;
 
-    @MockBean
-    private JpaMetamodelMappingContext jpaMappingContext;
-
-    private RegisterRequest registerRequest;
-    private LoginRequest loginRequest;
-    private AuthResponse authResponse;
+    private AuthResponse mockAuthResponse;
 
     @BeforeEach
     void setUp() {
-        registerRequest = new RegisterRequest();
-        registerRequest.setFullName("Test User");
-        registerRequest.setEmail("test@example.com");
-        registerRequest.setPassword("securePassword123");
-        registerRequest.setMobileNumber("9876543210");
-
-        loginRequest = new LoginRequest();
-        loginRequest.setEmail("test@example.com");
-        loginRequest.setPassword("securePassword123");
-
-        authResponse = AuthResponse.builder()
-                .accessToken("mock-access-token")
-                .refreshToken("mock-refresh-token")
-                .tokenType("Bearer")
-                .expiresIn(3600L)
-                .role(Role.ROLE_USER)
-                .fullName("Test User")
-                .email("test@example.com")
-                .authProvider(AuthProvider.LOCAL)
-                .isProfileComplete(true)
+        mockAuthResponse = AuthResponse.builder()
+                .accessToken("mock_access_token")
+                .refreshToken("mock_refresh_token")
                 .build();
     }
 
     @Test
-    void register_Success() throws Exception {
-        doNothing().when(authService).register(any(RegisterRequest.class));
-
-        mockMvc.perform(post("/api/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(registerRequest)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("User registered successfully"));
-    }
-
-    @Test
-    void register_ValidationError_MissingEmail() throws Exception {
-        registerRequest.setEmail(null);
-
-        mockMvc.perform(post("/api/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(registerRequest)))
-                .andExpect(status().isBadRequest()); // 400 Status dynamically generated by Spring @Valid
-    }
-
-    @Test
     void login_Success() throws Exception {
-        when(authService.login(any(LoginRequest.class))).thenReturn(authResponse);
+        LoginRequest req = new LoginRequest();
+        req.setEmail("admin@omnicharge.com");
+        req.setPassword("pass");
+
+        AdminLoginInitResponse initResponse = AdminLoginInitResponse.builder()
+                .requires2fa(true).email("admin@omnicharge.com").build();
+
+        when(authService.login(any(LoginRequest.class), anyString())).thenReturn(initResponse);
 
         mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginRequest)))
+                .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.accessToken").value("mock-access-token"))
-                .andExpect(jsonPath("$.data.email").value("test@example.com"));
+                .andExpect(jsonPath("$.data.requires2fa").value(true));
     }
 
     @Test
-    void forgotPassword_Success() throws Exception {
-        ForgotPasswordRequest request = new ForgotPasswordRequest("test@example.com");
-        doNothing().when(passwordResetService).forgotPassword(any(ForgotPasswordRequest.class));
+    void login_Unauthorized() throws Exception {
+        LoginRequest req = new LoginRequest();
+        req.setEmail("admin@omnicharge.com");
+        req.setPassword("wrongpass");
 
-        mockMvc.perform(post("/api/auth/forgot-password")
+        when(authService.login(any(LoginRequest.class), anyString()))
+                .thenThrow(new UnauthorizedException("Invalid email or password"));
+
+        mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("OTP sent to your email"));
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Invalid email or password"));
     }
 
     @Test
-    void logout_Success() throws Exception {
-        doNothing().when(authService).logout(anyString());
+    void sendMobileOtp_Success() throws Exception {
+        SendMobileOtpRequest req = new SendMobileOtpRequest();
+        req.setMobileNumber("+919000000000");
 
-        mockMvc.perform(post("/api/auth/logout")
-                .header("Authorization", "Bearer mock-access-token")
-                .contentType(MediaType.APPLICATION_JSON))
+        doNothing().when(authService).sendMobileOtp(any(SendMobileOtpRequest.class), anyString());
+
+        mockMvc.perform(post("/api/auth/mobile/send-otp")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("Logout successful"));
-        
-        verify(authService, times(1)).logout("mock-access-token");
+                .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
+    void sendMobileOtp_ValidationError() throws Exception {
+        SendMobileOtpRequest req = new SendMobileOtpRequest();
+        // Empty mobile number
+
+        mockMvc.perform(post("/api/auth/mobile/send-otp")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void verifyMobileOtp_Success() throws Exception {
+        VerifyMobileOtpRequest req = new VerifyMobileOtpRequest();
+        req.setMobileNumber("+919000000000");
+        req.setOtp("123456");
+
+        when(authService.verifyMobileOtp(any(VerifyMobileOtpRequest.class))).thenReturn(mockAuthResponse);
+
+        mockMvc.perform(post("/api/auth/mobile/verify-otp")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.accessToken").value("mock_access_token"));
+    }
+
+    @Test
+    void verifyMobileOtp_InvalidOtp() throws Exception {
+        VerifyMobileOtpRequest req = new VerifyMobileOtpRequest();
+        req.setMobileNumber("+919000000000");
+        req.setOtp("111111");
+
+        when(authService.verifyMobileOtp(any(VerifyMobileOtpRequest.class)))
+                .thenThrow(new BadRequestException("Invalid or expired OTP"));
+
+        mockMvc.perform(post("/api/auth/mobile/verify-otp")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Invalid or expired OTP"));
+    }
+
+    @Test
+    void verifyMobileOtp_AdminForbidden() throws Exception {
+        VerifyMobileOtpRequest req = new VerifyMobileOtpRequest();
+        req.setMobileNumber("+919000000000");
+        req.setOtp("123456");
+
+        when(authService.verifyMobileOtp(any(VerifyMobileOtpRequest.class)))
+                .thenThrow(new ForbiddenException("Administrators must use the secure Admin Portal"));
+
+        mockMvc.perform(post("/api/auth/mobile/verify-otp")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.success").value(false));
     }
 }
+
+

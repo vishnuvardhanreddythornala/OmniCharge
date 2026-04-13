@@ -1,6 +1,6 @@
 package com.omnicharge.user.controller;
 
-import com.omnicharge.common.dto.ApiResponse;
+import com.omnicharge.user.common.dto.ApiResponse;
 import com.omnicharge.user.dto.ChangePasswordRequest;
 import com.omnicharge.user.dto.UpdateProfileRequest;
 import com.omnicharge.user.dto.UserProfileResponse;

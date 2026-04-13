@@ -1,8 +1,8 @@
 package com.omnicharge.logging.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LoggingConstants;
+import com.omnicharge.logging.common.logging.LogEvent;
+import com.omnicharge.logging.common.logging.LoggingConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

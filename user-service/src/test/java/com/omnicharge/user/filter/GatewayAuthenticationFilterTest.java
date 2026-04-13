@@ -30,6 +30,9 @@ class GatewayAuthenticationFilterTest {
 
     @Mock
     private FilterChain filterChain;
+    @Mock
+    private com.omnicharge.user.common.logging.LogEventPublisher logEventPublisher;
+
 
     @InjectMocks
     private GatewayAuthenticationFilter filter;

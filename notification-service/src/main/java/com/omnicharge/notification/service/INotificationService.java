@@ -19,5 +19,5 @@ public interface INotificationService {
 
     long getUnreadCount(Long userId);
 
-    Page<NotificationResponse> getAllNotifications(Pageable pageable);
+    Page<NotificationResponse> getAllNotifications(String category, Pageable pageable);
 }

@@ -33,7 +33,4 @@ scrape_configs:
         labels:
           service: logging-service
 
-  - job_name: 'cadvisor'
-    scrape_interval: 5s
-    static_configs:
-      - targets: ['cadvisor:8080']
+  

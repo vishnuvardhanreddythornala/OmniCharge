@@ -40,6 +40,9 @@ class RedisProjectorTest {
 
     @Mock
     private ValueOperations<String, String> valueOperations;
+    @Mock
+    private com.omnicharge.operator.common.logging.LogEventPublisher logEventPublisher;
+
 
     @InjectMocks
     private RedisProjector redisProjector;

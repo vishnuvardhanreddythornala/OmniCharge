@@ -1,9 +1,9 @@
 package com.omnicharge.notification.service;
 
-import com.omnicharge.common.event.PaymentCompletedEvent;
-import com.omnicharge.common.event.RechargeCompletedEvent;
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.notification.common.event.PaymentCompletedEvent;
+import com.omnicharge.notification.common.event.RechargeCompletedEvent;
+import com.omnicharge.notification.common.logging.LogEvent;
+import com.omnicharge.notification.common.logging.LogEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -208,7 +208,7 @@ public class EmailService implements IEmailService {
     }
 
     private String buildPaymentConfirmationEmail(PaymentCompletedEvent event) {
-        String statusIcon = "SUCCESS".equals(event.getStatus()) ? "✅" : "❌";
+        String statusIcon = "";
         String statusColor = "SUCCESS".equals(event.getStatus()) ? "#28a745" : "#dc3545";
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy hh:mm a");
@@ -273,7 +273,7 @@ public class EmailService implements IEmailService {
     }
 
     private String buildRechargeConfirmationEmail(RechargeCompletedEvent event) {
-        String statusIcon = "SUCCESS".equals(event.getStatus()) ? "✅" : "❌";
+        String statusIcon = "";
         String statusColor = "SUCCESS".equals(event.getStatus()) ? "#28a745" : "#dc3545";
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy hh:mm a");
@@ -353,7 +353,7 @@ public class EmailService implements IEmailService {
             <body>
                 <div class="container">
                     <div class="header">
-                        <h1>⚠️ Plan Expiry Reminder</h1>
+                        <h1>Plan Expiry Reminder</h1>
                     </div>
                     <div class="content">
                         <p>Dear %s,</p>
@@ -395,7 +395,7 @@ public class EmailService implements IEmailService {
             <body>
                 <div class="container">
                     <div class="header">
-                        <h1>❌ Plan Expired</h1>
+                        <h1>Plan Expired</h1>
                     </div>
                     <div class="content">
                         <p>Dear %s,</p>

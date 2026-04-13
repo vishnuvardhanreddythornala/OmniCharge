@@ -1,8 +1,8 @@
 package com.omnicharge.payment.messaging;
 
-import com.omnicharge.common.event.PaymentCompletedEvent;
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.payment.common.event.PaymentCompletedEvent;
+import com.omnicharge.payment.common.logging.LogEvent;
+import com.omnicharge.payment.common.logging.LogEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -16,13 +16,19 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class PaymentEventProducer {
+    private static final String SUCCESS_LOG = "[Payment Producer] Sending Payment Success Event for Transaction: {}";
+    private static final String FAILED_LOG = "[Payment Producer] Sending Payment Failed Event for Transaction: {}";
+
+    private static final String EXCHANGE = "omnicharge.exchange";
+    private static final String SERVICE_NAME = "payment-service";
+    private static final String EVENT_TYPE_SAGA = "SAGA_EVENT_PUBLISHED";
 
     private final RabbitTemplate rabbitTemplate;
     private final LogEventPublisher logEventPublisher;
 
     public void publishPaymentCompleted(PaymentCompletedEvent event) {
         try {
-            rabbitTemplate.convertAndSend("omnicharge.exchange", "payment.completed", event);
+            rabbitTemplate.convertAndSend(EXCHANGE, "payment.completed", event);
             log.info("Published payment completed event for transactionId: {}", event.getTransactionId());
             
             // Log business operation: SAGA_EVENT_PUBLISHED
@@ -33,13 +39,13 @@ public class PaymentEventProducer {
             context.put("userId", event.getUserId().toString());
             context.put("status", event.getStatus());
             context.put("routingKey", "payment.completed");
-            context.put("exchange", "omnicharge.exchange");
+            context.put("exchange", EXCHANGE);
             
             logEventPublisher.publish(LogEvent.builder()
-                    .serviceName("payment-service")
+                    .serviceName(SERVICE_NAME)
                     .level("INFO")
                     .message("SAGA event published: PaymentCompletedEvent")
-                    .eventType("SAGA_EVENT_PUBLISHED")
+                    .eventType(EVENT_TYPE_SAGA)
                     .context(context)
                     .timestamp(LocalDateTime.now())
                     .build());
@@ -48,9 +54,9 @@ public class PaymentEventProducer {
         }
     }
 
-    public void publishPaymentApproved(com.omnicharge.common.event.saga.PaymentApprovedEvent event) {
+    public void publishPaymentApproved(com.omnicharge.payment.common.event.saga.PaymentApprovedEvent event) {
         try {
-            rabbitTemplate.convertAndSend("omnicharge.exchange", "saga.payment.approved", event);
+            rabbitTemplate.convertAndSend(EXCHANGE, "saga.payment.approved", event);
             log.info("Published payment approved event for rechargeId: {}", event.getRechargeId());
             
             // Log business operation: SAGA_EVENT_PUBLISHED
@@ -61,13 +67,13 @@ public class PaymentEventProducer {
             context.put("status", event.getStatus());
             context.put("amount", event.getAmount().toString());
             context.put("routingKey", "saga.payment.approved");
-            context.put("exchange", "omnicharge.exchange");
+            context.put("exchange", EXCHANGE);
             
             logEventPublisher.publish(LogEvent.builder()
-                    .serviceName("payment-service")
+                    .serviceName(SERVICE_NAME)
                     .level("INFO")
                     .message("SAGA event published: PaymentApprovedEvent")
-                    .eventType("SAGA_EVENT_PUBLISHED")
+                    .eventType(EVENT_TYPE_SAGA)
                     .context(context)
                     .timestamp(LocalDateTime.now())
                     .build());
@@ -76,9 +82,9 @@ public class PaymentEventProducer {
         }
     }
 
-    public void publishPaymentRejected(com.omnicharge.common.event.saga.PaymentRejectedEvent event) {
+    public void publishPaymentRejected(com.omnicharge.payment.common.event.saga.PaymentRejectedEvent event) {
         try {
-            rabbitTemplate.convertAndSend("omnicharge.exchange", "saga.payment.rejected", event);
+            rabbitTemplate.convertAndSend(EXCHANGE, "saga.payment.rejected", event);
             log.info("Published payment rejected event for rechargeId: {}", event.getRechargeId());
             
             // Log business operation: SAGA_EVENT_PUBLISHED
@@ -87,13 +93,13 @@ public class PaymentEventProducer {
             context.put("rechargeId", event.getRechargeId());
             context.put("failureReason", event.getFailureReason());
             context.put("routingKey", "saga.payment.rejected");
-            context.put("exchange", "omnicharge.exchange");
+            context.put("exchange", EXCHANGE);
             
             logEventPublisher.publish(LogEvent.builder()
-                    .serviceName("payment-service")
+                    .serviceName(SERVICE_NAME)
                     .level("WARN")
                     .message("SAGA event published: PaymentRejectedEvent")
-                    .eventType("SAGA_EVENT_PUBLISHED")
+                    .eventType(EVENT_TYPE_SAGA)
                     .context(context)
                     .timestamp(LocalDateTime.now())
                     .build());
@@ -102,3 +108,4 @@ public class PaymentEventProducer {
         }
     }
 }
+

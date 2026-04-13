@@ -1,9 +1,9 @@
 package com.omnicharge.notification.service;
 
-import com.omnicharge.common.exception.BadRequestException;
-import com.omnicharge.common.exception.ResourceNotFoundException;
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.notification.common.exception.BadRequestException;
+import com.omnicharge.notification.common.exception.ResourceNotFoundException;
+import com.omnicharge.notification.common.logging.LogEvent;
+import com.omnicharge.notification.common.logging.LogEventPublisher;
 import com.omnicharge.notification.dto.NotificationResponse;
 import com.omnicharge.notification.entity.Notification;
 import com.omnicharge.notification.entity.NotificationCategory;
@@ -17,7 +17,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -46,7 +48,7 @@ public class NotificationService implements INotificationService {
         notification.setMessage(htmlBody);
         notification.setReferenceId(referenceId);
         notification.setStatus(NotificationStatus.SENT);  // Email already sent by consumer
-        notification.setIsRead(false);
+        notification.setIsRead(true); // Auto-read so it doesn't bump the unread badge count
 
         try {
             Notification saved = notificationRepository.save(notification);
@@ -161,8 +163,34 @@ public class NotificationService implements INotificationService {
     }
 
     @Override
-    public Page<NotificationResponse> getAllNotifications(Pageable pageable) {
-        Page<Notification> notifications = notificationRepository.findAll(pageable);
+    public Page<NotificationResponse> getAllNotifications(String category, Pageable pageable) {
+        Page<Notification> notifications;
+        if (category == null || "ALL".equalsIgnoreCase(category)) {
+            notifications = notificationRepository.findAll(pageable);
+        } else if ("USER".equalsIgnoreCase(category)) {
+            // User messages = payment-related notifications
+            List<NotificationCategory> userCategories = Arrays.asList(
+                    NotificationCategory.PAYMENT_SUCCESS,
+                    NotificationCategory.PAYMENT_FAILED
+            );
+            notifications = notificationRepository.findByCategoryIn(userCategories, pageable);
+        } else if ("SYSTEM".equalsIgnoreCase(category)) {
+            // System messages = plan-related notifications
+            List<NotificationCategory> systemCategories = Arrays.asList(
+                    NotificationCategory.PLAN_EXPIRY_REMINDER,
+                    NotificationCategory.PLAN_EXPIRED
+            );
+            notifications = notificationRepository.findByCategoryIn(systemCategories, pageable);
+        } else {
+            // Direct category match (e.g., PAYMENT_SUCCESS, PLAN_EXPIRED)
+            try {
+                NotificationCategory cat = NotificationCategory.valueOf(category.toUpperCase());
+                notifications = notificationRepository.findByCategoryIn(List.of(cat), pageable);
+            } catch (IllegalArgumentException e) {
+                log.warn("Unknown notification category: {}. Returning all.", category);
+                notifications = notificationRepository.findAll(pageable);
+            }
+        }
         return notifications.map(this::mapToResponse);
     }
 

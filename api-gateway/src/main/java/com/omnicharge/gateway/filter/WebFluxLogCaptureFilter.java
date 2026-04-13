@@ -1,7 +1,7 @@
 package com.omnicharge.gateway.filter;
 
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.gateway.common.logging.LogEvent;
+import com.omnicharge.gateway.common.logging.LogEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -62,7 +62,6 @@ public class WebFluxLogCaptureFilter implements GlobalFilter, Ordered {
         
         // Extract trace ID from reactive context (Micrometer tracing)
         return chain.filter(exchange)
-                .doOnSuccess(aVoid -> logRequest(exchange, method, path, sourceIp, userId, userRole, startTime, null))
                 .doOnError(error -> logRequest(exchange, method, path, sourceIp, userId, userRole, startTime, error))
                 .then(Mono.fromRunnable(() -> logRequest(exchange, method, path, sourceIp, userId, userRole, startTime, null)));
     }

@@ -3,9 +3,9 @@ package com.omnicharge.operator.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.omnicharge.common.exception.ResourceNotFoundException;
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.operator.common.exception.ResourceNotFoundException;
+import com.omnicharge.operator.common.logging.LogEvent;
+import com.omnicharge.operator.common.logging.LogEventPublisher;
 import com.omnicharge.operator.dto.PlanRequest;
 import com.omnicharge.operator.dto.PlanResponse;
 import com.omnicharge.operator.entity.Operator;
@@ -83,10 +83,11 @@ public class PlanService implements IPlanService {
             Long operatorId,
             PlanCategory category,
             Boolean isActive,
+            String search,
             Pageable pageable) {
         
-        // Admin: search with status filter
-        Page<Plan> plans = planRepository.searchPlansWithStatus(operatorId, category, isActive, pageable);
+        // Admin: search with status and text filter
+        Page<Plan> plans = planRepository.searchPlansWithStatus(operatorId, category, isActive, search, pageable);
         return plans.map(this::mapToResponse);
     }
 
@@ -166,7 +167,7 @@ public class PlanService implements IPlanService {
 
         // Check if operator is active
         if (!plan.getOperator().getIsActive()) {
-            throw new IllegalStateException("Cannot activate plan: operator is inactive");
+            throw new com.omnicharge.operator.common.exception.BadRequestException("Cannot activate plan: operator is inactive");
         }
 
         plan.setIsActive(true);
@@ -238,6 +239,9 @@ public class PlanService implements IPlanService {
                 .additionalBenefits(plan.getAdditionalBenefits())
                 .category(plan.getCategory())
                 .isActive(plan.getIsActive())
+                .deactivatedByOperator(plan.getDeactivatedByOperator())
+                .lastModifiedDate(plan.getLastModifiedDate())
+                .lastModifiedBy(plan.getLastModifiedBy())
                 .build();
     }
     

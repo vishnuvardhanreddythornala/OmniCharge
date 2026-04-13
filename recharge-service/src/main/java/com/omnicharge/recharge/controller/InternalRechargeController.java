@@ -1,6 +1,6 @@
 package com.omnicharge.recharge.controller;
 
-import com.omnicharge.common.dto.ApiResponse;
+import com.omnicharge.recharge.common.dto.ApiResponse;
 import com.omnicharge.recharge.dto.ExpiringRechargeResponse;
 import com.omnicharge.recharge.service.IRechargeService;
 import lombok.RequiredArgsConstructor;

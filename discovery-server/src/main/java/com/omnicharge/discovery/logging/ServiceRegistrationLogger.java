@@ -1,7 +1,7 @@
 package com.omnicharge.discovery.logging;
 
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.discovery.common.logging.LogEvent;
+import com.omnicharge.discovery.common.logging.LogEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -53,6 +53,7 @@ public class ServiceRegistrationLogger {
                     .build();
             
             logEventPublisher.publish(logEvent);
+            log.info(message);
             
         } catch (Exception e) {
             // Don't let logging errors break service discovery

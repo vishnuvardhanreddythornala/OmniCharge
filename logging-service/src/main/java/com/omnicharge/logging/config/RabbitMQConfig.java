@@ -2,7 +2,7 @@ package com.omnicharge.logging.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.omnicharge.common.logging.LoggingConstants;
+import com.omnicharge.logging.common.logging.LoggingConstants;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

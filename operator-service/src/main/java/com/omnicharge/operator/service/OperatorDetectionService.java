@@ -2,8 +2,8 @@ package com.omnicharge.operator.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.operator.common.logging.LogEvent;
+import com.omnicharge.operator.common.logging.LogEventPublisher;
 import com.omnicharge.operator.client.NumverifyClient;
 import com.omnicharge.operator.dto.NumverifyResponse;
 import com.omnicharge.operator.dto.OperatorDetectionResponse;
@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -157,6 +158,24 @@ public class OperatorDetectionService implements IOperatorDetectionService {
         }
         
         return null;
+    }
+
+    @Override
+    public void invalidateDetectionCacheForOperator(Long operatorId) {
+        try {
+            Set<String> keys = redisTemplate.keys("operator:detect:*");
+            if (keys != null && !keys.isEmpty()) {
+                for (String key : keys) {
+                    String cached = redisTemplate.opsForValue().get(key);
+                    if (cached != null && cached.contains("\"operatorId\":" + operatorId)) {
+                        redisTemplate.delete(key);
+                        log.info("Invalidated detection cache key: {}", key);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to invalidate detection cache for operatorId: {}", operatorId, e);
+        }
     }
 
     private Operator detectByPrefix(String mobileNumber) {

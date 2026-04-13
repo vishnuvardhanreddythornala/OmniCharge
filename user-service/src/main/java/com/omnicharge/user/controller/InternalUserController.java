@@ -1,6 +1,6 @@
 package com.omnicharge.user.controller;
 
-import com.omnicharge.common.dto.ApiResponse;
+import com.omnicharge.user.common.dto.ApiResponse;
 import com.omnicharge.user.dto.UserProfileResponse;
 import com.omnicharge.user.service.IUserService;
 import lombok.RequiredArgsConstructor;

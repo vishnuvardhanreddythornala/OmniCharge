@@ -1,7 +1,7 @@
 package com.omnicharge.operator.client;
 
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.operator.common.logging.LogEvent;
+import com.omnicharge.operator.common.logging.LogEventPublisher;
 import com.omnicharge.operator.dto.NumverifyResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -23,6 +23,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     Optional<Transaction> findByRechargeId(String rechargeId);
 
+    List<Transaction> findByRechargeIdAndStatus(String rechargeId, PaymentStatus status);
+
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.status = :status")
     BigDecimal sumAmountByStatus(@Param("status") PaymentStatus status);
 
@@ -31,8 +33,9 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             "AND (:minAmount IS NULL OR t.amount >= :minAmount) " +
             "AND (:maxAmount IS NULL OR t.amount <= :maxAmount) " +
             "AND (:status IS NULL OR t.status = :status) " +
-            "AND (:startDate IS NULL OR t.createdDate >= :startDate) " +
-            "AND (:endDate IS NULL OR t.createdDate <= :endDate)")
+            "AND (CAST(:startDate AS timestamp) IS NULL OR t.createdDate >= :startDate) " +
+            "AND (CAST(:endDate AS timestamp) IS NULL OR t.createdDate <= :endDate) " +
+            "AND (:transactionId IS NULL OR t.transactionId LIKE %:transactionId%)")
     Page<Transaction> findByUserIdWithFilters(
             @Param("userId") Long userId,
             @Param("minAmount") BigDecimal minAmount,
@@ -40,6 +43,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             @Param("status") PaymentStatus status,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
+            @Param("transactionId") String transactionId,
             Pageable pageable);
 
     // Admin filtering queries
@@ -48,8 +52,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             "AND (:minAmount IS NULL OR t.amount >= :minAmount) " +
             "AND (:maxAmount IS NULL OR t.amount <= :maxAmount) " +
             "AND (:status IS NULL OR t.status = :status) " +
-            "AND (:startDate IS NULL OR t.createdDate >= :startDate) " +
-            "AND (:endDate IS NULL OR t.createdDate <= :endDate) " +
+            "AND (CAST(:startDate AS timestamp) IS NULL OR t.createdDate >= :startDate) " +
+            "AND (CAST(:endDate AS timestamp) IS NULL OR t.createdDate <= :endDate) " +
             "AND (:rechargeId IS NULL OR t.rechargeId = :rechargeId)")
     Page<Transaction> findAllWithFilters(
             @Param("userId") Long userId,
@@ -85,4 +89,13 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             "GROUP BY DATE(t.createdDate) " +
             "ORDER BY DATE(t.createdDate) DESC")
     List<Object[]> findRevenueByDate(@Param("startDate") LocalDateTime startDate, @Param("status") PaymentStatus status);
+
+    /**
+     * Sweeper: Find all PENDING transactions created before the cutoff time.
+     * These are zombie transactions where the user abandoned the payment flow.
+     */
+    @Query("SELECT t FROM Transaction t WHERE t.status = :status AND t.createdDate < :cutoff")
+    List<Transaction> findByStatusAndCreatedDateBefore(
+            @Param("status") PaymentStatus status,
+            @Param("cutoff") LocalDateTime cutoff);
 }

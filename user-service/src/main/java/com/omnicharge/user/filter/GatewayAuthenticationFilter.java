@@ -37,8 +37,8 @@ public class GatewayAuthenticationFilter extends OncePerRequestFilter {
         String userRole = request.getHeader(HEADER_USER_ROLE);
         String userEmail = request.getHeader(HEADER_USER_EMAIL);
 
-        // If headers are present, create authentication object
-        if (userId != null && userRole != null && userEmail != null) {
+        // If core headers are present, create authentication object
+        if (userId != null && userRole != null) {
             log.debug("Authenticating user from gateway headers: userId={}, role={}, email={}", 
                      userId, userRole, userEmail);
 
@@ -55,7 +55,7 @@ public class GatewayAuthenticationFilter extends OncePerRequestFilter {
             
             log.debug("Authentication set successfully for user: {}", userId);
         } else {
-            log.debug("No gateway headers found, skipping authentication");
+            log.debug("Missing required gateway headers (userId or role), skipping authentication");
         }
 
         filterChain.doFilter(request, response);

@@ -37,6 +37,31 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue planExpiryQueue() {
+        return new Queue("notification.plan.expiry.queue", true);
+    }
+
+    @Bean
+    public Binding planExpiryBinding(Queue planExpiryQueue, TopicExchange exchange) {
+        return BindingBuilder.bind(planExpiryQueue).to(exchange).with("plan.expiry");
+    }
+
+    @Bean
+    public Queue otpQueue() {
+        return new Queue("notification.otp.queue", true);
+    }
+
+    @Bean
+    public Binding otpBinding(Queue otpQueue, TopicExchange exchange) {
+        return BindingBuilder.bind(otpQueue).to(exchange).with("mobile.otp.send");
+    }
+
+    @Bean
+    public Binding emailOtpBinding(Queue otpQueue, TopicExchange exchange) {
+        return BindingBuilder.bind(otpQueue).to(exchange).with("email.otp.send");
+    }
+
+    @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }

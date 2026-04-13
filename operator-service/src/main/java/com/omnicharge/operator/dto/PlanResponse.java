@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -26,4 +27,7 @@ public class PlanResponse {
     private String additionalBenefits;
     private PlanCategory category;
     private Boolean isActive;
+    private Boolean deactivatedByOperator;
+    private LocalDateTime lastModifiedDate;
+    private String lastModifiedBy;
 }

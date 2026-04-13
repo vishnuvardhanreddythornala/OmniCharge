@@ -3,7 +3,7 @@ package com.omnicharge.operator.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.omnicharge.common.exception.ResourceNotFoundException;
+import com.omnicharge.operator.common.exception.ResourceNotFoundException;
 import com.omnicharge.operator.dto.PlanResponse;
 import com.omnicharge.operator.entity.Plan;
 import com.omnicharge.operator.entity.PlanCategory;

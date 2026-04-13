@@ -1,9 +1,10 @@
 package com.omnicharge.logging.consumer;
 
-import com.omnicharge.common.logging.LogEvent;
+import com.omnicharge.logging.common.logging.LogEvent;
 import com.omnicharge.logging.service.LogFileWriterService;
 import com.omnicharge.logging.service.LogPersistenceService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,49 +13,54 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class LogEventConsumerTest {
 
+    @Mock private LogPersistenceService logPersistenceService;
+    @Mock private LogFileWriterService logFileWriterService;
     @Mock
-    private LogPersistenceService logPersistenceService;
+    private com.omnicharge.logging.common.logging.LogEventPublisher logEventPublisher;
 
-    @Mock
-    private LogFileWriterService logFileWriterService;
 
     @InjectMocks
     private LogEventConsumer logEventConsumer;
 
-    private LogEvent sampleEvent;
+    private LogEvent validEvent;
 
     @BeforeEach
     void setUp() {
-        sampleEvent = LogEvent.builder()
-                .serviceName("user-service")
-                .level("INFO")
-                .logger("TestLogger")
-                .message("Test Message")
-                .timestamp(LocalDateTime.now())
-                .build();
+        validEvent = new LogEvent();
+        validEvent.setServiceName("payment-service");
+        validEvent.setLevel("INFO");
+        validEvent.setMessage("Payment processed");
+        validEvent.setTimestamp(LocalDateTime.now());
     }
 
     @Test
-    void consumeLogEvent_SuccessfullyCallsBothServices() {
-        logEventConsumer.consumeLogEvent(sampleEvent);
+    @DisplayName("SUCCESS: Dispatches event to both file writer and persistence")
+    void consumeLogEvent_Success() {
+        logEventConsumer.consumeLogEvent(validEvent);
 
-        verify(logFileWriterService, times(1)).writeToFile(sampleEvent);
-        verify(logPersistenceService, times(1)).save(sampleEvent);
+        verify(logFileWriterService, times(1)).writeToFile(validEvent);
+        verify(logPersistenceService, times(1)).save(validEvent);
     }
 
     @Test
-    void consumeLogEvent_IsolatesFailures() {
-        doThrow(new RuntimeException("DB Error")).when(logPersistenceService).save(any(LogEvent.class));
+    @DisplayName("FAIL: File writer failure does not crash consumer")
+    void consumeLogEvent_FileWriterFailure() {
+        doThrow(new RuntimeException("Disk full")).when(logFileWriterService).writeToFile(any());
 
-        // Should handle exception and not break the application
-        logEventConsumer.consumeLogEvent(sampleEvent);
+        assertDoesNotThrow(() -> logEventConsumer.consumeLogEvent(validEvent));
+    }
 
-        verify(logFileWriterService, times(1)).writeToFile(sampleEvent);
-        verify(logPersistenceService, times(1)).save(sampleEvent);
+    @Test
+    @DisplayName("FAIL: DB persistence failure does not crash consumer")
+    void consumeLogEvent_PersistenceFailure() {
+        doThrow(new RuntimeException("DB timeout")).when(logPersistenceService).save(any());
+
+        assertDoesNotThrow(() -> logEventConsumer.consumeLogEvent(validEvent));
     }
 }

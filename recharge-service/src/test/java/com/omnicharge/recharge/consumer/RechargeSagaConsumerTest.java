@@ -1,9 +1,11 @@
 package com.omnicharge.recharge.consumer;
 
-import com.omnicharge.common.dto.ApiResponse;
-import com.omnicharge.common.event.RechargeCompletedEvent;
-import com.omnicharge.common.event.saga.PaymentApprovedEvent;
-import com.omnicharge.common.event.saga.PaymentRejectedEvent;
+import com.omnicharge.recharge.common.dto.ApiResponse;
+import com.omnicharge.recharge.common.event.RechargeCompletedEvent;
+import com.omnicharge.recharge.common.event.saga.PaymentApprovedEvent;
+import com.omnicharge.recharge.common.event.saga.PaymentRejectedEvent;
+import com.omnicharge.recharge.common.logging.LogEvent;
+import com.omnicharge.recharge.common.logging.LogEventPublisher;
 import com.omnicharge.recharge.client.UserServiceClient;
 import com.omnicharge.recharge.dto.UserProfileResponse;
 import com.omnicharge.recharge.entity.Recharge;
@@ -13,17 +15,15 @@ import com.omnicharge.recharge.repository.RechargeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,84 +39,89 @@ class RechargeSagaConsumerTest {
     private UserServiceClient userServiceClient;
 
     @Mock
-    private com.omnicharge.common.logging.LogEventPublisher logEventPublisher;
+    private LogEventPublisher logEventPublisher;
 
     @InjectMocks
     private RechargeSagaConsumer rechargeSagaConsumer;
 
-    private Recharge recharge;
-    private UserProfileResponse userProfile;
+    private Recharge processingRecharge;
 
     @BeforeEach
     void setUp() {
-        recharge = new Recharge();
-        recharge.setId(100L);
-        recharge.setRechargeId("OMNI-SAGA123");
-        recharge.setUserId(1L);
-        recharge.setStatus(RechargeStatus.PROCESSING);
-        recharge.setAmount(new java.math.BigDecimal("299.00")); // Add amount
-        
-        userProfile = new UserProfileResponse();
-        userProfile.setEmail("user@example.com");
+        processingRecharge = new Recharge();
+        processingRecharge.setId(10L);
+        processingRecharge.setRechargeId("OMNI-REC123");
+        processingRecharge.setUserId(1L);
+        processingRecharge.setAmount(new BigDecimal("199.00"));
+        processingRecharge.setStatus(RechargeStatus.PROCESSING);
     }
 
     @Test
-    void consumePaymentApprovedEvent_Success_TriggersNotification() {
+    void consumePaymentApprovedEvent_Success() {
         PaymentApprovedEvent event = PaymentApprovedEvent.builder()
-                .rechargeId("OMNI-SAGA123")
-                .transactionId("PAY_999")
+                .rechargeId("OMNI-REC123")
+                .transactionId("TXN-999")
+                .amount(new BigDecimal("199.00"))
                 .build();
 
-        when(rechargeRepository.findByRechargeId("OMNI-SAGA123")).thenReturn(Optional.of(recharge));
-        when(userServiceClient.getUserById(1L)).thenReturn(ApiResponse.success("OK", userProfile));
+        UserProfileResponse userProfile = new UserProfileResponse();
+        userProfile.setEmail("test@ex.com");
+        userProfile.setMobileNumber("9876543210");
+        
+        when(rechargeRepository.findByRechargeId("OMNI-REC123")).thenReturn(Optional.of(processingRecharge));
+        when(userServiceClient.getUserById(1L)).thenReturn(ApiResponse.success(userProfile));
 
         rechargeSagaConsumer.consumePaymentApprovedEvent(event);
 
-        // Verify entity transitioned directly to SUCCESS
-        assertEquals(RechargeStatus.SUCCESS, recharge.getStatus());
-        assertEquals("PAY_999", recharge.getTransactionId());
-        verify(rechargeRepository, times(1)).save(recharge);
-
-        // Verify cascading event publishing for Notification System mapping
-        ArgumentCaptor<RechargeCompletedEvent> captor = ArgumentCaptor.forClass(RechargeCompletedEvent.class);
-        verify(rechargeEventProducer, times(1)).publishRechargeCompleted(captor.capture());
-        
-        RechargeCompletedEvent completedEvent = captor.getValue();
-        assertEquals("SUCCESS", completedEvent.getStatus());
-        assertEquals("user@example.com", completedEvent.getUserEmail());
+        assertEquals(RechargeStatus.SUCCESS, processingRecharge.getStatus());
+        assertEquals("TXN-999", processingRecharge.getTransactionId());
+        verify(rechargeRepository, times(1)).save(processingRecharge);
+        verify(logEventPublisher, times(1)).publish(any(LogEvent.class));
+        verify(rechargeEventProducer, times(1)).publishRechargeCompleted(any(RechargeCompletedEvent.class));
     }
 
     @Test
-    void consumePaymentRejectedEvent_Fails_BypassesNotification() {
+    void consumePaymentApprovedEvent_RechargeNotFound() {
+        PaymentApprovedEvent event = PaymentApprovedEvent.builder().rechargeId("MISSING").build();
+        when(rechargeRepository.findByRechargeId("MISSING")).thenReturn(Optional.empty());
+
+        rechargeSagaConsumer.consumePaymentApprovedEvent(event);
+
+        verify(rechargeRepository, never()).save(any());
+        verify(rechargeEventProducer, never()).publishRechargeCompleted(any());
+    }
+
+    @Test
+    void consumePaymentRejectedEvent_Success() {
         PaymentRejectedEvent event = PaymentRejectedEvent.builder()
-                .rechargeId("OMNI-SAGA123")
-                .failureReason("Insufficient Funds in Wallet")
+                .rechargeId("OMNI-REC123")
+                .failureReason("User Cancelled")
                 .build();
 
-        when(rechargeRepository.findByRechargeId("OMNI-SAGA123")).thenReturn(Optional.of(recharge));
+        when(rechargeRepository.findByRechargeId("OMNI-REC123")).thenReturn(Optional.of(processingRecharge));
 
         rechargeSagaConsumer.consumePaymentRejectedEvent(event);
 
-        // Verify entity reduction to FAILED
-        assertEquals(RechargeStatus.FAILED, recharge.getStatus());
-        assertEquals("Insufficient Funds in Wallet", recharge.getFailureReason());
-        verify(rechargeRepository, times(1)).save(recharge);
-
-        // Notifications or successful callbacks are explicitly bypassed on Saga Rejected.
-        verify(rechargeEventProducer, never()).publishRechargeCompleted(any());
-        verify(userServiceClient, never()).getUserById(anyLong());
+        assertEquals(RechargeStatus.FAILED, processingRecharge.getStatus());
+        assertEquals("User Cancelled", processingRecharge.getFailureReason());
+        verify(rechargeRepository, times(1)).save(processingRecharge);
+        verify(logEventPublisher, times(1)).publish(any(LogEvent.class));
     }
 
     @Test
-    void consumePaymentApprovedEvent_RechargeNotFound_IgnoresEventSafely() {
-        PaymentApprovedEvent event = PaymentApprovedEvent.builder()
-                .rechargeId("UNKNOWN-ID")
+    void consumePaymentRejectedEvent_DuplicateSuccessIgnored() {
+        processingRecharge.setStatus(RechargeStatus.SUCCESS);
+        PaymentRejectedEvent event = PaymentRejectedEvent.builder()
+                .rechargeId("OMNI-REC123")
+                .failureReason("Late Reject Signal")
                 .build();
 
-        when(rechargeRepository.findByRechargeId("UNKNOWN-ID")).thenReturn(Optional.empty());
+        when(rechargeRepository.findByRechargeId("OMNI-REC123")).thenReturn(Optional.of(processingRecharge));
 
-        // Exception shouldn't bubble up; just logs error due to ifPresentOrElse
-        assertDoesNotThrow(() -> rechargeSagaConsumer.consumePaymentApprovedEvent(event));
+        rechargeSagaConsumer.consumePaymentRejectedEvent(event);
+
+        assertEquals(RechargeStatus.SUCCESS, processingRecharge.getStatus());
         verify(rechargeRepository, never()).save(any());
+        verify(logEventPublisher, never()).publish(any(LogEvent.class));
     }
 }

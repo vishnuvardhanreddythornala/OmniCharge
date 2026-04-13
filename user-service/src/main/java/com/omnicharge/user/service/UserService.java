@@ -1,17 +1,20 @@
 package com.omnicharge.user.service;
 
-import com.omnicharge.common.exception.BadRequestException;
-import com.omnicharge.common.exception.DuplicateResourceException;
-import com.omnicharge.common.exception.ResourceNotFoundException;
-import com.omnicharge.common.exception.UnauthorizedException;
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.user.common.exception.BadRequestException;
+import com.omnicharge.user.common.exception.DuplicateResourceException;
+import com.omnicharge.user.common.exception.ResourceNotFoundException;
+import com.omnicharge.user.common.exception.UnauthorizedException;
+import com.omnicharge.user.common.logging.LogEvent;
+import com.omnicharge.user.common.logging.LogEventPublisher;
 import com.omnicharge.user.dto.ChangePasswordRequest;
 import com.omnicharge.user.dto.UpdateProfileRequest;
 import com.omnicharge.user.dto.UserProfileResponse;
 import com.omnicharge.user.entity.AuthProvider;
+import com.omnicharge.user.entity.RefreshToken;
 import com.omnicharge.user.entity.User;
+import com.omnicharge.user.repository.RefreshTokenRepository;
 import com.omnicharge.user.repository.UserRepository;
+import org.springframework.data.redis.core.RedisTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -22,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -32,6 +36,8 @@ public class UserService implements IUserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final LogEventPublisher logEventPublisher;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final RedisTemplate<String, String> redisTemplate;
 
     public UserProfileResponse getProfile(Long userId) {
         User user = userRepository.findById(userId)
@@ -48,16 +54,9 @@ public class UserService implements IUserService {
         // Track changed fields
         Map<String, String> changedFields = new HashMap<>();
         
-        // Check if mobile number is being changed and if it's already taken
-        if (request.getMobileNumber() != null && 
-            !request.getMobileNumber().equals(user.getMobileNumber())) {
-            if (userRepository.existsByMobileNumber(request.getMobileNumber())) {
-                throw new DuplicateResourceException("Mobile number already registered");
-            }
-            changedFields.put("mobileNumber", request.getMobileNumber());
-            user.setMobileNumber(request.getMobileNumber());
-        }
-
+        // SECURITY LOCKDOWN: Mobile number can ONLY be updated via /verify-mobile endpoint
+        // This prevents users from changing mobile numbers without verification
+        
         if (!request.getFullName().equals(user.getFullName())) {
             changedFields.put("fullName", request.getFullName());
         }
@@ -96,19 +95,75 @@ public class UserService implements IUserService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
 
-        log.info("Password changed for user: {}", userId);
+        // SECURITY: Revoke ALL refresh tokens for this user (force logout from all devices)
+        List<RefreshToken> allTokens = refreshTokenRepository.findByUserOrderByExpiryDateAsc(user);
+        for (RefreshToken rt : allTokens) {
+            String redisKey = "refresh:" + user.getId() + ":" + rt.getToken();
+            redisTemplate.delete(redisKey);
+        }
+        refreshTokenRepository.deleteByUser(user);
+        log.info("Password changed for user: {}. All {} refresh tokens revoked (global logout).", userId, allTokens.size());
         
         // Log business operation
         Map<String, Object> context = new HashMap<>();
         context.put("userId", userId);
         context.put("email", user.getEmail());
-        publishBusinessLog("PASSWORD_CHANGE",
-            "User password changed: userId=" + userId,
+        context.put("devicesLoggedOut", allTokens.size());
+        publishBusinessLog("PASSWORD_CHANGE_GLOBAL_LOGOUT",
+            "User password changed & all sessions revoked: userId=" + userId + ", devicesLoggedOut=" + allTokens.size(),
             context);
     }
 
     // Admin methods
-    public Page<UserProfileResponse> getAllUsers(Pageable pageable) {
+    public Page<UserProfileResponse> getAllUsers(String search, String status, Pageable pageable) {
+        // Determine if we need status filtering
+        final Boolean isActiveFilter;
+        if ("ACTIVE".equalsIgnoreCase(status)) {
+            isActiveFilter = true;
+        } else if ("SUSPENDED".equalsIgnoreCase(status)) {
+            isActiveFilter = false;
+        } else {
+            isActiveFilter = null;
+        }
+
+        if (search != null && !search.trim().isEmpty()) {
+            String cleanSearch = search.trim();
+            
+            // Handle USR- prefix or zero-padded numeric IDs (e.g., USR-00025, 00025)
+            String idCandidate = cleanSearch;
+            if (idCandidate.toUpperCase().startsWith("USR-")) {
+                idCandidate = idCandidate.substring(4);
+            }
+            // Check if the remaining string is purely numeric (with optional leading zeros)
+            if (idCandidate.matches("^\\d+$")) {
+                try {
+                    Long id = Long.parseLong(idCandidate);
+                    return userRepository.findById(id)
+                        .filter(u -> isActiveFilter == null || u.getIsActive().equals(isActiveFilter))
+                        .map(u -> new org.springframework.data.domain.PageImpl<>(
+                                java.util.Collections.singletonList(u), pageable, 1))
+                        .orElseGet(() -> new org.springframework.data.domain.PageImpl<>(
+                                java.util.Collections.emptyList(), pageable, 0))
+                        .map(this::mapToProfileResponse);
+                } catch (NumberFormatException e) {
+                    // Fall through to regular search
+                }
+            }
+            
+            // Regular fuzzy search for names and emails
+            if (isActiveFilter != null) {
+                return userRepository.searchUsersByStatus(cleanSearch, isActiveFilter, pageable)
+                        .map(this::mapToProfileResponse);
+            }
+            return userRepository.searchUsers(cleanSearch, pageable)
+                    .map(this::mapToProfileResponse);
+        }
+
+        // No search query — just filter by status or return all
+        if (isActiveFilter != null) {
+            return userRepository.findByIsActive(isActiveFilter, pageable)
+                    .map(this::mapToProfileResponse);
+        }
         return userRepository.findAll(pageable)
                 .map(this::mapToProfileResponse);
     }
@@ -140,6 +195,8 @@ public class UserService implements IUserService {
                 .role(user.getRole())
                 .authProvider(user.getAuthProvider())
                 .isActive(user.getIsActive())
+                .isMobileVerified(user.getIsMobileVerified())
+                .isEmailVerified(user.getIsEmailVerified())
                 .createdDate(user.getCreatedDate())
                 .build();
     }

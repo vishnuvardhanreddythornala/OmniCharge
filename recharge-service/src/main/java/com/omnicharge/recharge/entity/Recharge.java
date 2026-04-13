@@ -1,6 +1,6 @@
 package com.omnicharge.recharge.entity;
 
-import com.omnicharge.common.audit.Auditable;
+import com.omnicharge.recharge.common.audit.Auditable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

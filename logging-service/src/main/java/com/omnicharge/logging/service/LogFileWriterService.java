@@ -1,6 +1,6 @@
 package com.omnicharge.logging.service;
 
-import com.omnicharge.common.logging.LogEvent;
+import com.omnicharge.logging.common.logging.LogEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -36,7 +36,7 @@ public class LogFileWriterService {
             DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     // 10MB limit per file before rolling
-    private static final long MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+    private static final long MAX_FILE_SIZE_BYTES = 10L * 1024 * 1024;
     
     // Critical log levels that should appear in all-services.log
     private static final Set<String> CRITICAL_LEVELS = Set.of("ERROR", "WARN", "LIFECYCLE");

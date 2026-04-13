@@ -1,6 +1,6 @@
 package com.omnicharge.notification.controller;
 
-import com.omnicharge.common.dto.ApiResponse;
+import com.omnicharge.notification.common.dto.ApiResponse;
 import com.omnicharge.notification.dto.NotificationResponse;
 import com.omnicharge.notification.service.INotificationService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +22,7 @@ public class AdminNotificationController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<NotificationResponse>>> getAllNotifications(
+            @RequestParam(required = false) String category,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdDate") String sortBy,
@@ -31,7 +32,7 @@ public class AdminNotificationController {
                 Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<NotificationResponse> notifications = notificationService.getAllNotifications(pageable);
+        Page<NotificationResponse> notifications = notificationService.getAllNotifications(category, pageable);
         return ResponseEntity.ok(ApiResponse.success("All notifications retrieved successfully", notifications));
     }
 }

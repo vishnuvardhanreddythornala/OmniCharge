@@ -1,7 +1,7 @@
 package com.omnicharge.config.logging;
 
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.config.common.logging.LogEvent;
+import com.omnicharge.config.common.logging.LogEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.config.server.environment.EnvironmentController;

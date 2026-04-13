@@ -1,6 +1,6 @@
 package com.omnicharge.recharge.client;
 
-import com.omnicharge.common.dto.ApiResponse;
+import com.omnicharge.recharge.common.dto.ApiResponse;
 import com.omnicharge.recharge.dto.UserProfileResponse;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;

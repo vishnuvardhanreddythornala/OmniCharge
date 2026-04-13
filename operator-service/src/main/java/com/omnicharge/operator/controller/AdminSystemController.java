@@ -1,6 +1,6 @@
 package com.omnicharge.operator.controller;
 
-import com.omnicharge.common.dto.ApiResponse;
+import com.omnicharge.operator.common.dto.ApiResponse;
 import com.omnicharge.operator.service.SystemCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

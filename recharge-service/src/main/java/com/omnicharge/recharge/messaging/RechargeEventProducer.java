@@ -1,8 +1,8 @@
 package com.omnicharge.recharge.messaging;
 
-import com.omnicharge.common.event.RechargeCompletedEvent;
-import com.omnicharge.common.logging.LogEvent;
-import com.omnicharge.common.logging.LogEventPublisher;
+import com.omnicharge.recharge.common.event.RechargeCompletedEvent;
+import com.omnicharge.recharge.common.logging.LogEvent;
+import com.omnicharge.recharge.common.logging.LogEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -17,12 +17,15 @@ import java.util.Map;
 @Slf4j
 public class RechargeEventProducer {
 
+    private static final String EXCHANGE = "omnicharge.exchange";
+    private static final String EVENT_TYPE_SAGA = "SAGA_EVENT_PUBLISHED";
+
     private final RabbitTemplate rabbitTemplate;
     private final LogEventPublisher logEventPublisher;
 
     public void publishRechargeCompleted(RechargeCompletedEvent event) {
         try {
-            rabbitTemplate.convertAndSend("omnicharge.exchange", "recharge.completed", event);
+            rabbitTemplate.convertAndSend(EXCHANGE, "recharge.completed", event);
             log.info("Published recharge completed event for rechargeId: {}", event.getRechargeId());
 
             // Log business operation: SAGA_EVENT_PUBLISHED
@@ -30,7 +33,7 @@ public class RechargeEventProducer {
             completedContext.put("eventType", "RechargeCompletedEvent");
             completedContext.put("rechargeId", event.getRechargeId());
             completedContext.put("routingKey", "recharge.completed");
-            completedContext.put("exchange", "omnicharge.exchange");
+            completedContext.put("exchange", EXCHANGE);
             completedContext.put("status", event.getStatus());
             completedContext.put("userId", event.getUserId().toString());
             
@@ -38,7 +41,7 @@ public class RechargeEventProducer {
                     .serviceName("recharge-service")
                     .level("INFO")
                     .message("SAGA event published: RechargeCompletedEvent")
-                    .eventType("SAGA_EVENT_PUBLISHED")
+                    .eventType(EVENT_TYPE_SAGA)
                     .context(completedContext)
                     .timestamp(LocalDateTime.now())
                     .build());
@@ -62,9 +65,9 @@ public class RechargeEventProducer {
         }
     }
 
-    public void publishRechargeInitiated(com.omnicharge.common.event.saga.RechargeInitiatedEvent event) {
+    public void publishRechargeInitiated(com.omnicharge.recharge.common.event.saga.RechargeInitiatedEvent event) {
         try {
-            rabbitTemplate.convertAndSend("omnicharge.exchange", "saga.recharge.initiated", event);
+            rabbitTemplate.convertAndSend(EXCHANGE, "saga.recharge.initiated", event);
             log.info("Published recharge initiated event for rechargeId: {}", event.getRechargeId());
 
             // Log business operation: SAGA_EVENT_PUBLISHED
@@ -72,7 +75,7 @@ public class RechargeEventProducer {
             initiatedContext.put("eventType", "RechargeInitiatedEvent");
             initiatedContext.put("rechargeId", event.getRechargeId());
             initiatedContext.put("routingKey", "saga.recharge.initiated");
-            initiatedContext.put("exchange", "omnicharge.exchange");
+            initiatedContext.put("exchange", EXCHANGE);
             initiatedContext.put("amount", event.getAmount().toString());
             initiatedContext.put("userId", event.getUserId().toString());
             initiatedContext.put("paymentMethod", event.getPaymentMethod());
@@ -81,7 +84,7 @@ public class RechargeEventProducer {
                     .serviceName("recharge-service")
                     .level("INFO")
                     .message("SAGA event published: RechargeInitiatedEvent")
-                    .eventType("SAGA_EVENT_PUBLISHED")
+                    .eventType(EVENT_TYPE_SAGA)
                     .context(initiatedContext)
                     .timestamp(LocalDateTime.now())
                     .build());

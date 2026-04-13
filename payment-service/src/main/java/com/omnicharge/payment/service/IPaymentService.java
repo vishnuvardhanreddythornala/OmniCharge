@@ -20,12 +20,13 @@ public interface IPaymentService {
     TransactionResponse getTransaction(String transactionId, Long userId);
 
     Page<TransactionResponse> getPaymentHistory(
-            Long userId, 
-            BigDecimal minAmount, 
-            BigDecimal maxAmount, 
-            PaymentStatus status, 
-            LocalDateTime startDate, 
-            LocalDateTime endDate, 
+            Long userId,
+            String transactionId,
+            BigDecimal minAmount,
+            BigDecimal maxAmount,
+            PaymentStatus status,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
             Pageable pageable);
 
     Page<TransactionResponse> getAllTransactions(
@@ -39,4 +40,6 @@ public interface IPaymentService {
             Pageable pageable);
 
     PaymentStatsResponse getPaymentStats(Integer days);
+
+    TransactionResponse failPayment(String transactionId, String failureReason);
 }

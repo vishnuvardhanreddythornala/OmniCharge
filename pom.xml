@@ -5,13 +5,12 @@
 
 	<groupId>com.omnicharge</groupId>
 	<artifactId>omnicharge-parent</artifactId>
-	<version>1.0.0</version>
+	<version>1</version>
 	<packaging>pom</packaging>
 	<name>OmniCharge Parent</name>
 	<description>Root parent POM for OmniCharge Microservices Ecosystem</description>
 
 	<modules>
-		<module>omnicharge-common</module>
 		<module>config-server</module>
 		<module>discovery-server</module>
 		<module>api-gateway</module>
@@ -31,6 +30,49 @@
 		<maven.compiler.release></maven.compiler.release>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<!-- SonarQube Verification Properties -->
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<sonar.organization>vishnuvardhanreddythornala</sonar.organization>
+		<sonar.projectKey>vishnuvardhanreddythornala_OmniCharge</sonar.projectKey>
+		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+		<sonar.cpd.exclusions>**/common/dto/**,**/common/logging/**,**/common/exception/**</sonar.cpd.exclusions>
+		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+		<sonar.coverage.jacoco.xmlReportPaths>**/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+		<sonar.coverage.exclusions>**/*Application.java,**/config/**</sonar.coverage.exclusions>
 	</properties>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.sonarsource.scanner.maven</groupId>
+					<artifactId>sonar-maven-plugin</artifactId>
+					<version>4.0.0.4121</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.12</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>

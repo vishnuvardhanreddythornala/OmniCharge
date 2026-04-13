@@ -1,6 +1,6 @@
 package com.omnicharge.payment.controller;
 
-import com.omnicharge.common.dto.ApiResponse;
+import com.omnicharge.payment.common.dto.ApiResponse;
 import com.omnicharge.payment.dto.PaymentRequest;
 import com.omnicharge.payment.dto.PaymentResponse;
 import com.omnicharge.payment.dto.TransactionResponse;
@@ -34,8 +34,7 @@ public class PaymentController {
         // Security: Validate that the authenticated user matches the request userId
         if (!request.getUserId().equals(authenticatedUserId)) {
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("Unauthorized: Cannot create payment for another user. Request userId: " 
-                            + request.getUserId() + ", Header userId: " + authenticatedUserId));
+                    .body(ApiResponse.error("Unauthorized: Cannot create payment for another user"));
         }
         
         PaymentResponse payment = paymentService.processPayment(request);
@@ -62,9 +61,19 @@ public class PaymentController {
         return ResponseEntity.ok(ApiResponse.success("Payment confirmed successfully", transaction));
     }
 
+    @PostMapping("/webhook/fail/{transactionId}")
+    public ResponseEntity<ApiResponse<TransactionResponse>> failPayment(
+            @PathVariable String transactionId,
+            @RequestParam(required = false, defaultValue = "Payment cancelled by user") String reason) {
+        
+        TransactionResponse transaction = paymentService.failPayment(transactionId, reason);
+        return ResponseEntity.ok(ApiResponse.success("Payment failure recorded", transaction));
+    }
+
     @GetMapping("/history")
     public ResponseEntity<ApiResponse<Page<TransactionResponse>>> getPaymentHistory(
             @RequestHeader("X-User-Id") Long userId,
+            @RequestParam(required = false) String transactionId,
             @RequestParam(required = false) BigDecimal minAmount,
             @RequestParam(required = false) BigDecimal maxAmount,
             @RequestParam(required = false) PaymentStatus status,
@@ -80,7 +89,7 @@ public class PaymentController {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<TransactionResponse> transactions = paymentService.getPaymentHistory(
-                userId, minAmount, maxAmount, status, startDate, endDate, pageable);
+                userId, transactionId, minAmount, maxAmount, status, startDate, endDate, pageable);
         return ResponseEntity.ok(ApiResponse.success("Payment history retrieved successfully", transactions));
     }
 }

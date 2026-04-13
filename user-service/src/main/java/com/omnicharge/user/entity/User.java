@@ -1,6 +1,6 @@
 package com.omnicharge.user.entity;
 
-import com.omnicharge.common.audit.Auditable;
+import com.omnicharge.user.common.audit.Auditable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -23,15 +23,14 @@ public class User extends Auditable {
     private Long id;
 
     @Email
-    @NotBlank
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = true)
     private String email;
 
     @NotBlank
     @Column(nullable = false)
     private String fullName;
 
-    @Pattern(regexp = "^[6-9]\\d{9}$", message = "Invalid mobile number")
+    @Pattern(regexp = "^\\+\\d{1,3}\\d{6,14}$", message = "Invalid mobile number")
     @Column(unique = true)
     private String mobileNumber;
 
@@ -51,4 +50,10 @@ public class User extends Auditable {
 
     @Column(nullable = false)
     private Boolean isActive = true;
+
+    @Column(nullable = false)
+    private Boolean isMobileVerified = false;
+
+    @Column(nullable = false)
+    private Boolean isEmailVerified = false;
 }

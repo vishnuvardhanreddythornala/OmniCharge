@@ -22,5 +22,7 @@ public class UserProfileResponse {
     private Role role;
     private AuthProvider authProvider;
     private Boolean isActive;
+    private Boolean isMobileVerified;
+    private Boolean isEmailVerified;
     private LocalDateTime createdDate;
 }

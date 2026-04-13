@@ -33,4 +33,47 @@ public interface RechargeRepository extends JpaRepository<Recharge, Long> {
             @Param("status") RechargeStatus status,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
+
+    /** Downtime-resilient: finds ALL SUCCESS recharges whose planExpiryDate has passed */
+    @Query("SELECT r FROM Recharge r WHERE r.status = :status AND r.planExpiryDate < :cutoffDate")
+    List<Recharge> findByStatusAndPlanExpiryDateBefore(
+            @Param("status") RechargeStatus status,
+            @Param("cutoffDate") LocalDate cutoffDate);
+
+    /** Date-filtered user recharge history — supports optional start/end date boundaries */
+    @Query("SELECT r FROM Recharge r WHERE r.userId = :userId " +
+           "AND r.createdDate >= :startDate AND r.createdDate <= :endDate")
+    Page<Recharge> findByUserIdWithDateFilters(
+            @Param("userId") Long userId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable);
+
+    /** Admin: date-filtered listing (no status filter) */
+    @Query("SELECT r FROM Recharge r WHERE " +
+           "r.createdDate >= :startDate AND r.createdDate <= :endDate")
+    Page<Recharge> findAllWithDateFilters(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable);
+
+    /** Admin: date + status filtered listing */
+    @Query("SELECT r FROM Recharge r WHERE " +
+           "r.status = :status " +
+           "AND r.createdDate >= :startDate AND r.createdDate <= :endDate")
+    Page<Recharge> findAllWithStatusAndDateFilters(
+            @Param("status") RechargeStatus status,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable);
+
+    /** Admin: date + multiple statuses filtered listing (e.g. INITIATED + PROCESSING) */
+    @Query("SELECT r FROM Recharge r WHERE " +
+           "r.status IN :statuses " +
+           "AND r.createdDate >= :startDate AND r.createdDate <= :endDate")
+    Page<Recharge> findAllWithStatusesAndDateFilters(
+            @Param("statuses") java.util.List<RechargeStatus> statuses,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable);
 }

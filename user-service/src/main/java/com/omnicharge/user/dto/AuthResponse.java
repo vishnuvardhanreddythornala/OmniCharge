@@ -25,4 +25,5 @@ public class AuthResponse {
     private String email;
     private AuthProvider authProvider;
     private Boolean isProfileComplete;
+    private Boolean isMobileVerified;
 }

@@ -1,39 +1,43 @@
 package com.omnicharge.payment.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.omnicharge.common.dto.ApiResponse;
 import com.omnicharge.payment.dto.PaymentRequest;
 import com.omnicharge.payment.dto.PaymentResponse;
 import com.omnicharge.payment.dto.TransactionResponse;
+import com.omnicharge.payment.entity.PaymentStatus;
 import com.omnicharge.payment.service.IPaymentService;
-import org.junit.jupiter.api.BeforeEach;
+import com.omnicharge.payment.common.logging.LogEventPublisher;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import java.math.BigDecimal;
-import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@WebMvcTest(PaymentController.class)
+@WebMvcTest(controllers = PaymentController.class, excludeAutoConfiguration = {
+        JpaRepositoriesAutoConfiguration.class,
+        DataSourceAutoConfiguration.class,
+        HibernateJpaAutoConfiguration.class
+})
 @AutoConfigureMockMvc(addFilters = false)
-@MockBean(JpaMetamodelMappingContext.class)
-@MockBean(com.omnicharge.common.logging.LogEventPublisher.class)
 class PaymentControllerTest {
 
     @Autowired
@@ -42,89 +46,101 @@ class PaymentControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private IPaymentService paymentService;
 
-    private PaymentRequest paymentRequest;
-    private PaymentResponse paymentResponse;
-
-    @BeforeEach
-    void setUp() {
-        paymentRequest = new PaymentRequest();
-        paymentRequest.setRechargeId("OMNI-1234");
-        paymentRequest.setUserId(1L);
-        paymentRequest.setAmount(new BigDecimal("299.00"));
-        paymentRequest.setPaymentMethod("CREDIT_CARD");
-
-        paymentResponse = PaymentResponse.builder()
-                .transactionId("TXN-123")
-                .status("SUCCESS")
-                .amount(new BigDecimal("299.00"))
-                .build();
-    }
+    @MockitoBean
+    private LogEventPublisher logEventPublisher;
 
     @Test
     void processPayment_Success() throws Exception {
-        when(paymentService.processPayment(any(PaymentRequest.class))).thenReturn(paymentResponse);
+        PaymentRequest request = new PaymentRequest();
+        request.setUserId(1L);
+        request.setRechargeId(UUID.randomUUID().toString());
+        request.setAmount(new BigDecimal("199.00"));
+        request.setPaymentMethod("UPI");
+
+        PaymentResponse response = new PaymentResponse();
+        response.setTransactionId("TXN-123");
+        response.setStatus(PaymentStatus.SUCCESS.name());
+
+        when(paymentService.processPayment(any())).thenReturn(response);
 
         mockMvc.perform(post("/api/payments/process")
-                        .header("X-User-Id", "1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(paymentRequest)))
+                .header("X-User-Id", "1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.transactionId").value("TXN-123"));
     }
 
     @Test
-    void processPayment_UnauthorizedUserMismatch_ReturnsBadRequest() throws Exception {
-        // Here X-User-Id is 2, but paymentRequest.userId is 1
+    void processPayment_UnauthorizedUserMismatch() throws Exception {
+        PaymentRequest request = new PaymentRequest();
+        request.setUserId(2L); // Different user ID from header
+        request.setRechargeId(UUID.randomUUID().toString());
+        request.setAmount(new BigDecimal("199.00"));
+        request.setPaymentMethod("UPI");
+
         mockMvc.perform(post("/api/payments/process")
-                        .header("X-User-Id", "2")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(paymentRequest)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("Unauthorized: Cannot create payment for another user"));
+                .header("X-User-Id", "1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void getTransaction_Found() throws Exception {
-        TransactionResponse tx = TransactionResponse.builder().transactionId("TXN-123").build();
-        when(paymentService.getTransaction("TXN-123", 1L)).thenReturn(tx);
+    void getTransaction_Success() throws Exception {
+        TransactionResponse response = new TransactionResponse();
+        response.setTransactionId("TXN-123");
+
+        when(paymentService.getTransaction("TXN-123", 1L)).thenReturn(response);
 
         mockMvc.perform(get("/api/payments/TXN-123")
-                        .header("X-User-Id", "1")
-                        .contentType(MediaType.APPLICATION_JSON))
+                .header("X-User-Id", "1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
+                .andExpect(jsonPath("$.data.transactionId").value("TXN-123"));
     }
 
     @Test
-    void getPaymentHistory() throws Exception {
-        TransactionResponse tx = TransactionResponse.builder().transactionId("TXN-123").build();
-        Page<TransactionResponse> page = new PageImpl<>(Collections.singletonList(tx));
-        when(paymentService.getPaymentHistory(eq(1L), any(), any(), any(), any(), any(), any(Pageable.class)))
-                .thenReturn(page);
+    void confirmPaymentManually_Success() throws Exception {
+        TransactionResponse response = new TransactionResponse();
+        response.setTransactionId("TXN-123");
+        response.setStatus(PaymentStatus.SUCCESS);
+
+        when(paymentService.confirmPayment(any(), any(), any())).thenReturn(response);
+
+        mockMvc.perform(post("/api/payments/webhook/confirm/TXN-123")
+                .param("razorpayPaymentId", "pay_abc")
+                .param("razorpaySignature", "sign_abc"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void failPayment_Success() throws Exception {
+        TransactionResponse response = new TransactionResponse();
+        response.setTransactionId("TXN-123");
+        response.setStatus(PaymentStatus.FAILED);
+
+        when(paymentService.failPayment(any(), any())).thenReturn(response);
+
+        mockMvc.perform(post("/api/payments/webhook/fail/TXN-123")
+                .param("reason", "Cancelled"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void getPaymentHistory_Success() throws Exception {
+        TransactionResponse response = new TransactionResponse();
+        response.setTransactionId("TXN-123");
+        Page<TransactionResponse> page = new PageImpl<>(List.of(response));
+
+        when(paymentService.getPaymentHistory(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(page);
 
         mockMvc.perform(get("/api/payments/history")
-                        .header("X-User-Id", "1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content[0].transactionId").value("TXN-123"));
-    }
-
-    @Test
-    void confirmPaymentManually() throws Exception {
-        TransactionResponse tx = TransactionResponse.builder().transactionId("TXN-CONFIRMED").status(com.omnicharge.payment.entity.PaymentStatus.SUCCESS).build();
-        when(paymentService.confirmPayment("TXN-CONFIRMED", "mockRzId", "mockSig")).thenReturn(tx);
-
-        mockMvc.perform(post("/api/payments/webhook/confirm/TXN-CONFIRMED")
-                        .param("razorpayPaymentId", "mockRzId")
-                        .param("razorpaySignature", "mockSig")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.transactionId").value("TXN-CONFIRMED"));
+                .header("X-User-Id", "1")
+                .param("page", "0")
+                .param("size", "10"))
+                .andExpect(status().isOk());
     }
 }

@@ -51,15 +51,17 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
             @Param("isActive") Boolean isActive
     );
     
-    // Admin search with status filter
+    // Admin search with status and text filter
     @Query("SELECT p FROM Plan p WHERE " +
            "(:operatorId IS NULL OR p.operator.id = :operatorId) " +
            "AND (:category IS NULL OR p.category = :category) " +
-           "AND (:isActive IS NULL OR p.isActive = :isActive)")
+           "AND (:isActive IS NULL OR p.isActive = :isActive) " +
+           "AND (:search IS NULL OR LOWER(p.planName) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(p.dataLimit) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<Plan> searchPlansWithStatus(
             @Param("operatorId") Long operatorId,
             @Param("category") PlanCategory category,
             @Param("isActive") Boolean isActive,
+            @Param("search") String search,
             Pageable pageable
     );
 }

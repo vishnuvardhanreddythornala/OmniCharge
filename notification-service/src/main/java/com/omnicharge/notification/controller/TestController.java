@@ -1,6 +1,6 @@
 package com.omnicharge.notification.controller;
 
-import com.omnicharge.common.dto.ApiResponse;
+import com.omnicharge.notification.common.dto.ApiResponse;
 import com.omnicharge.notification.entity.Notification;
 import com.omnicharge.notification.entity.NotificationCategory;
 import com.omnicharge.notification.entity.NotificationStatus;

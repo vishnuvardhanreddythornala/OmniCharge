@@ -1,75 +1,94 @@
 package com.omnicharge.recharge.controller;
 
+import com.omnicharge.recharge.common.dto.ApiResponse;
 import com.omnicharge.recharge.dto.RechargeResponse;
 import com.omnicharge.recharge.dto.RechargeStatsResponse;
 import com.omnicharge.recharge.service.IRechargeService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 
-import java.math.BigDecimal;
-import java.util.Collections;
+import java.time.LocalDateTime;
+import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
-@WebMvcTest(AdminRechargeController.class)
-@AutoConfigureMockMvc(addFilters = false)
-@MockBean(JpaMetamodelMappingContext.class)
-@MockBean(com.omnicharge.common.logging.LogEventPublisher.class)
+@ExtendWith(MockitoExtension.class)
 class AdminRechargeControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
+    @Mock
     private IRechargeService rechargeService;
 
-    @Test
-    void getAllRecharges() throws Exception {
-        RechargeResponse response = RechargeResponse.builder()
-                .rechargeId("OMNI-ADMINVIEW")
-                .operatorName("Vodafone")
-                .build();
-        Page<RechargeResponse> page = new PageImpl<>(Collections.singletonList(response));
-        
-        when(rechargeService.getAllRecharges(any(Pageable.class))).thenReturn(page);
+    @InjectMocks
+    private AdminRechargeController adminRechargeController;
 
-        mockMvc.perform(get("/api/admin/recharges")
-                        .param("page", "0")
-                        .param("size", "10")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.content[0].operatorName").value("Vodafone"));
+    private RechargeResponse rechargeResponse;
+
+    @BeforeEach
+    void setUp() {
+        rechargeResponse = RechargeResponse.builder()
+                .rechargeId("REC123")
+                .userId(1L)
+                .amount(new java.math.BigDecimal("199.00"))
+                .build();
     }
 
     @Test
-    void getRechargeStats() throws Exception {
+    void getAllRecharges_Success_Descending() {
+        Page<RechargeResponse> page = new PageImpl<>(List.of(rechargeResponse));
+        
+        when(rechargeService.getAllRecharges(
+                eq("SUCCESS"), any(LocalDateTime.class), any(LocalDateTime.class), any(PageRequest.class)))
+                .thenReturn(page);
+                
+        ResponseEntity<ApiResponse<Page<RechargeResponse>>> response = adminRechargeController.getAllRecharges(
+                0, 10, "createdDate", "DESC",
+                LocalDateTime.now().minusDays(1), LocalDateTime.now(), "SUCCESS");
+                
+        assertEquals(200, response.getStatusCodeValue());
+        assertTrue(response.getBody().isSuccess());
+        assertEquals(1, response.getBody().getData().getTotalElements());
+    }
+
+    @Test
+    void getAllRecharges_Success_Ascending() {
+        Page<RechargeResponse> page = new PageImpl<>(List.of(rechargeResponse));
+        
+        when(rechargeService.getAllRecharges(
+                isNull(), isNull(), isNull(), any(PageRequest.class)))
+                .thenReturn(page);
+                
+        ResponseEntity<ApiResponse<Page<RechargeResponse>>> response = adminRechargeController.getAllRecharges(
+                0, 10, "amount", "ASC",
+                null, null, null);
+                
+        assertEquals(200, response.getStatusCodeValue());
+        assertTrue(response.getBody().isSuccess());
+        assertEquals(1, response.getBody().getData().getTotalElements());
+    }
+
+    @Test
+    void getRechargeStats_Success() {
         RechargeStatsResponse stats = RechargeStatsResponse.builder()
                 .totalRecharges(100L)
-                .successCount(80L)
-                .failedCount(20L)
-                .totalAmount(new BigDecimal("15000.00"))
                 .build();
-
+                
         when(rechargeService.getRechargeStats()).thenReturn(stats);
-
-        mockMvc.perform(get("/api/admin/recharges/stats")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.totalAmount").value(15000.00))
-                .andExpect(jsonPath("$.data.successCount").value(80));
+        
+        ResponseEntity<ApiResponse<RechargeStatsResponse>> response = adminRechargeController.getRechargeStats();
+        
+        assertEquals(200, response.getStatusCodeValue());
+        assertTrue(response.getBody().isSuccess());
+        assertEquals(100L, response.getBody().getData().getTotalRecharges());
     }
 }

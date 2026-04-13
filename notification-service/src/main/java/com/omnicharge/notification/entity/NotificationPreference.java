@@ -1,6 +1,6 @@
 package com.omnicharge.notification.entity;
 
-import com.omnicharge.common.audit.Auditable;
+import com.omnicharge.notification.common.audit.Auditable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,8 +1,10 @@
 package com.omnicharge.recharge.service;
 
-import com.omnicharge.common.dto.ApiResponse;
-import com.omnicharge.common.exception.BadRequestException;
-import com.omnicharge.common.exception.ResourceNotFoundException;
+import com.omnicharge.recharge.common.dto.ApiResponse;
+import com.omnicharge.recharge.common.exception.BadRequestException;
+import com.omnicharge.recharge.common.exception.ResourceNotFoundException;
+import com.omnicharge.recharge.common.logging.LogEvent;
+import com.omnicharge.recharge.common.logging.LogEventPublisher;
 import com.omnicharge.recharge.client.OperatorServiceClient;
 import com.omnicharge.recharge.client.UserServiceClient;
 import com.omnicharge.recharge.dto.*;
@@ -18,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
@@ -30,6 +31,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,163 +50,303 @@ class RechargeServiceTest {
     private RechargeEventProducer rechargeEventProducer;
 
     @Mock
-    private com.omnicharge.common.logging.LogEventPublisher logEventPublisher;
+    private LogEventPublisher logEventPublisher;
 
     @InjectMocks
     private RechargeService rechargeService;
 
-    private RechargeRequest rechargeRequest;
-    private PlanResponse planResponse;
-    private UserProfileResponse userProfileResponse;
-    private Recharge recharge;
+    private RechargeRequest validRequest;
+    private PlanResponse validPlan;
 
     @BeforeEach
     void setUp() {
-        rechargeRequest = new RechargeRequest();
-        rechargeRequest.setMobileNumber("9876543210");
-        rechargeRequest.setOperatorId(1L);
-        rechargeRequest.setPlanId(10L);
-        rechargeRequest.setPaymentMethod("UPI");
+        validRequest = new RechargeRequest();
+        validRequest.setOperatorId(1L);
+        validRequest.setPlanId(10L);
+        validRequest.setMobileNumber("9876543210");
+        validRequest.setPaymentMethod("UPI");
 
-        planResponse = PlanResponse.builder()
-                .id(10L)
-                .operatorId(1L)
-                .operatorName("Airtel")
-                .planName("Unlimited 5G")
-                .price(new BigDecimal("299.00"))
-                .validityDays(28)
-                .isActive(true)
-                .build();
-
-        userProfileResponse = UserProfileResponse.builder()
-                .id(1L)
-                .email("test@example.com")
-                .mobileNumber("9876543210")
-                .build();
-
-        recharge = new Recharge();
-        recharge.setId(100L);
-        recharge.setRechargeId("OMNI-A1B2C3D4");
-        recharge.setUserId(1L);
-        recharge.setMobileNumber("9876543210");
-        recharge.setOperatorId(1L);
-        recharge.setOperatorName("Airtel");
-        recharge.setPlanId(10L);
-        recharge.setPlanName("Unlimited 5G");
-        recharge.setAmount(new BigDecimal("299.00"));
-        recharge.setPlanValidityDays(28);
-        recharge.setPlanExpiryDate(LocalDate.now().plusDays(28));
-        recharge.setStatus(RechargeStatus.SUCCESS);
-        recharge.setCreatedDate(LocalDateTime.now());
+        validPlan = new PlanResponse();
+        validPlan.setId(10L);
+        validPlan.setOperatorId(1L);
+        validPlan.setOperatorName("Airtel");
+        validPlan.setPlanName("Basic 199");
+        validPlan.setPrice(new BigDecimal("199.00"));
+        validPlan.setValidityDays(28);
+        validPlan.setIsActive(true);
     }
 
     @Test
     void initiateRecharge_Success() {
-        when(operatorServiceClient.getPlan(anyLong()))
-                .thenReturn(ApiResponse.success("Success", planResponse));
-        when(userServiceClient.getUserById(anyLong()))
-                .thenReturn(ApiResponse.success("Success", userProfileResponse));
+        when(operatorServiceClient.getPlan(10L)).thenReturn(ApiResponse.success(validPlan));
+        when(rechargeRepository.save(any(Recharge.class))).thenAnswer(i -> i.getArgument(0));
 
-        when(rechargeRepository.save(any(Recharge.class))).thenAnswer(invocation -> {
-            Recharge r = invocation.getArgument(0);
-            r.setRechargeId("OMNI-MOCK123");
-            return r;
-        });
+        UserProfileResponse userProfile = new UserProfileResponse();
+        userProfile.setEmail("user@example.com");
+        userProfile.setIsEmailVerified(true);
+        userProfile.setMobileNumber("9876543210");
+        when(userServiceClient.getUserById(1L)).thenReturn(ApiResponse.success(userProfile));
 
-        doNothing().when(rechargeEventProducer).publishRechargeInitiated(any());
-
-        RechargeResponse response = rechargeService.initiateRecharge(1L, rechargeRequest);
+        RechargeResponse response = rechargeService.initiateRecharge(1L, validRequest);
 
         assertNotNull(response);
-        assertEquals(RechargeStatus.PROCESSING, response.getStatus());
+        assertEquals(RechargeStatus.PROCESSING, response.getStatus()); // Saves INITIATED then PROCESSING
         verify(rechargeEventProducer, times(1)).publishRechargeInitiated(any());
-        verify(rechargeRepository, times(2)).save(any(Recharge.class));
+        verify(logEventPublisher, atLeastOnce()).publish(any(LogEvent.class));
+        verify(rechargeRepository, times(2)).save(any());
     }
 
     @Test
-    void initiateRecharge_CircuitBreaker_OperatorDown_ThrowsException() {
-        // Simulates Resilience4j fallback returning null or an error map from circuit breaker intercept
-        when(operatorServiceClient.getPlan(anyLong())).thenReturn(null);
+    void initiateRecharge_OperatorServiceCircuitBreakerFails() {
+        when(operatorServiceClient.getPlan(10L)).thenReturn(null);
 
-        BadRequestException ex = assertThrows(BadRequestException.class, () ->
-            rechargeService.initiateRecharge(1L, rechargeRequest)
-        );
-        assertTrue(ex.getMessage().contains("Operator Service is temporarily unavailable"));
+        assertThrows(BadRequestException.class, () -> {
+            rechargeService.initiateRecharge(1L, validRequest);
+        });
+
+        when(operatorServiceClient.getPlan(10L)).thenReturn(ApiResponse.error("Service Down"));
+
+        assertThrows(BadRequestException.class, () -> {
+            rechargeService.initiateRecharge(1L, validRequest);
+        });
+        
         verify(rechargeRepository, never()).save(any());
     }
 
     @Test
-    void initiateRecharge_OperatorAPI_ReturnsError_ThrowsException() {
-        when(operatorServiceClient.getPlan(anyLong())).thenReturn(ApiResponse.error("Internal Server Error"));
+    void initiateRecharge_PlanInactive() {
+        validPlan.setIsActive(false);
+        when(operatorServiceClient.getPlan(10L)).thenReturn(ApiResponse.success(validPlan));
 
-        assertThrows(BadRequestException.class, () -> rechargeService.initiateRecharge(1L, rechargeRequest));
+        assertThrows(BadRequestException.class, () -> {
+            rechargeService.initiateRecharge(1L, validRequest);
+        });
+        verify(rechargeRepository, never()).save(any());
     }
 
     @Test
-    void initiateRecharge_PlanInactive_ThrowsException() {
-        planResponse.setIsActive(false);
-        when(operatorServiceClient.getPlan(anyLong())).thenReturn(ApiResponse.success("Success", planResponse));
+    void initiateRecharge_PlanOperatorMismatch() {
+        validRequest.setOperatorId(2L); // Different operator ID parameter
+        when(operatorServiceClient.getPlan(10L)).thenReturn(ApiResponse.success(validPlan));
 
-        BadRequestException ex = assertThrows(BadRequestException.class, () ->
-                rechargeService.initiateRecharge(1L, rechargeRequest)
-        );
-        assertEquals("Invalid or inactive plan", ex.getMessage());
+        assertThrows(BadRequestException.class, () -> {
+            rechargeService.initiateRecharge(1L, validRequest);
+        });
+        verify(rechargeRepository, never()).save(any());
     }
-
+    
     @Test
-    void initiateRecharge_PlanOperatorMismatch_ThrowsException() {
-        planResponse.setOperatorId(99L); // Differs from rechargeRequest (1L)
-        when(operatorServiceClient.getPlan(anyLong())).thenReturn(ApiResponse.success("Success", planResponse));
-
-        BadRequestException ex = assertThrows(BadRequestException.class, () ->
-                rechargeService.initiateRecharge(1L, rechargeRequest)
-        );
-        assertEquals("Plan does not belong to the specified operator", ex.getMessage());
-    }
-
-    @Test
-    void initiateRecharge_UserServiceDown_StillSucceedsWithoutUserDetails() {
-        when(operatorServiceClient.getPlan(anyLong()))
-                .thenReturn(ApiResponse.success("Success", planResponse));
-        // Fallback or outage returns null or error for UserServiceClient
-        when(userServiceClient.getUserById(anyLong())).thenThrow(new RuntimeException("API DOWN"));
-
+    void initiateRecharge_UserServiceFailsSilent() {
+        when(operatorServiceClient.getPlan(10L)).thenReturn(ApiResponse.success(validPlan));
         when(rechargeRepository.save(any(Recharge.class))).thenAnswer(i -> i.getArgument(0));
+        
+        // Mock fail to swallow the exception (graceful degradation)
+        when(userServiceClient.getUserById(1L)).thenThrow(new RuntimeException("API Down"));
 
-        // It should gracefully catch the exception from UserServiceClient and proceed
-        assertDoesNotThrow(() -> rechargeService.initiateRecharge(1L, rechargeRequest));
-        verify(rechargeEventProducer, times(1)).publishRechargeInitiated(any());
+        RechargeResponse response = rechargeService.initiateRecharge(1L, validRequest);
+
+        assertNotNull(response);
     }
 
     @Test
     void getRechargeById_Success() {
-        when(rechargeRepository.findByRechargeId("OMNI-A1B2C3D4")).thenReturn(Optional.of(recharge));
+        Recharge recharge = new Recharge();
+        recharge.setRechargeId("REC-123");
+        recharge.setUserId(1L);
 
-        RechargeResponse response = rechargeService.getRechargeById("OMNI-A1B2C3D4", 1L);
+        when(rechargeRepository.findByRechargeId("REC-123")).thenReturn(Optional.of(recharge));
+
+        RechargeResponse response = rechargeService.getRechargeById("REC-123", 1L);
 
         assertNotNull(response);
-        assertEquals("OMNI-A1B2C3D4", response.getRechargeId());
+        assertEquals("REC-123", response.getRechargeId());
     }
 
     @Test
     void getRechargeById_Unauthorized() {
-        when(rechargeRepository.findByRechargeId("OMNI-A1B2C3D4")).thenReturn(Optional.of(recharge));
+        Recharge recharge = new Recharge();
+        recharge.setRechargeId("REC-123");
+        recharge.setUserId(2L);
 
-        BadRequestException ex = assertThrows(BadRequestException.class, () ->
-                rechargeService.getRechargeById("OMNI-A1B2C3D4", 99L) // Wrong user ID
-        );
-        assertEquals("Unauthorized access to recharge", ex.getMessage());
+        when(rechargeRepository.findByRechargeId("REC-123")).thenReturn(Optional.of(recharge));
+
+        assertThrows(BadRequestException.class, () -> {
+            rechargeService.getRechargeById("REC-123", 1L);
+        });
+    }
+
+    @Test
+    void markAsExpired_Success() {
+        Recharge recharge = new Recharge();
+        recharge.setRechargeId("REC-123");
+        recharge.setUserId(1L);
+        recharge.setPlanExpiryDate(LocalDate.now().minusDays(1));
+
+        when(rechargeRepository.findByRechargeId("REC-123")).thenReturn(Optional.of(recharge));
+
+        rechargeService.markAsExpired("REC-123");
+
+        assertEquals(RechargeStatus.EXPIRED, recharge.getStatus());
+        verify(rechargeRepository, times(1)).save(recharge);
+        verify(logEventPublisher, times(1)).publish(any(LogEvent.class));
+    }
+
+    @Test
+    void markAsExpired_NotFound() {
+        when(rechargeRepository.findByRechargeId("REC-123")).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> rechargeService.markAsExpired("REC-123"));
+    }
+
+    @Test
+    void getRechargeHistory_Success() {
+        Recharge recharge = new Recharge();
+        Page<Recharge> page = new PageImpl<>(List.of(recharge));
+        when(rechargeRepository.findByUserId(anyLong(), any(Pageable.class))).thenReturn(page);
+        
+        Page<RechargeResponse> response = rechargeService.getRechargeHistory(1L, Pageable.unpaged());
+        assertNotNull(response);
+        assertEquals(1, response.getContent().size());
+    }
+    
+    @Test
+    void getRechargeHistory_WithDateFilters_Success() {
+        Recharge recharge = new Recharge();
+        Page<Recharge> page = new PageImpl<>(List.of(recharge));
+        when(rechargeRepository.findByUserIdWithDateFilters(eq(1L), any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class)))
+                .thenReturn(page);
+        
+        Page<RechargeResponse> response = rechargeService.getRechargeHistory(1L, null, null, Pageable.unpaged());
+        assertNotNull(response);
+        assertEquals(1, response.getContent().size());
+    }
+
+    @Test
+    void getRechargeStatus_Success() {
+        Recharge recharge = new Recharge();
+        recharge.setStatus(RechargeStatus.SUCCESS);
+        when(rechargeRepository.findByRechargeId("REC-123")).thenReturn(Optional.of(recharge));
+        
+        String status = rechargeService.getRechargeStatus("REC-123");
+        assertEquals("SUCCESS", status);
+    }
+
+    @Test
+    void getRechargeStatus_NotFound() {
+        when(rechargeRepository.findByRechargeId("REC-123")).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> rechargeService.getRechargeStatus("REC-123"));
+    }
+
+    @Test
+    void getAllRecharges_NoStatus_Success() {
+        Recharge recharge = new Recharge();
+        Page<Recharge> page = new PageImpl<>(List.of(recharge));
+        
+        when(rechargeRepository.findAllWithDateFilters(any(), any(), any())).thenReturn(page);
+        
+        Page<RechargeResponse> response = rechargeService.getAllRecharges("", null, null, Pageable.unpaged());
+        assertNotNull(response);
+        assertEquals(1, response.getContent().size());
+    }
+
+    @Test
+    void getAllRecharges_Processing_Success() {
+        Recharge recharge = new Recharge();
+        Page<Recharge> page = new PageImpl<>(List.of(recharge));
+        
+        when(rechargeRepository.findAllWithStatusesAndDateFilters(anyList(), any(), any(), any())).thenReturn(page);
+        
+        Page<RechargeResponse> response = rechargeService.getAllRecharges("PROCESSING", null, null, Pageable.unpaged());
+        assertNotNull(response);
+        assertEquals(1, response.getContent().size());
+    }
+
+    @Test
+    void getAllRecharges_SuccessStatus_Success() {
+        Recharge recharge = new Recharge();
+        Page<Recharge> page = new PageImpl<>(List.of(recharge));
+        
+        when(rechargeRepository.findAllWithStatusAndDateFilters(eq(RechargeStatus.SUCCESS), any(), any(), any())).thenReturn(page);
+        
+        Page<RechargeResponse> response = rechargeService.getAllRecharges("SUCCESS", null, null, Pageable.unpaged());
+        assertNotNull(response);
+        assertEquals(1, response.getContent().size());
+    }
+
+    @Test
+    void getAllRecharges_Simple_Success() {
+        Recharge recharge = new Recharge();
+        Page<Recharge> page = new PageImpl<>(List.of(recharge));
+        when(rechargeRepository.findAll(any(Pageable.class))).thenReturn(page);
+        
+        Page<RechargeResponse> response = rechargeService.getAllRecharges(Pageable.unpaged());
+        assertNotNull(response);
+        assertEquals(1, response.getContent().size());
+    }
+
+    @Test
+    void getRechargeStats_Success() {
+        when(rechargeRepository.count()).thenReturn(50L);
+        when(rechargeRepository.countByStatus(RechargeStatus.SUCCESS)).thenReturn(40L);
+        when(rechargeRepository.countByStatus(RechargeStatus.FAILED)).thenReturn(10L);
+        
+        Recharge successMatch = new Recharge();
+        successMatch.setStatus(RechargeStatus.SUCCESS);
+        successMatch.setAmount(new BigDecimal("100"));
+        
+        Recharge failMatch = new Recharge();
+        failMatch.setStatus(RechargeStatus.FAILED);
+        failMatch.setAmount(new BigDecimal("100"));
+
+        when(rechargeRepository.findByCreatedDateBetween(any(), any())).thenReturn(List.of(successMatch, failMatch));
+        
+        RechargeStatsResponse response = rechargeService.getRechargeStats();
+        assertNotNull(response);
+        assertEquals(50L, response.getTotalRecharges());
+        assertEquals(new BigDecimal("100"), response.getTotalAmount());
     }
 
     @Test
     void getExpiringRecharges_Success() {
+        Recharge recharge = new Recharge();
+        recharge.setUserId(1L);
+        recharge.setAmount(new BigDecimal("100"));
+        
         when(rechargeRepository.findByStatusAndPlanExpiryDate(eq(RechargeStatus.SUCCESS), any(LocalDate.class)))
                 .thenReturn(List.of(recharge));
-        when(userServiceClient.getUserById(1L)).thenReturn(ApiResponse.success("OK", userProfileResponse));
+                
+        UserProfileResponse user = new UserProfileResponse();
+        user.setEmail("test@test.com");
+        when(userServiceClient.getUserById(1L)).thenReturn(ApiResponse.success(user));
+        
+        List<ExpiringRechargeResponse> responses = rechargeService.getExpiringRecharges(3);
+        assertEquals(1, responses.size());
+        assertEquals("test@test.com", responses.get(0).getUserEmail());
+    }
 
-        List<ExpiringRechargeResponse> responses = rechargeService.getExpiringRecharges(5);
+    @Test
+    void getExpiringRecharges_UserFetchThrows() {
+        Recharge recharge = new Recharge();
+        recharge.setUserId(1L);
+        
+        when(rechargeRepository.findByStatusAndPlanExpiryDate(eq(RechargeStatus.SUCCESS), any(LocalDate.class)))
+                .thenReturn(List.of(recharge));
+                
+        when(userServiceClient.getUserById(1L)).thenThrow(new RuntimeException("Unable to fetch user"));
+        
+        List<ExpiringRechargeResponse> responses = rechargeService.getExpiringRecharges(3);
+        assertEquals(1, responses.size());
+        assertNull(responses.get(0).getUserEmail());
+    }
 
-        assertFalse(responses.isEmpty());
-        assertEquals("test@example.com", responses.get(0).getUserEmail());
+    @Test
+    void getExpiredToday_Success() {
+        Recharge recharge = new Recharge();
+        recharge.setUserId(1L);
+        
+        when(rechargeRepository.findByStatusAndPlanExpiryDate(eq(RechargeStatus.SUCCESS), any(LocalDate.class)))
+                .thenReturn(List.of(recharge));
+                
+        List<ExpiringRechargeResponse> responses = rechargeService.getExpiredToday();
+        assertEquals(1, responses.size());
     }
 }

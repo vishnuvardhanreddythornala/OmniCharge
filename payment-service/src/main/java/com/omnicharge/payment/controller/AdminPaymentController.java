@@ -1,6 +1,6 @@
 package com.omnicharge.payment.controller;
 
-import com.omnicharge.common.dto.ApiResponse;
+import com.omnicharge.payment.common.dto.ApiResponse;
 import com.omnicharge.payment.dto.PaymentStatsResponse;
 import com.omnicharge.payment.dto.TransactionResponse;
 import com.omnicharge.payment.entity.PaymentStatus;
@@ -42,7 +42,7 @@ public class AdminPaymentController {
             @RequestParam(defaultValue = "DESC") String sortDir) {
 
         // Security: Verify ADMIN role
-        if (!"ADMIN".equals(userRole)) {
+        if (!"ROLE_ADMIN".equals(userRole)) {
             return ResponseEntity.status(403)
                     .body(ApiResponse.error("Access denied: Admin role required"));
         }
@@ -62,7 +62,7 @@ public class AdminPaymentController {
             @RequestParam(required = false, defaultValue = "30") Integer days) {
         
         // Security: Verify ADMIN role
-        if (!"ADMIN".equals(userRole)) {
+        if (!"ROLE_ADMIN".equals(userRole)) {
             return ResponseEntity.status(403)
                     .body(ApiResponse.error("Access denied: Admin role required"));
         }

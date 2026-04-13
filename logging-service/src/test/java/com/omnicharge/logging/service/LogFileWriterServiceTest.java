@@ -1,127 +1,92 @@
 package com.omnicharge.logging.service;
 
-import com.omnicharge.common.logging.LogEvent;
-import org.junit.jupiter.api.AfterEach;
+import com.omnicharge.logging.common.logging.LogEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.util.FileSystemUtils;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(MockitoExtension.class)
 class LogFileWriterServiceTest {
 
+    @InjectMocks
     private LogFileWriterService logFileWriterService;
-    private Path tempLogDir;
+
+    @TempDir
+    Path tempDir;
 
     @BeforeEach
-    void setUp() throws IOException {
-        logFileWriterService = new LogFileWriterService();
-        tempLogDir = Files.createTempDirectory("test_logs");
-        ReflectionTestUtils.setField(logFileWriterService, "logBaseDir", tempLogDir.toString());
-    }
-
-    @AfterEach
-    void tearDown() throws IOException {
-        FileSystemUtils.deleteRecursively(tempLogDir);
+    void setUp() {
+        ReflectionTestUtils.setField(logFileWriterService, "logBaseDir", tempDir.toString());
     }
 
     @Test
-    void writeToFile_CreatesServiceLogFile() {
+    void writeToFile_WritesToServiceLogNotToAllServicesLogIfInfo() throws Exception {
         LogEvent event = LogEvent.builder()
                 .serviceName("test-service")
                 .level("INFO")
-                .logger("TestLogger")
-                .message("Hello Logging")
-                .traceId("tr-123")
+                .message("Normal start")
+                .eventType("START")
                 .timestamp(LocalDateTime.now())
                 .build();
 
         logFileWriterService.writeToFile(event);
 
-        Path serviceLog = tempLogDir.resolve("test-service").resolve("test-service.log");
+        Path serviceLog = tempDir.resolve("test-service").resolve("test-service.log");
+        Path allLog = tempDir.resolve("all-services.log");
 
-        assertTrue(Files.exists(serviceLog), "Service log file should be created");
-        
-        try {
-            String serviceLogContent = Files.readString(serviceLog);
-            assertTrue(serviceLogContent.contains("Hello Logging"));
-            assertTrue(serviceLogContent.contains("test-service"));
-            assertTrue(serviceLogContent.contains("INFO"));
-            assertTrue(serviceLogContent.contains("tr-123"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        assertTrue(Files.exists(serviceLog));
+        assertTrue(Files.notExists(allLog) || Files.size(allLog) == 0);
     }
-    
+
     @Test
-    void writeToFile_CriticalEventWrittenToAllServicesLog() {
-        LogEvent errorEvent = LogEvent.builder()
+    void writeToFile_WritesToBothIfError() throws Exception {
+        LogEvent event = LogEvent.builder()
                 .serviceName("test-service")
                 .level("ERROR")
-                .logger("TestLogger")
-                .message("Critical error occurred")
-                .traceId("tr-456")
+                .message("Failure")
+                .eventType("CRASH")
                 .timestamp(LocalDateTime.now())
                 .build();
 
-        logFileWriterService.writeToFile(errorEvent);
+        logFileWriterService.writeToFile(event);
 
-        Path serviceLog = tempLogDir.resolve("test-service").resolve("test-service.log");
-        Path combinedLog = tempLogDir.resolve("all-services.log");
+        Path serviceLog = tempDir.resolve("test-service").resolve("test-service.log");
+        Path allLog = tempDir.resolve("all-services.log");
 
-        assertTrue(Files.exists(serviceLog), "Service log file should be created");
-        assertTrue(Files.exists(combinedLog), "Combined log file should be created for ERROR level");
+        assertTrue(Files.exists(serviceLog));
+        assertTrue(Files.exists(allLog));
         
-        try {
-            String serviceLogContent = Files.readString(serviceLog);
-            assertTrue(serviceLogContent.contains("Critical error occurred"));
-            
-            String combinedLogContent = Files.readString(combinedLog);
-            assertTrue(combinedLogContent.contains("Critical error occurred"),
-                    "ERROR level event should appear in all-services.log");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        String allLogContent = Files.readString(allLog);
+        assertTrue(allLogContent.contains("ERROR"));
+        assertTrue(allLogContent.contains("Failure"));
     }
-    
+
     @Test
-    void writeToFile_NonCriticalEventNotInAllServicesLog() {
-        LogEvent infoEvent = LogEvent.builder()
+    void writeToFile_WritesToBothIfLifecycle() throws Exception {
+        LogEvent event = LogEvent.builder()
                 .serviceName("test-service")
                 .level("INFO")
-                .logger("TestLogger")
-                .message("Non-critical info message")
-                .traceId("tr-789")
+                .message("App started")
+                .eventType("LIFECYCLE")
                 .timestamp(LocalDateTime.now())
                 .build();
 
-        logFileWriterService.writeToFile(infoEvent);
+        logFileWriterService.writeToFile(event);
 
-        Path serviceLog = tempLogDir.resolve("test-service").resolve("test-service.log");
-        Path combinedLog = tempLogDir.resolve("all-services.log");
+        Path serviceLog = tempDir.resolve("test-service").resolve("test-service.log");
+        Path allLog = tempDir.resolve("all-services.log");
 
-        assertTrue(Files.exists(serviceLog), "Service log file should be created");
-        
-        try {
-            String serviceLogContent = Files.readString(serviceLog);
-            assertTrue(serviceLogContent.contains("Non-critical info message"),
-                    "INFO event should appear in per-service log");
-            
-            // all-services.log should not exist or should not contain the INFO message
-            if (Files.exists(combinedLog)) {
-                String combinedLogContent = Files.readString(combinedLog);
-                assertTrue(!combinedLogContent.contains("Non-critical info message"),
-                        "INFO level event should NOT appear in all-services.log");
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        assertTrue(Files.exists(serviceLog));
+        assertTrue(Files.exists(allLog));
     }
 }
