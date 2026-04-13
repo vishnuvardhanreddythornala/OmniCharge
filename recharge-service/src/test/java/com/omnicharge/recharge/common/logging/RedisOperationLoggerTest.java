@@ -24,7 +24,7 @@ class RedisOperationLoggerTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(logger, "serviceName", "recharge-service");
+        ReflectionTestUtils.setField(logger, "serviceName", "user-service");
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.getName()).thenReturn("testMethod");
     }

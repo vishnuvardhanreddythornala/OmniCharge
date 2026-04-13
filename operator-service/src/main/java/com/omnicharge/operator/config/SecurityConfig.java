@@ -19,6 +19,7 @@ public class SecurityConfig {
     private final GatewayAuthenticationFilter gatewayAuthenticationFilter;
 
     @Bean
+    @SuppressWarnings("java:S4502")
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())

@@ -28,7 +28,7 @@ class RabbitMQEventLoggerTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        ReflectionTestUtils.setField(logger, "serviceName", "recharge-service");
+        ReflectionTestUtils.setField(logger, "serviceName", "user-service");
         when(joinPoint.getSignature()).thenReturn(signature);
         Method m = this.getClass().getDeclaredMethod("setUp");
         when(signature.getMethod()).thenReturn(m);

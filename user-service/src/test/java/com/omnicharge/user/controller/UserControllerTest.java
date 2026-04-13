@@ -30,10 +30,17 @@ class UserControllerTest {
 
     @MockitoBean private JpaMetamodelMappingContext jpaMappingContext;
     @MockitoBean(name = "logEventPublisher") private LogEventPublisher logEventPublisher;
-    @Autowired private MockMvc mockMvc;
-    @Autowired private ObjectMapper objectMapper;
+    private final MockMvc mockMvc;
+    private final ObjectMapper objectMapper;
     @MockitoBean private IUserService userService;
 
+
+
+    @Autowired
+    public UserControllerTest(MockMvc mockMvc, ObjectMapper objectMapper) {
+        this.mockMvc = mockMvc;
+        this.objectMapper = objectMapper;
+    }
     @Test
     void getProfile_Success() throws Exception {
         UserProfileResponse profile = new UserProfileResponse();

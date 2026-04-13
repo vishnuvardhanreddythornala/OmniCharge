@@ -79,29 +79,24 @@ class LogCaptureFilterTest {
         verify(logEventPublisher, times(1)).publish(any());
     }
 
-    @Test
-    void testShouldNotFilter_Actuator() {
-        when(req.getRequestURI()).thenReturn("/actuator/health");
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {
+            "/actuator/health",
+            "/swagger-ui/index.html",
+            "/v3/api-docs",
+            "/webjars/springfox-swagger-ui"
+    })
+    void testShouldNotFilter_ExcludedPaths(String uri) {
+        when(req.getRequestURI()).thenReturn(uri);
         assertTrue(filter.shouldNotFilter(req));
     }
 
-    @Test
-    void testShouldNotFilter_Swagger() {
-        when(req.getRequestURI()).thenReturn("/swagger-ui/index.html");
-        assertTrue(filter.shouldNotFilter(req));
-    }
 
-    @Test
-    void testShouldNotFilter_ApiDocs() {
-        when(req.getRequestURI()).thenReturn("/v3/api-docs");
-        assertTrue(filter.shouldNotFilter(req));
-    }
 
-    @Test
-    void testShouldNotFilter_WebJars() {
-        when(req.getRequestURI()).thenReturn("/webjars/springfox-swagger-ui");
-        assertTrue(filter.shouldNotFilter(req));
-    }
+
+
+
 
     @Test
     void testShouldNotFilter_NormalPath() {

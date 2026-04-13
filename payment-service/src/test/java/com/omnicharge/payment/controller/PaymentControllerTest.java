@@ -42,12 +42,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @AutoConfigureMockMvc(addFilters = false)
 class PaymentControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final MockMvc mockMvc;
+    private final ObjectMapper objectMapper;
 
     @MockitoBean
     private IPaymentService paymentService;
@@ -55,6 +51,13 @@ class PaymentControllerTest {
     @MockitoBean
     private LogEventPublisher logEventPublisher;
 
+
+
+    @Autowired
+    public PaymentControllerTest(MockMvc mockMvc, ObjectMapper objectMapper) {
+        this.mockMvc = mockMvc;
+        this.objectMapper = objectMapper;
+    }
     @Test
     void processPayment_Success() throws Exception {
         PaymentRequest request = new PaymentRequest();

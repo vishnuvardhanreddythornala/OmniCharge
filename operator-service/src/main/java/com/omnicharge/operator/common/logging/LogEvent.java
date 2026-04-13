@@ -33,5 +33,6 @@ public class LogEvent implements Serializable {
     
     // New fields for enhanced logging
     private String eventType;       // "LIFECYCLE", "RABBITMQ", "REDIS", "EXCEPTION", "BUSINESS", etc.
+    @SuppressWarnings("java:S1948") // Context maps are safely serialized over Jackson JSON
     private Map<String, Object> context; // Additional contextual data (e.g., queue name, cache key, etc.)
 }

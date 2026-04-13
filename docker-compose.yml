@@ -430,3 +430,15 @@ services:
         condition: service_healthy
     networks:
       - omnicharge-net
+
+  omnicharge-ui:
+    build: ./omnicharge-ui
+    container_name: omnicharge-ui
+    restart: on-failure
+    ports:
+      - "4200:80"
+    depends_on:
+      api-gateway:
+        condition: service_started
+    networks:
+      - omnicharge-net

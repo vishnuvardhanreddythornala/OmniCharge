@@ -28,7 +28,7 @@ class RabbitMQEventLoggerTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        ReflectionTestUtils.setField(logger, "serviceName", "payment-service");
+        ReflectionTestUtils.setField(logger, "serviceName", "user-service");
         when(joinPoint.getSignature()).thenReturn(signature);
         Method m = this.getClass().getDeclaredMethod("setUp");
         when(signature.getMethod()).thenReturn(m);
@@ -111,8 +111,6 @@ class RabbitMQEventLoggerTest {
 
     @Test
     void testLogPublishing_ReentrantCall() throws Throwable {
-        // Set IS_LOGGING true manually by calling a method and intercepting from within? 
-        // We'll simulate by accessing ThreadLocal.
         ThreadLocal<Boolean> tl = (ThreadLocal<Boolean>) ReflectionTestUtils.getField(RabbitMQEventLogger.class, "IS_LOGGING");
         tl.set(true);
         try {

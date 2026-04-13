@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Slf4j
 public class RedisOperationLogger {
+    private static final String UNKNOWN = "unknown";
 
     private static final String LOGGER_NAME = "RedisOperationLogger";
     private static final String EVENT_TYPE_REDIS = "REDIS";
@@ -45,7 +46,7 @@ public class RedisOperationLogger {
     @Around("execution(* org.springframework.data.redis.core.ValueOperations.get(..))")
     public Object logRedisGet(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
-        String key = args.length > 0 ? String.valueOf(args[0]) : "unknown";
+        String key = args.length > 0 ? String.valueOf(args[0]) : UNKNOWN;
         
         long startTime = System.currentTimeMillis();
         Object result = null;
@@ -59,7 +60,7 @@ public class RedisOperationLogger {
             }
             return result;
         } catch (Exception e) {
-            status = "ERROR";
+            status = LEVEL_ERROR;
             errorMessage = e.getMessage();
             log.error("Redis: Error getting key: {}", key, e);
             throw e;
@@ -76,7 +77,7 @@ public class RedisOperationLogger {
             
             LogEvent logEvent = LogEvent.builder()
                     .serviceName(serviceName)
-                    .level(status.equals("ERROR") ? LEVEL_ERROR : LEVEL_DEBUG)
+                    .level(status.equals(LEVEL_ERROR) ? LEVEL_ERROR : LEVEL_DEBUG)
                     .eventType(EVENT_TYPE_REDIS)
                     .logger(LOGGER_NAME)
                     .message(message)
@@ -95,7 +96,7 @@ public class RedisOperationLogger {
     @Around("execution(* org.springframework.data.redis.core.ValueOperations.set(..))")
     public Object logRedisSet(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
-        String key = args.length > 0 ? String.valueOf(args[0]) : "unknown";
+        String key = args.length > 0 ? String.valueOf(args[0]) : UNKNOWN;
         
         long startTime = System.currentTimeMillis();
         String status = STATUS_SUCCESS;
@@ -140,7 +141,7 @@ public class RedisOperationLogger {
     @Around("execution(* org.springframework.data.redis.core.RedisTemplate.delete(..))")
     public Object logRedisDelete(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
-        String key = args.length > 0 ? String.valueOf(args[0]) : "unknown";
+        String key = args.length > 0 ? String.valueOf(args[0]) : UNKNOWN;
         
         long startTime = System.currentTimeMillis();
         String status = STATUS_SUCCESS;

@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 
 @org.mockito.junit.jupiter.MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
 @ExtendWith(MockitoExtension.class)
-class FallbackLogReplayerTest {
+class FallbackLogReplayerFullTest {
 
     @Mock private RabbitTemplate rabbitTemplate;
 

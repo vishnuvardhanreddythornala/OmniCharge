@@ -24,50 +24,41 @@ class FallbackLogWriterTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(fallbackLogWriter, "fallbackDir", tempDir.toString());
-        ReflectionTestUtils.setField(fallbackLogWriter, "serviceName", "logging-service");
+        ReflectionTestUtils.setField(fallbackLogWriter, "serviceName", "user-service");
     }
 
     @Test
     void writeToFallbackFile_Success() throws IOException {
         LogEvent event = new LogEvent();
-        event.setServiceName("logging-service");
+        event.setServiceName("user-service");
         event.setLevel("ERROR");
-        event.setMessage("Queue failure test");
+        event.setMessage("Queue failure");
         event.setTimestamp(LocalDateTime.now());
 
         fallbackLogWriter.writeToFallbackFile(event);
 
-        Path fallbackFile = tempDir.resolve("fallback-buffer-logging-service.log");
-        assertTrue(Files.exists(fallbackFile));
-        assertTrue(Files.readString(fallbackFile).contains("Queue failure test"));
+        Path f = tempDir.resolve("fallback-buffer-user-service.log");
+        assertTrue(Files.exists(f));
+        assertTrue(Files.readString(f).contains("Queue failure"));
     }
 
     @Test
     void writeToFallbackFile_MultipleAppends() throws IOException {
-        LogEvent e1 = new LogEvent();
-        e1.setServiceName("logging-service");
-        e1.setMessage("Event 1");
-        e1.setTimestamp(LocalDateTime.now());
-        LogEvent e2 = new LogEvent();
-        e2.setServiceName("logging-service");
-        e2.setMessage("Event 2");
-        e2.setTimestamp(LocalDateTime.now());
+        LogEvent e1 = new LogEvent(); e1.setMessage("L1"); e1.setTimestamp(LocalDateTime.now());
+        LogEvent e2 = new LogEvent(); e2.setMessage("L2"); e2.setTimestamp(LocalDateTime.now());
 
         fallbackLogWriter.writeToFallbackFile(e1);
         fallbackLogWriter.writeToFallbackFile(e2);
 
-        String content = Files.readString(tempDir.resolve("fallback-buffer-logging-service.log"));
-        assertTrue(content.contains("Event 1"));
-        assertTrue(content.contains("Event 2"));
+        String c = Files.readString(tempDir.resolve("fallback-buffer-user-service.log"));
+        assertTrue(c.contains("L1"));
+        assertTrue(c.contains("L2"));
     }
 
     @Test
     void writeToFallbackFile_InvalidDir_HandlesGracefully() {
         ReflectionTestUtils.setField(fallbackLogWriter, "fallbackDir", "NUL\\\\invalid");
-        LogEvent event = new LogEvent();
-        event.setMessage("Lost");
-        event.setTimestamp(LocalDateTime.now());
-
+        LogEvent event = new LogEvent(); event.setMessage("Lost"); event.setTimestamp(LocalDateTime.now());
         assertDoesNotThrow(() -> fallbackLogWriter.writeToFallbackFile(event));
     }
 }

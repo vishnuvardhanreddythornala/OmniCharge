@@ -35,12 +35,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @AutoConfigureMockMvc(addFilters = false)
 class RechargeControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final MockMvc mockMvc;
+    private final ObjectMapper objectMapper;
 
     @MockitoBean
     private IRechargeService rechargeService;
@@ -48,6 +44,13 @@ class RechargeControllerTest {
     @MockitoBean
     private LogEventPublisher logEventPublisher;
 
+
+
+    @Autowired
+    public RechargeControllerTest(MockMvc mockMvc, ObjectMapper objectMapper) {
+        this.mockMvc = mockMvc;
+        this.objectMapper = objectMapper;
+    }
     @Test
     void initiateRecharge_Success() throws Exception {
         RechargeRequest request = new RechargeRequest();

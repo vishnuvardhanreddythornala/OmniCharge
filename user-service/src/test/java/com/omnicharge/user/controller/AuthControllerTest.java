@@ -39,13 +39,8 @@ class AuthControllerTest {
 
     @MockitoBean(name="logEventPublisher")
     private com.omnicharge.user.common.logging.LogEventPublisher logEventPublisher;
-
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final MockMvc mockMvc;
+    private final ObjectMapper objectMapper;
 
     @MockitoBean
     private IAuthService authService;
@@ -58,6 +53,13 @@ class AuthControllerTest {
 
     private AuthResponse mockAuthResponse;
 
+
+
+    @Autowired
+    public AuthControllerTest(MockMvc mockMvc, ObjectMapper objectMapper) {
+        this.mockMvc = mockMvc;
+        this.objectMapper = objectMapper;
+    }
     @BeforeEach
     void setUp() {
         mockAuthResponse = AuthResponse.builder()

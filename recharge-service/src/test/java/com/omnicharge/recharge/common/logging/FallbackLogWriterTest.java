@@ -24,20 +24,20 @@ class FallbackLogWriterTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(fallbackLogWriter, "fallbackDir", tempDir.toString());
-        ReflectionTestUtils.setField(fallbackLogWriter, "serviceName", "recharge-service");
+        ReflectionTestUtils.setField(fallbackLogWriter, "serviceName", "user-service");
     }
 
     @Test
     void writeToFallbackFile_Success() throws IOException {
         LogEvent event = new LogEvent();
-        event.setServiceName("recharge-service");
+        event.setServiceName("user-service");
         event.setLevel("ERROR");
         event.setMessage("Queue failure");
         event.setTimestamp(LocalDateTime.now());
 
         fallbackLogWriter.writeToFallbackFile(event);
 
-        Path f = tempDir.resolve("fallback-buffer-recharge-service.log");
+        Path f = tempDir.resolve("fallback-buffer-user-service.log");
         assertTrue(Files.exists(f));
         assertTrue(Files.readString(f).contains("Queue failure"));
     }
@@ -50,7 +50,7 @@ class FallbackLogWriterTest {
         fallbackLogWriter.writeToFallbackFile(e1);
         fallbackLogWriter.writeToFallbackFile(e2);
 
-        String c = Files.readString(tempDir.resolve("fallback-buffer-recharge-service.log"));
+        String c = Files.readString(tempDir.resolve("fallback-buffer-user-service.log"));
         assertTrue(c.contains("L1"));
         assertTrue(c.contains("L2"));
     }

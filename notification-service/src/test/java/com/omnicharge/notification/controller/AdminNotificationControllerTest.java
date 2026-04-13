@@ -30,9 +30,15 @@ class AdminNotificationControllerTest {
 
     @MockitoBean private JpaMetamodelMappingContext jpaMappingContext;
     @MockitoBean(name = "logEventPublisher") private LogEventPublisher logEventPublisher;
-    @Autowired private MockMvc mockMvc;
+    private final MockMvc mockMvc;
     @MockitoBean private INotificationService notificationService;
 
+
+
+    @Autowired
+    public AdminNotificationControllerTest(MockMvc mockMvc) {
+        this.mockMvc = mockMvc;
+    }
     @Test
     void getAllNotifications_Success() throws Exception {
         Page<NotificationResponse> page = new PageImpl<>(Collections.emptyList());

@@ -33,11 +33,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class PlanControllerTest {
     @MockitoBean(name="logEventPublisher")
     private com.omnicharge.operator.common.logging.LogEventPublisher logEventPublisher;
+    private final MockMvc mockMvc;
+
 
 
     @Autowired
-    private MockMvc mockMvc;
-
+    public PlanControllerTest(MockMvc mockMvc) {
+        this.mockMvc = mockMvc;
+    }
     @MockBean
     private PlanQueryService planQueryService;
 

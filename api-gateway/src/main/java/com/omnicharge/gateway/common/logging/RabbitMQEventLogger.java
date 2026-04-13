@@ -26,6 +26,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 @Slf4j
 public class RabbitMQEventLogger {
+    private static final String UNKNOWN = "unknown";
 
     private static final String STATUS_SUCCESS = "SUCCESS";
     private static final String STATUS_FAILED = "FAILED";
@@ -51,7 +52,7 @@ public class RabbitMQEventLogger {
         
         // Extract queue names from annotation
         String[] queues = rabbitListener.queues();
-        String queueInfo = queues.length > 0 ? String.join(", ", queues) : "unknown";
+        String queueInfo = queues.length > 0 ? String.join(", ", queues) : UNKNOWN;
         
         if (queueInfo.contains(LoggingConstants.LOGGING_QUEUE)) {
             return joinPoint.proceed();
@@ -116,7 +117,7 @@ public class RabbitMQEventLogger {
             return joinPoint.proceed();
         }
         
-        if (IS_LOGGING.get()) {
+        if (Boolean.TRUE.equals(IS_LOGGING.get())) {
             return joinPoint.proceed();
         }
         IS_LOGGING.set(true);
@@ -125,8 +126,15 @@ public class RabbitMQEventLogger {
             
             // Extract exchange, routing key, and message from arguments
             String exchange = args.length > 0 && args[0] instanceof String ? (String) args[0] : "default";
-            String routingKey = args.length > 1 && args[1] instanceof String ? (String) args[1] : "unknown";
-            Object message = args.length > 2 ? args[2] : (args.length > 1 ? args[1] : "unknown");
+            String routingKey = args.length > 1 && args[1] instanceof String ? (String) args[1] : UNKNOWN;
+            Object message;
+            if (args.length > 2) {
+                message = args[2];
+            } else if (args.length > 1) {
+                message = args[1];
+            } else {
+                message = UNKNOWN;
+            }
             
             if (LoggingConstants.LOGGING_EXCHANGE.equals(exchange)) {
                 return joinPoint.proceed();

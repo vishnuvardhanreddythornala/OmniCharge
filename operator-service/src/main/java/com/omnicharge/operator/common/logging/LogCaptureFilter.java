@@ -31,6 +31,7 @@ public class LogCaptureFilter extends OncePerRequestFilter {
     private final LogEventPublisher logEventPublisher;
 
     @Override
+    @SuppressWarnings("java:S3358")
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)

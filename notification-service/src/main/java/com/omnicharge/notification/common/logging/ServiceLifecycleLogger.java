@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
  * This component is auto-configured via Spring Boot AutoConfiguration.imports
  * and requires no manual wiring in services.
  * 
- * Lifecycle events are marked with level "LIFECYCLE" and eventType "LIFECYCLE"
+ * Lifecycle events are marked with level EVENT_TYPE_LIFECYCLE and eventType EVENT_TYPE_LIFECYCLE
  * to enable selective routing to all-services.log.
  */
 @Component
@@ -36,7 +36,7 @@ public class ServiceLifecycleLogger {
         
         LogEvent lifecycleEvent = LogEvent.builder()
                 .serviceName(serviceName)
-                .level("LIFECYCLE")
+                .level(EVENT_TYPE_LIFECYCLE)
                 .eventType(EVENT_TYPE_LIFECYCLE)
                 .logger(ServiceLifecycleLogger.class.getName())
                 .message(String.format("Service %s STARTED successfully", serviceName))
@@ -55,7 +55,7 @@ public class ServiceLifecycleLogger {
         
         LogEvent lifecycleEvent = LogEvent.builder()
                 .serviceName(serviceName)
-                .level("LIFECYCLE")
+                .level(EVENT_TYPE_LIFECYCLE)
                 .eventType(EVENT_TYPE_LIFECYCLE)
                 .logger(ServiceLifecycleLogger.class.getName())
                 .message(String.format("Service %s STOPPING gracefully", serviceName))

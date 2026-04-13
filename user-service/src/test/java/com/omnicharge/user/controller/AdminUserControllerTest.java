@@ -31,9 +31,15 @@ class AdminUserControllerTest {
 
     @MockitoBean private JpaMetamodelMappingContext jpaMappingContext;
     @MockitoBean(name = "logEventPublisher") private LogEventPublisher logEventPublisher;
-    @Autowired private MockMvc mockMvc;
+    private final MockMvc mockMvc;
     @MockitoBean private IUserService userService;
 
+
+
+    @Autowired
+    public AdminUserControllerTest(MockMvc mockMvc) {
+        this.mockMvc = mockMvc;
+    }
     @Test
     void getAllUsers_Success() throws Exception {
         UserProfileResponse user = new UserProfileResponse();

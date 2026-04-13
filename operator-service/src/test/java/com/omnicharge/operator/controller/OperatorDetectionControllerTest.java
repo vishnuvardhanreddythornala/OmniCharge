@@ -29,11 +29,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class OperatorDetectionControllerTest {
     @MockitoBean(name="logEventPublisher")
     private com.omnicharge.operator.common.logging.LogEventPublisher logEventPublisher;
+    private final MockMvc mockMvc;
+
 
 
     @Autowired
-    private MockMvc mockMvc;
-
+    public OperatorDetectionControllerTest(MockMvc mockMvc) {
+        this.mockMvc = mockMvc;
+    }
     @MockBean
     private IOperatorDetectionService operatorDetectionService;
 

@@ -43,6 +43,7 @@ public class WebFluxLogCaptureFilter implements GlobalFilter, Ordered {
     private final LogEventPublisher logEventPublisher;
 
     @Override
+    @SuppressWarnings("java:S3358")
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();

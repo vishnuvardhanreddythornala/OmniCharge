@@ -31,12 +31,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = MobileVerificationController.class, excludeAutoConfiguration = {JpaRepositoriesAutoConfiguration.class, DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 @AutoConfigureMockMvc(addFilters = false)
 class MobileVerificationControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final MockMvc mockMvc;
+    private final ObjectMapper objectMapper;
 
     @MockitoBean
     private MobileVerificationService mobileVerificationService;
@@ -44,6 +40,13 @@ class MobileVerificationControllerTest {
     @MockitoBean
     private LogEventPublisher logEventPublisher;
 
+
+
+    @Autowired
+    public MobileVerificationControllerTest(MockMvc mockMvc, ObjectMapper objectMapper) {
+        this.mockMvc = mockMvc;
+        this.objectMapper = objectMapper;
+    }
     @Test
     void sendOtp_Success() throws Exception {
         SendMobileOtpRequest req = new SendMobileOtpRequest();
