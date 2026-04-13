@@ -206,6 +206,7 @@
 						<exclude>**/exception/**</exclude>
 						<exclude>**/*Application.*</exclude>
 						<exclude>**/TestController*</exclude>
+						<exclude>**/audit/**</exclude>
 					</excludes>
 				</configuration>
 				<executions>

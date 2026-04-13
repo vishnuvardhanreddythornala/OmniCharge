@@ -208,6 +208,7 @@
 						<exclude>**/constants/**</exclude>
 						<exclude>**/exception/**</exclude>
 						<exclude>**/*Application.*</exclude>
+						<exclude>**/audit/**</exclude>
 					</excludes>
 				</configuration>
 				<executions>

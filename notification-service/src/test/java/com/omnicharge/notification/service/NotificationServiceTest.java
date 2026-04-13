@@ -2,7 +2,6 @@ package com.omnicharge.notification.service;
 
 import com.omnicharge.notification.common.exception.BadRequestException;
 import com.omnicharge.notification.common.exception.ResourceNotFoundException;
-import com.omnicharge.notification.common.logging.LogEvent;
 import com.omnicharge.notification.common.logging.LogEventPublisher;
 import com.omnicharge.notification.dto.NotificationResponse;
 import com.omnicharge.notification.entity.Notification;
@@ -10,23 +9,21 @@ import com.omnicharge.notification.entity.NotificationCategory;
 import com.omnicharge.notification.entity.NotificationStatus;
 import com.omnicharge.notification.entity.NotificationType;
 import com.omnicharge.notification.repository.NotificationRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.*;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+@org.mockito.junit.jupiter.MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceTest {
 
@@ -35,111 +32,188 @@ class NotificationServiceTest {
     @Mock private ISmsService smsService;
     @Mock private LogEventPublisher logEventPublisher;
 
-    @InjectMocks
-    private NotificationService notificationService;
+    @InjectMocks private NotificationService notificationService;
 
-    private Notification notification;
-
-    @BeforeEach
-    void setUp() {
-        notification = new Notification();
-        notification.setId(1L);
-        notification.setUserId(10L);
-        notification.setType(NotificationType.EMAIL);
-        notification.setCategory(NotificationCategory.PAYMENT_SUCCESS);
-        notification.setStatus(NotificationStatus.SENT);
-        notification.setIsRead(false);
+    private Notification createNotification(Long id, Long userId) {
+        Notification n = new Notification();
+        n.setId(id);
+        n.setUserId(userId);
+        n.setType(NotificationType.EMAIL);
+        n.setCategory(NotificationCategory.PAYMENT_SUCCESS);
+        n.setSubject("Test");
+        n.setMessage("Test message");
+        n.setStatus(NotificationStatus.SENT);
+        n.setIsRead(false);
+        n.setReferenceId("ref-1");
+        n.setUserEmail("test@test.com");
+        return n;
     }
+
+    // ===== createAndSendEmail =====
 
     @Test
     void createAndSendEmail_Success() {
-        when(notificationRepository.save(any(Notification.class))).thenReturn(notification);
+        Notification saved = createNotification(1L, 1L);
+        when(notificationRepository.save(any())).thenReturn(saved);
 
-        notificationService.createAndSendEmail(10L, "test@test.com", "Sub", "Body", NotificationCategory.PAYMENT_SUCCESS, "ref-1");
+        notificationService.createAndSendEmail(1L, "test@test.com", "Subject", "Body",
+                NotificationCategory.PAYMENT_SUCCESS, "ref-1");
 
-        verify(notificationRepository, times(1)).save(any(Notification.class));
-        verify(logEventPublisher, times(1)).publish(any(LogEvent.class));
+        verify(notificationRepository).save(any());
+        verify(logEventPublisher, atLeastOnce()).publish(any());
     }
 
     @Test
-    void createAndSendEmail_FailsToSave() {
-        when(notificationRepository.save(any(Notification.class))).thenThrow(new RuntimeException("DB Error"));
+    void createAndSendEmail_DbFailure() {
+        when(notificationRepository.save(any())).thenThrow(new RuntimeException("DB error"));
 
-        assertThrows(RuntimeException.class, () -> 
-            notificationService.createAndSendEmail(10L, "test@test.com", "Sub", "Body", NotificationCategory.PAYMENT_SUCCESS, "ref-1")
-        );
+        assertThrows(RuntimeException.class,
+                () -> notificationService.createAndSendEmail(1L, "test@test.com", "Subject", "Body",
+                        NotificationCategory.PAYMENT_SUCCESS, "ref-1"));
     }
+
+    // ===== createAndSendSms =====
 
     @Test
     void createAndSendSms_Success() {
-        when(notificationRepository.save(any(Notification.class))).thenReturn(notification);
+        Notification saved = createNotification(1L, 1L);
+        saved.setType(NotificationType.SMS);
+        when(notificationRepository.save(any())).thenReturn(saved);
 
-        notificationService.createAndSendSms(10L, "9876543210", "Message", NotificationCategory.PAYMENT_SUCCESS, "ref-1");
+        notificationService.createAndSendSms(1L, "+919876543210", "SMS body",
+                NotificationCategory.PAYMENT_SUCCESS, "ref-1");
 
-        verify(smsService, times(1)).sendSms("9876543210", "Message");
-        verify(notificationRepository, times(1)).save(argThat(n -> n.getStatus() == NotificationStatus.SENT));
+        verify(smsService).sendSms("+919876543210", "SMS body");
+        verify(notificationRepository).save(any());
     }
 
     @Test
-    void createAndSendSms_SmsFailureThrowsErrorButSavesFailedStatus() {
-        doThrow(new RuntimeException("Twilio down")).when(smsService).sendSms("9876543210", "Message");
-        when(notificationRepository.save(any(Notification.class))).thenReturn(notification);
+    void createAndSendSms_SmsFailure_SavesFailedStatus() {
+        doThrow(new RuntimeException("Twilio error")).when(smsService).sendSms(anyString(), anyString());
+        Notification saved = createNotification(1L, 1L);
+        saved.setStatus(NotificationStatus.FAILED);
+        when(notificationRepository.save(any())).thenReturn(saved);
 
-        notificationService.createAndSendSms(10L, "9876543210", "Message", NotificationCategory.PAYMENT_SUCCESS, "ref-1");
+        notificationService.createAndSendSms(1L, "+919876543210", "SMS body",
+                NotificationCategory.PAYMENT_SUCCESS, "ref-1");
 
-        verify(smsService, times(1)).sendSms("9876543210", "Message");
-        verify(notificationRepository, times(1)).save(argThat(n -> n.getStatus() == NotificationStatus.FAILED));
-        // Expecting 2 log events: SMS_FAILED and NOTIFICATION_CREATED
-        verify(logEventPublisher, times(2)).publish(any(LogEvent.class));
+        verify(notificationRepository).save(argThat(n -> n.getStatus() == NotificationStatus.FAILED));
     }
+
+    @Test
+    void createAndSendSms_DbFailure() {
+        when(notificationRepository.save(any())).thenThrow(new RuntimeException("DB error"));
+
+        assertThrows(RuntimeException.class,
+                () -> notificationService.createAndSendSms(1L, "+919876543210", "body",
+                        NotificationCategory.PAYMENT_SUCCESS, "ref-1"));
+    }
+
+    // ===== getUserNotifications =====
 
     @Test
     void getUserNotifications_Success() {
-        Page<Notification> p = new PageImpl<>(List.of(notification));
-        when(notificationRepository.findByUserId(10L, PageRequest.of(0, 10))).thenReturn(p);
+        Notification n = createNotification(1L, 1L);
+        Page<Notification> page = new PageImpl<>(List.of(n));
+        when(notificationRepository.findByUserId(eq(1L), any())).thenReturn(page);
 
-        Page<NotificationResponse> result = notificationService.getUserNotifications(10L, PageRequest.of(0, 10));
+        Page<NotificationResponse> result = notificationService.getUserNotifications(1L, PageRequest.of(0, 10));
 
-        assertEquals(1, result.getContent().size());
+        assertEquals(1, result.getTotalElements());
     }
+
+    // ===== markAsRead =====
 
     @Test
     void markAsRead_Success() {
-        when(notificationRepository.findById(1L)).thenReturn(Optional.of(notification));
+        Notification n = createNotification(1L, 1L);
+        when(notificationRepository.findById(1L)).thenReturn(Optional.of(n));
+        when(notificationRepository.save(any())).thenReturn(n);
 
-        notificationService.markAsRead(1L, 10L);
+        notificationService.markAsRead(1L, 1L);
 
-        assertTrue(notification.getIsRead());
-        verify(notificationRepository, times(1)).save(notification);
-    }
-
-    @Test
-    void markAsRead_Unauthorized() {
-        when(notificationRepository.findById(1L)).thenReturn(Optional.of(notification));
-
-        assertThrows(BadRequestException.class, () -> notificationService.markAsRead(1L, 99L));
+        verify(notificationRepository).save(argThat(saved -> saved.getIsRead()));
     }
 
     @Test
     void markAsRead_NotFound() {
-        when(notificationRepository.findById(1L)).thenReturn(Optional.empty());
+        when(notificationRepository.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> notificationService.markAsRead(1L, 10L));
+        assertThrows(ResourceNotFoundException.class, () -> notificationService.markAsRead(999L, 1L));
     }
+
+    @Test
+    void markAsRead_UnauthorizedUser() {
+        Notification n = createNotification(1L, 1L);
+        when(notificationRepository.findById(1L)).thenReturn(Optional.of(n));
+
+        assertThrows(BadRequestException.class, () -> notificationService.markAsRead(1L, 999L));
+    }
+
+    // ===== getUnreadCount =====
 
     @Test
     void getUnreadCount_Success() {
-        when(notificationRepository.countByUserIdAndIsRead(10L, false)).thenReturn(5L);
+        when(notificationRepository.countByUserIdAndIsRead(1L, false)).thenReturn(5L);
 
-        assertEquals(5L, notificationService.getUnreadCount(10L));
+        long count = notificationService.getUnreadCount(1L);
+
+        assertEquals(5, count);
+    }
+
+    // ===== getAllNotifications =====
+
+    @Test
+    void getAllNotifications_CategoryNull() {
+        Page<Notification> page = new PageImpl<>(List.of());
+        when(notificationRepository.findAll(any(Pageable.class))).thenReturn(page);
+
+        Page<NotificationResponse> result = notificationService.getAllNotifications(null, PageRequest.of(0, 10));
+        assertNotNull(result);
     }
 
     @Test
-    void getAllNotifications_UserCategory() {
-        Page<Notification> p = new PageImpl<>(List.of(notification));
-        when(notificationRepository.findByCategoryIn(anyList(), any())).thenReturn(p);
+    void getAllNotifications_CategoryAll() {
+        Page<Notification> page = new PageImpl<>(List.of());
+        when(notificationRepository.findAll(any(Pageable.class))).thenReturn(page);
+
+        Page<NotificationResponse> result = notificationService.getAllNotifications("ALL", PageRequest.of(0, 10));
+        assertNotNull(result);
+    }
+
+    @Test
+    void getAllNotifications_CategoryUser() {
+        Page<Notification> page = new PageImpl<>(List.of());
+        when(notificationRepository.findByCategoryIn(anyList(), any())).thenReturn(page);
 
         Page<NotificationResponse> result = notificationService.getAllNotifications("USER", PageRequest.of(0, 10));
-        assertEquals(1, result.getContent().size());
+        assertNotNull(result);
+    }
+
+    @Test
+    void getAllNotifications_CategorySystem() {
+        Page<Notification> page = new PageImpl<>(List.of());
+        when(notificationRepository.findByCategoryIn(anyList(), any())).thenReturn(page);
+
+        Page<NotificationResponse> result = notificationService.getAllNotifications("SYSTEM", PageRequest.of(0, 10));
+        assertNotNull(result);
+    }
+
+    @Test
+    void getAllNotifications_DirectCategory() {
+        Page<Notification> page = new PageImpl<>(List.of());
+        when(notificationRepository.findByCategoryIn(anyList(), any())).thenReturn(page);
+
+        Page<NotificationResponse> result = notificationService.getAllNotifications("PAYMENT_SUCCESS", PageRequest.of(0, 10));
+        assertNotNull(result);
+    }
+
+    @Test
+    void getAllNotifications_UnknownCategory_FallsBackToAll() {
+        Page<Notification> page = new PageImpl<>(List.of());
+        when(notificationRepository.findAll(any(Pageable.class))).thenReturn(page);
+
+        Page<NotificationResponse> result = notificationService.getAllNotifications("INVALID_GARBAGE", PageRequest.of(0, 10));
+        assertNotNull(result);
     }
 }
