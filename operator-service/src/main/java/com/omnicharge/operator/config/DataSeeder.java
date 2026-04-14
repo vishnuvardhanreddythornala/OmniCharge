@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
 
 @Component
 @RequiredArgsConstructor
@@ -23,10 +24,48 @@ public class DataSeeder implements CommandLineRunner {
     private final OperatorRepository operatorRepository;
     private final PlanRepository planRepository;
 
+    private static final String DATA_1GB = "1GB/day";
+    private static final String UNLIMITED = "Unlimited";
+    private static final String SMS_100 = "100 SMS/day";
+
     @Override
     public void run(String... args) {
         seedOperators();
         seedPlans();
+        seedDummyOperatorsAndPlans();
+    }
+
+    private void seedDummyOperatorsAndPlans() {
+        if (operatorRepository.count() > 10) return;
+        
+        log.info("Starting bulk seed of Operator & Plan data...");
+        List<Operator> bulkOperators = new ArrayList<>();
+        List<Plan> bulkPlans = new ArrayList<>();
+        
+        // Seed 50 fake operators
+        for (int i = 1; i <= 50; i++) {
+            Operator dummyOp = createOperator("Mock Operator " + i, "MOCK" + i, OperatorCategory.PREPAID, null);
+            bulkOperators.add(dummyOp);
+        }
+        operatorRepository.saveAll(bulkOperators);
+        
+        // Seed 10 plans per dummy operator (500 plans total)
+        for (Operator op : bulkOperators) {
+            for (int p = 1; p <= 10; p++) {
+                bulkPlans.add(createPlan(op, "Bulk Plan " + op.getCode() + "-" + p, 
+                    new BigDecimal("1" + p + "9"), 28, DATA_1GB, UNLIMITED, SMS_100, null, PlanCategory.DATA));
+                
+                if (bulkPlans.size() >= 100) {
+                    planRepository.saveAll(bulkPlans);
+                    bulkPlans.clear();
+                }
+            }
+        }
+        if (!bulkPlans.isEmpty()) {
+            planRepository.saveAll(bulkPlans);
+        }
+        
+        log.info("Finished seeding dummy Operator and Plan records.");
     }
 
     private void seedOperators() {
@@ -58,23 +97,23 @@ public class DataSeeder implements CommandLineRunner {
 
         if (airtel != null) {
             planRepository.saveAll(Arrays.asList(
-                    createPlan(airtel, "Unlimited 84 Days", new BigDecimal("719"), 84, "2GB/day", "Unlimited", "100 SMS/day", "Free Hellotunes", PlanCategory.RECOMMENDED),
-                    createPlan(airtel, "Data Booster", new BigDecimal("299"), 28, "1.5GB/day", "Unlimited", "100 SMS/day", "Disney+ Hotstar Mobile", PlanCategory.DATA),
-                    createPlan(airtel, "Talktime Special", new BigDecimal("199"), 28, "1GB/day", "Unlimited", "100 SMS/day", null, PlanCategory.TALKTIME)
+                    createPlan(airtel, "Unlimited 84 Days", new BigDecimal("719"), 84, "2GB/day", UNLIMITED, SMS_100, "Free Hellotunes", PlanCategory.RECOMMENDED),
+                    createPlan(airtel, "Data Booster", new BigDecimal("299"), 28, "1.5GB/day", UNLIMITED, SMS_100, "Disney+ Hotstar Mobile", PlanCategory.DATA),
+                    createPlan(airtel, "Talktime Special", new BigDecimal("199"), 28, DATA_1GB, UNLIMITED, SMS_100, null, PlanCategory.TALKTIME)
             ));
         }
 
         if (jio != null) {
             planRepository.saveAll(Arrays.asList(
-                    createPlan(jio, "Jio Unlimited", new BigDecimal("666"), 84, "2GB/day", "Unlimited", "100 SMS/day", "JioTV, JioCinema", PlanCategory.RECOMMENDED),
-                    createPlan(jio, "Data Pack", new BigDecimal("349"), 28, "2GB/day", "Unlimited", "100 SMS/day", "JioSaavn Pro", PlanCategory.DATA)
+                    createPlan(jio, "Jio Unlimited", new BigDecimal("666"), 84, "2GB/day", UNLIMITED, SMS_100, "JioTV, JioCinema", PlanCategory.RECOMMENDED),
+                    createPlan(jio, "Data Pack", new BigDecimal("349"), 28, "2GB/day", UNLIMITED, SMS_100, "JioSaavn Pro", PlanCategory.DATA)
             ));
         }
 
         if (vi != null) {
             planRepository.saveAll(Arrays.asList(
-                    createPlan(vi, "Vi Hero Unlimited", new BigDecimal("699"), 84, "1.5GB/day", "Unlimited", "100 SMS/day", "Vi Movies & TV", PlanCategory.UNLIMITED),
-                    createPlan(vi, "Weekend Data", new BigDecimal("249"), 28, "1GB/day", "Unlimited", "100 SMS/day", null, PlanCategory.DATA)
+                    createPlan(vi, "Vi Hero Unlimited", new BigDecimal("699"), 84, "1.5GB/day", UNLIMITED, SMS_100, "Vi Movies & TV", PlanCategory.UNLIMITED),
+                    createPlan(vi, "Weekend Data", new BigDecimal("249"), 28, DATA_1GB, UNLIMITED, SMS_100, null, PlanCategory.DATA)
             ));
         }
 
