@@ -12,6 +12,7 @@ volumes:
   elasticsearch_data:
   prometheus_data:
   grafana_data:
+  certbot_webroot:
 
 services:
   # ==========================================
@@ -437,8 +438,13 @@ services:
     restart: on-failure
     ports:
       - "4200:80"
+      - "443:443"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - certbot_webroot:/var/www/certbot:ro
     depends_on:
       api-gateway:
         condition: service_started
     networks:
       - omnicharge-net
+
