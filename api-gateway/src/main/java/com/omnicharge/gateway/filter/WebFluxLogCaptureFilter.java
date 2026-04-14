@@ -79,8 +79,8 @@ public class WebFluxLogCaptureFilter implements GlobalFilter, Ordered {
             
             // Extract target service from route
             Route route = exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR);
-            String targetService = route != null ? route.getId() : "unknown";
-            String targetUri = route != null ? route.getUri().toString() : "unknown";
+            String targetService = route != null ? route.getId() : UNKNOWN;
+            String targetUri = route != null ? route.getUri().toString() : UNKNOWN;
             
             // Determine log level based on status code
             String level = determineLogLevel(statusCode, error);
@@ -140,7 +140,7 @@ public class WebFluxLogCaptureFilter implements GlobalFilter, Ordered {
             logEventPublisher.publish(logEvent);
             
             // Also log routing decision at DEBUG level for detailed analysis
-            if (!"unknown".equals(targetService)) {
+            if (!UNKNOWN.equals(targetService)) {
                 logRoutingDecision(method, path, targetService, targetUri, traceId);
             }
             
@@ -175,6 +175,8 @@ public class WebFluxLogCaptureFilter implements GlobalFilter, Ordered {
         logEventPublisher.publish(routingEvent);
     }
 
+    private static final String UNKNOWN = "unknown";
+
     private String extractSourceIp(ServerHttpRequest request) {
         // Try X-Forwarded-For header first (for proxied requests)
         String forwardedFor = request.getHeaders().getFirst("X-Forwarded-For");
@@ -189,7 +191,7 @@ public class WebFluxLogCaptureFilter implements GlobalFilter, Ordered {
             return remoteAddress.getAddress().getHostAddress();
         }
         
-        return "unknown";
+        return UNKNOWN;
     }
 
     private String extractTraceId(ServerWebExchange exchange) {

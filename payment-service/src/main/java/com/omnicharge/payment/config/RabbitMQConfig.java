@@ -27,8 +27,24 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public org.springframework.amqp.support.converter.DefaultClassMapper classMapper() {
+        org.springframework.amqp.support.converter.DefaultClassMapper classMapper = new org.springframework.amqp.support.converter.DefaultClassMapper();
+        java.util.Map<String, Class<?>> idClassMapping = new java.util.HashMap<>();
+        
+        idClassMapping.put("com.omnicharge.recharge.common.event.saga.RechargeInitiatedEvent", com.omnicharge.payment.common.event.saga.RechargeInitiatedEvent.class);
+        idClassMapping.put("com.omnicharge.payment.common.event.saga.RechargeInitiatedEvent", com.omnicharge.payment.common.event.saga.RechargeInitiatedEvent.class);
+        
+        classMapper.setIdClassMapping(idClassMapping);
+        classMapper.setTrustedPackages("*");
+        return classMapper;
+    }
+
+    @Bean
+    @org.springframework.context.annotation.Primary
     public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+        Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
+        converter.setClassMapper(classMapper());
+        return converter;
     }
 
     @Bean

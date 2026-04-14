@@ -37,6 +37,7 @@ public class PlanService implements IPlanService {
     private final OperatorRepository operatorRepository;
     private final OperatorEventPublisher operatorEventPublisher;
     private final LogEventPublisher logEventPublisher;
+    private final org.springframework.data.redis.core.RedisTemplate<String, String> redisTemplate;
 
     @Override
     public List<PlanResponse> getPlansByOperator(Long operatorId) {
@@ -112,7 +113,10 @@ public class PlanService implements IPlanService {
         plan = planRepository.save(plan);
         log.info("Created plan: {} for operator: {}", plan.getPlanName(), operator.getName());
 
-        // Emit CQRS Event to update read models
+        // Immediately invalidate Redis cache so users see the new plan
+        invalidatePlanCache(operatorId);
+
+        // Emit CQRS Event to rebuild read models asynchronously
         operatorEventPublisher.publishPlanUpdatedEvent(operatorId);
 
         return mapToResponse(plan);
@@ -136,7 +140,10 @@ public class PlanService implements IPlanService {
         plan = planRepository.save(plan);
         log.info("Updated plan: {}", plan.getPlanName());
 
-        // Emit CQRS Event to update read models
+        // Immediately invalidate Redis cache so users see the updated plan
+        invalidatePlanCache(plan.getOperator().getId());
+
+        // Emit CQRS Event to rebuild read models asynchronously
         operatorEventPublisher.publishPlanUpdatedEvent(plan.getOperator().getId());
 
         return mapToResponse(plan);
@@ -155,7 +162,10 @@ public class PlanService implements IPlanService {
         
         log.info("Soft deleted plan: {}", plan.getPlanName());
 
-        // Emit CQRS Event to update read models
+        // Immediately invalidate Redis cache
+        invalidatePlanCache(plan.getOperator().getId());
+
+        // Emit CQRS Event to rebuild read models asynchronously
         operatorEventPublisher.publishPlanUpdatedEvent(plan.getOperator().getId());
     }
 
@@ -188,7 +198,10 @@ public class PlanService implements IPlanService {
             "Plan activated: planId=" + plan.getId() + ", name=" + plan.getPlanName() + ", operator=" + plan.getOperator().getName(),
             context);
 
-        // Emit CQRS Event to update read models
+        // Immediately invalidate Redis cache
+        invalidatePlanCache(plan.getOperator().getId());
+
+        // Emit CQRS Event to rebuild read models asynchronously
         operatorEventPublisher.publishPlanUpdatedEvent(plan.getOperator().getId());
 
         return mapToResponse(plan);
@@ -219,7 +232,10 @@ public class PlanService implements IPlanService {
             "Plan deactivated: planId=" + plan.getId() + ", name=" + plan.getPlanName() + ", reason=Manual deactivation",
             context);
 
-        // Emit CQRS Event to update read models
+        // Immediately invalidate Redis cache
+        invalidatePlanCache(plan.getOperator().getId());
+
+        // Emit CQRS Event to rebuild read models asynchronously
         operatorEventPublisher.publishPlanUpdatedEvent(plan.getOperator().getId());
 
         return mapToResponse(plan);
@@ -259,4 +275,18 @@ public class PlanService implements IPlanService {
         logEventPublisher.publish(logEvent);
     }
 
+    /**
+     * Immediately delete the Redis cache for a specific operator's plans.
+     * This forces the next user request to fall through to the DB (via PlanQueryService fallback),
+     * ensuring admin-added plans are visible instantly without waiting for the CQRS event.
+     */
+    private void invalidatePlanCache(Long operatorId) {
+        try {
+            String cacheKey = "plans:operator:" + operatorId;
+            redisTemplate.delete(cacheKey);
+            log.info("Invalidated Redis plan cache for operatorId: {}", operatorId);
+        } catch (Exception e) {
+            log.warn("Failed to invalidate Redis plan cache for operatorId: {}. Users may see stale data until CQRS event processes.", operatorId, e);
+        }
+    }
 }

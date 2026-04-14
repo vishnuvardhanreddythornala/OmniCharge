@@ -57,6 +57,8 @@ class SmsServiceTest {
         doThrow(new RuntimeException("Log publish failed")).when(logEventPublisher).publish(any());
 
         // Even if log publisher fails, sendSms should handle it gracefully
-        smsService.sendSms("9876543210", "Test Message");
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> {
+            smsService.sendSms("9876543210", "Test Message");
+        });
     }
 }

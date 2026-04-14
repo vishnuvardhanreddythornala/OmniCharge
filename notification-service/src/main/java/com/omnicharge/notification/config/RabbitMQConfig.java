@@ -8,6 +8,12 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import org.springframework.amqp.support.converter.DefaultClassMapper;
+import com.omnicharge.notification.dto.OtpEvent;
+
+import java.util.Map;
+import java.util.HashMap;
+
 @Configuration
 public class RabbitMQConfig {
 
@@ -62,8 +68,37 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public DefaultClassMapper classMapper() {
+        DefaultClassMapper classMapper = new DefaultClassMapper();
+        Map<String, Class<?>> idClassMapping = new HashMap<>();
+        
+        // Map OtpEvent
+        idClassMapping.put("com.omnicharge.user.dto.OtpEvent", OtpEvent.class);
+        idClassMapping.put("com.omnicharge.notification.dto.OtpEvent", OtpEvent.class);
+        
+        // Map PaymentCompletedEvent
+        idClassMapping.put("com.omnicharge.payment.common.event.PaymentCompletedEvent", com.omnicharge.notification.common.event.PaymentCompletedEvent.class);
+        idClassMapping.put("com.omnicharge.notification.common.event.PaymentCompletedEvent", com.omnicharge.notification.common.event.PaymentCompletedEvent.class);
+        
+        // Map RechargeCompletedEvent
+        idClassMapping.put("com.omnicharge.recharge.common.event.RechargeCompletedEvent", com.omnicharge.notification.common.event.RechargeCompletedEvent.class);
+        idClassMapping.put("com.omnicharge.notification.common.event.RechargeCompletedEvent", com.omnicharge.notification.common.event.RechargeCompletedEvent.class);
+        
+        // Map PlanExpiryEvent
+        idClassMapping.put("com.omnicharge.recharge.common.event.PlanExpiryEvent", com.omnicharge.notification.common.event.PlanExpiryEvent.class);
+        idClassMapping.put("com.omnicharge.notification.common.event.PlanExpiryEvent", com.omnicharge.notification.common.event.PlanExpiryEvent.class);
+        
+        classMapper.setIdClassMapping(idClassMapping);
+        classMapper.setTrustedPackages("*");
+        return classMapper;
+    }
+
+    @Bean
+    @org.springframework.context.annotation.Primary
     public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+        Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
+        converter.setClassMapper(classMapper());
+        return converter;
     }
 
     @Bean

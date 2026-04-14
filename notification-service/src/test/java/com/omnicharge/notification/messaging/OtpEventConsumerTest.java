@@ -65,6 +65,8 @@ class OtpEventConsumerTest {
         doThrow(new RuntimeException("Twilio down")).when(smsService).sendSms(anyString(), anyString());
 
         // Should not throw
-        otpEventConsumer.consumeOtpEvent(event);
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> {
+            otpEventConsumer.consumeOtpEvent(event);
+        });
     }
 }
