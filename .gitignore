@@ -63,8 +63,6 @@ ehthumbs.db
 .mvn/wrapper/maven-wrapper.jar
 
 # ===== Database/Docker/Other =====
-*.sql
-!databaseQuery.sql
 docker-compose.override.yml
 *.bak
 *.swp
