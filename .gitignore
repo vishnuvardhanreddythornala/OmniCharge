@@ -15,7 +15,6 @@ scripts/
 *.text
 *.bat
 *.sh
-omnicharge-ui/
 # ===== Build Outputs (Multi-Module Support) =====
 **/target/
 target/
