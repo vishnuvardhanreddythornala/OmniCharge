@@ -134,6 +134,23 @@ export class PaymentService {
     );
   }
 
+  /** Step 3c: Server-side verification fallback (checks Razorpay API directly) */
+  verifyPayment(transactionId: string): Observable<ApiResponse<TransactionResponse>> {
+    return this.http.post<ApiResponse<TransactionResponse>>(
+      `${this.API}/verify/${transactionId}`,
+      null
+    ).pipe(
+      tap(res => {
+        if (res.success && res.data) {
+          this._currentTransaction.set(res.data);
+          if (res.data.status === 'SUCCESS') {
+            this._paymentState.set('success');
+          }
+        }
+      })
+    );
+  }
+
   /** Get payment history */
   getPaymentHistory(page = 0, size = 10, filters?: { transactionId?: string; startDate?: string; endDate?: string }): Observable<ApiResponse<PagedResponse<TransactionResponse>>> {
     const params: Record<string, string> = { page: page.toString(), size: size.toString() };

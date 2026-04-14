@@ -70,6 +70,17 @@ public class PaymentController {
         return ResponseEntity.ok(ApiResponse.success("Payment failure recorded", transaction));
     }
 
+    /**
+     * Server-side payment verification fallback.
+     * Checks Razorpay API directly when client-side handler doesn't fire.
+     */
+    @PostMapping("/verify/{transactionId}")
+    public ResponseEntity<ApiResponse<TransactionResponse>> verifyPayment(
+            @PathVariable String transactionId) {
+        TransactionResponse transaction = paymentService.verifyPayment(transactionId);
+        return ResponseEntity.ok(ApiResponse.success("Payment verification completed", transaction));
+    }
+
     @GetMapping("/history")
     public ResponseEntity<ApiResponse<Page<TransactionResponse>>> getPaymentHistory(
             @RequestHeader("X-User-Id") Long userId,

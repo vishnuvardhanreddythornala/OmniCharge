@@ -891,23 +891,55 @@ export class RechargeFlowComponent implements OnInit, HasUnsavedChanges {
       this.currentStep.set('receipt');
 
     } catch (err: any) {
-      // Payment was cancelled or failed
-      const errorMsg = err?.message || 'Payment failed';
-      this.failureReason.set(errorMsg);
-
-      // If we have an active transaction, immediately cancel it to avoid the 15m delay
+      // Razorpay popup closed or handler didn't fire.
+      // CRITICAL FALLBACK: Check Razorpay API server-side before marking as failed.
       if (activeTransactionId) {
+        this.processingMessage.set('Verifying payment status...');
+
+        try {
+          // Wait a moment for Razorpay to process the payment
+          await new Promise(resolve => setTimeout(resolve, 3000));
+
+          // Poll backend which checks Razorpay API directly
+          const verifyRes = await firstValueFrom(
+            this.paymentService.verifyPayment(activeTransactionId)
+          );
+
+          if (verifyRes?.success && verifyRes.data?.status === 'SUCCESS') {
+            // Payment WAS successful — Razorpay confirmed it server-side!
+            console.log('Payment verified via server-side check!');
+            this.currentStep.set('receipt');
+            return;
+          }
+
+          // If still not captured, try once more after a longer wait
+          await new Promise(resolve => setTimeout(resolve, 5000));
+          const retryRes = await firstValueFrom(
+            this.paymentService.verifyPayment(activeTransactionId)
+          );
+
+          if (retryRes?.success && retryRes.data?.status === 'SUCCESS') {
+            console.log('Payment verified on retry!');
+            this.currentStep.set('receipt');
+            return;
+          }
+        } catch (verifyErr) {
+          console.warn('Verification check failed:', verifyErr);
+        }
+
+        // If verification didn't find a successful payment, mark as failed
+        const errorMsg = err?.message || 'Payment failed';
+        this.failureReason.set(errorMsg);
         try {
           await firstValueFrom(this.paymentService.failPayment(activeTransactionId, errorMsg));
         } catch (failErr) {
           console.warn('Failed to notify backend of cancellation:', failErr);
         }
+      } else {
+        this.failureReason.set(err?.message || 'Payment failed');
+        this.paymentService.resetPaymentState();
       }
 
-      // We explicitly DO NOT call resetPaymentState() yet, because failPayment automatically sets it!
-      if (!activeTransactionId) {
-          this.paymentService.resetPaymentState();
-      }
       this.currentStep.set('receipt');
     }
   }

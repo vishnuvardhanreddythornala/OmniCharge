@@ -53,6 +53,12 @@ public class PaymentService implements IPaymentService {
     private final RestTemplate restTemplate;
     private final LogEventPublisher logEventPublisher;
 
+    @org.springframework.beans.factory.annotation.Value("${razorpay.key.id}")
+    private String razorpayKeyId;
+
+    @org.springframework.beans.factory.annotation.Value("${razorpay.key.secret}")
+    private String razorpayKeySecret;
+
     @Override
     @Transactional
     public PaymentResponse processPayment(PaymentRequest request) {
@@ -459,6 +465,56 @@ public class PaymentService implements IPaymentService {
             log.error("Failed to fetch recharge details from recharge-service for rechargeId: {}", 
                     transaction.getRechargeId(), e);
         }
+    }
+
+    /**
+     * SERVER-SIDE VERIFICATION FALLBACK.
+     * Checks the Razorpay API directly to see if the order was paid.
+     * Called when the Razorpay checkout popup closes without the handler callback firing.
+     */
+    @Override
+    @Transactional
+    public TransactionResponse verifyPayment(String transactionId) {
+        Transaction transaction = transactionRepository.findByTransactionId(transactionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with id: " + transactionId));
+
+        // If already confirmed, just return
+        if (transaction.getStatus() == PaymentStatus.SUCCESS) {
+            log.info("Transaction {} is already confirmed", transactionId);
+            return mapToResponse(transaction);
+        }
+
+        String razorpayOrderId = transaction.getRazorpayOrderId();
+        if (razorpayOrderId == null) {
+            log.warn("No Razorpay order ID found for transaction {}", transactionId);
+            return mapToResponse(transaction);
+        }
+
+        try {
+            // Check Razorpay API for payments on this order
+            com.razorpay.RazorpayClient razorpay = new com.razorpay.RazorpayClient(razorpayKeyId, razorpayKeySecret);
+            java.util.List<com.razorpay.Payment> payments = razorpay.orders.fetchPayments(razorpayOrderId);
+
+            log.info("Razorpay order {} has {} payment(s)", razorpayOrderId, payments.size());
+
+            for (com.razorpay.Payment payment : payments) {
+                String status = payment.get("status");
+                String paymentId = payment.get("id");
+                log.info("Razorpay payment {} status: {}", paymentId, status);
+
+                if ("captured".equals(status) || "authorized".equals(status)) {
+                    // Payment was successful! Confirm it.
+                    log.info("Razorpay payment {} is {}, confirming transaction {}", paymentId, status, transactionId);
+                    return confirmPayment(transactionId, paymentId, null);
+                }
+            }
+
+            log.info("No successful payment found for order {} yet", razorpayOrderId);
+        } catch (Exception e) {
+            log.error("Failed to verify payment with Razorpay for transaction {}: {}", transactionId, e.getMessage());
+        }
+
+        return mapToResponse(transaction);
     }
 
     /**

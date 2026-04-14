@@ -41,5 +41,11 @@ public interface IPaymentService {
 
     PaymentStatsResponse getPaymentStats(Integer days);
 
+    /**
+     * Verifies the payment status directly with Razorpay API.
+     * Fallback for when the client-side handler callback doesn't fire (e.g. UPI on non-localhost).
+     */
+    TransactionResponse verifyPayment(String transactionId);
+
     TransactionResponse failPayment(String transactionId, String failureReason);
 }
