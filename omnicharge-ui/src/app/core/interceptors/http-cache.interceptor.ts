@@ -22,8 +22,7 @@ const TTL_MS = 5 * 60 * 1000; // 5 minutes
 const CACHEABLE_PATTERNS = [
   '/api/operators/active',
   // Note: /api/plans/search is intentionally NOT cached here.
-  // Plans are updated frequently by admins, so users should always
-  // see the latest plans without needing to refresh their browser.
+  // Plans are updated frequently by admins, so users should always able see the latest plans without needing to refresh their browser.
 ];
 
 function isCacheable(url: string): boolean {

@@ -43,7 +43,7 @@ public class RechargeService implements IRechargeService {
     @Override
     @Transactional
     public RechargeResponse initiateRecharge(Long userId, RechargeRequest request) {
-        // Validate plan with circuit breaker, retry, and caching
+        // Validate plan with circuit breaker, retry, and caching(Feign)
         ApiResponse<PlanResponse> planApiResponse = operatorServiceClient.getPlan(request.getPlanId());
         
         // Check if Operator Service is unavailable (circuit breaker fallback)
@@ -121,6 +121,7 @@ public class RechargeService implements IRechargeService {
         String userEmail = "";
         String userMobile = "";
         try {
+            //via Feign to get email/mobile for notifications
             ApiResponse<UserProfileResponse> userApiResponse = userServiceClient.getUserById(userId);
             if (userApiResponse != null && userApiResponse.isSuccess() && userApiResponse.getData() != null) {
                 if (Boolean.TRUE.equals(userApiResponse.getData().getIsEmailVerified())) {
