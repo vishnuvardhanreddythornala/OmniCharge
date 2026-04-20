@@ -58,7 +58,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
           
           <h2 class="text-2xl font-bold font-display text-white mb-1">Recharge Reminder</h2>
           <p class="text-sm font-medium text-accent-rose mb-1">
-            {{ reminderDaysLeft() === 0 ? 'Expires Today' : 'Due in ' + reminderDaysLeft() + ' days' }}
+            {{ reminderTimeLeft() }}
           </p>
           <p class="text-xs font-semibold text-surface-400 mb-6">
             Due On: {{ formatDate(expiringRecharge()?.planExpiryDate) }}
@@ -1031,20 +1031,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
   emailOtpDigits = signal<string[]>(['', '', '', '', '', '']);
 
   // Date Formatting Helper
-  formatDate(dateInput: any): string {
-    if (!dateInput) return '—';
+  parseDateLocally(dateInput: any): Date | null {
+    if (!dateInput) return null;
     try {
       let d: Date;
       if (Array.isArray(dateInput)) {
-        if (dateInput.length >= 6) d = new Date(dateInput[0], dateInput[1] - 1, dateInput[2], dateInput[3], dateInput[4], dateInput[5]);
-        else if (dateInput.length >= 3) d = new Date(dateInput[0], dateInput[1] - 1, dateInput[2]);
-        else return '—';
+        if (dateInput.length >= 6) {
+          d = new Date(dateInput[0], dateInput[1] - 1, dateInput[2], dateInput[3], dateInput[4], dateInput[5]);
+        } else if (dateInput.length >= 3) {
+          d = new Date(dateInput[0], dateInput[1] - 1, dateInput[2]);
+        } else return null;
       } else {
         d = new Date(dateInput);
       }
-      if (isNaN(d.getTime())) return '—';
-      return d.toLocaleString('en-IN', { month: 'short', day: '2-digit', year: 'numeric' });
-    } catch { return '—'; }
+      if (isNaN(d.getTime())) return null;
+      return d;
+    } catch { return null; }
+  }
+
+  formatDate(dateInput: any): string {
+    const d = this.parseDateLocally(dateInput);
+    if (!d) return '—';
+    return d.toLocaleString('en-IN', { month: 'short', day: '2-digit', year: 'numeric' });
   }
 
   // Recharges
@@ -1057,7 +1065,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // Recharge Reminder
   showReminderModal = signal(false);
   expiringRecharge = signal<RechargeHistoryItem | null>(null);
-  reminderDaysLeft = signal(0);
+  reminderTimeLeft = signal('');
 
   // FAQs
   faqOpen = signal<number | null>(null);
@@ -1103,11 +1111,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   getExactExpiryDate(r: RechargeHistoryItem): Date | null {
     if (r.createdDate && r.planValidityDays != null) {
-      const created = new Date(r.createdDate);
-      return new Date(created.getTime() + r.planValidityDays * 24 * 60 * 60 * 1000);
+      const created = this.parseDateLocally(r.createdDate);
+      if (created) {
+        return new Date(created.getTime() + r.planValidityDays * 24 * 60 * 60 * 1000);
+      }
     }
     if (r.planExpiryDate) {
-      return new Date(r.planExpiryDate);
+      return this.parseDateLocally(r.planExpiryDate);
     }
     return null;
   }
@@ -1278,7 +1288,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // Only check once per session ideally, but for demo we check on load
     const activeRecharges = this.recharges()
       .filter(r => r.status === 'SUCCESS' && this.getExactExpiryDate(r) !== null)
-      .sort((a, b) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime());
+      .sort((a, b) => {
+        const da = this.parseDateLocally(a.createdDate)?.getTime() || 0;
+        const db = this.parseDateLocally(b.createdDate)?.getTime() || 0;
+        return db - da;
+      });
       
     if (activeRecharges.length > 0) {
       const latest = activeRecharges[0];
@@ -1286,12 +1300,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
       if (expiry) {
         const now = new Date();
         const diffMs = expiry.getTime() - now.getTime();
-        const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
         
-        // Show if expiration is within 3 days and plan is not already expired
-        if (daysLeft >= 0 && daysLeft <= 3) {
+        // Show if expiration is within 3 days (3 * 24 * 60 * 60 * 1000 ms) and plan is not already expired
+        if (diffMs > 0 && diffMs <= 3 * 24 * 60 * 60 * 1000) {
           this.expiringRecharge.set(latest);
-          this.reminderDaysLeft.set(daysLeft);
+          
+          let timeText = '';
+          const totalHours = Math.floor(diffMs / (1000 * 60 * 60));
+          const totalDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+          
+          if (totalHours < 48) {
+            if (totalHours === 0) {
+               timeText = `Expires in less than an hour`;
+            } else {
+               timeText = `Due in ${totalHours} hour${totalHours > 1 ? 's' : ''}`;
+            }
+          } else {
+            timeText = `Due in ${totalDays} days`;
+          }
+          
+          this.reminderTimeLeft.set(timeText);
           this.showReminderModal.set(true);
         }
       }

@@ -2,7 +2,7 @@ package com.omnicharge.user.controller;
 
 import com.omnicharge.user.common.dto.ApiResponse;
 import com.omnicharge.user.dto.UserProfileResponse;
-import com.omnicharge.user.service.IUserService;
+import com.omnicharge.user.service.InterfaceUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class InternalUserController {
 
-    private final IUserService userService;
+    private final InterfaceUserService userService;
 
     /**
      * Get user profile by ID
      * Used by recharge-service to fetch user email and mobile for notifications
-     * 
+     *
      * @param id User ID
      * @return User profile with email and mobile number
      */

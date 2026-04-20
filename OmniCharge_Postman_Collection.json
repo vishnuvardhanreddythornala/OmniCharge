@@ -1,0 +1,529 @@
+{
+  "info": {
+    "name": "OmniCharge API Collection",
+    "description": "Complete Postman collection for OmniCharge microservices.\n\nBase URL: http://localhost:8080 (API Gateway)\n\nAdmin: vishnuvardhanreddythornala@gmail.com / Login@630",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "adminEmail", "value": "vishnuvardhanreddythornala@gmail.com" },
+    { "key": "adminPassword", "value": "Login@630" }
+  ],
+  "item": [
+    {
+      "name": "🔐 Auth - Admin",
+      "item": [
+        {
+          "name": "Admin Login (Step 1 - Get 2FA)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.tempToken) {",
+                  "  pm.collectionVariables.set('tempToken', jsonData.data.tempToken);",
+                  "}",
+                  "pm.test('Admin login step 1 successful', function() {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Admin Verify 2FA (Step 2)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', jsonData.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', jsonData.data.refreshToken);",
+                  "}",
+                  "pm.test('Admin 2FA verified', function() {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"otp\": \"CHECK_YOUR_EMAIL_FOR_OTP\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/admin/verify-2fa", "host": ["{{baseUrl}}"], "path": ["api", "auth", "admin", "verify-2fa"] }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', jsonData.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', jsonData.data.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/refresh-token", "host": ["{{baseUrl}}"], "path": ["api", "auth", "refresh-token"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/logout", "host": ["{{baseUrl}}"], "path": ["api", "auth", "logout"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔐 Auth - User (Mobile OTP)",
+      "item": [
+        {
+          "name": "Send Mobile OTP",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobileNumber\": \"+916345689745\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/mobile/send-otp", "host": ["{{baseUrl}}"], "path": ["api", "auth", "mobile", "send-otp"] }
+          }
+        },
+        {
+          "name": "Verify Mobile OTP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', jsonData.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', jsonData.data.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobileNumber\": \"+916345689745\",\n  \"otp\": \"ENTER_OTP_HERE\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/mobile/verify-otp", "host": ["{{baseUrl}}"], "path": ["api", "auth", "mobile", "verify-otp"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔐 Auth - User (Email OTP)",
+      "item": [
+        {
+          "name": "Send Email Login OTP",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/email/send-login-otp", "host": ["{{baseUrl}}"], "path": ["api", "auth", "email", "send-login-otp"] }
+          }
+        },
+        {
+          "name": "Verify Email Login OTP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', jsonData.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', jsonData.data.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"otp\": \"ENTER_OTP_HERE\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/email/verify-login-otp", "host": ["{{baseUrl}}"], "path": ["api", "auth", "email", "verify-login-otp"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔐 Auth - Google OAuth",
+      "item": [
+        {
+          "name": "Google Auth Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', jsonData.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', jsonData.data.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"credential\": \"GOOGLE_ID_TOKEN_HERE\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/google", "host": ["{{baseUrl}}"], "path": ["api", "auth", "google"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 User Profile",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/users/me", "host": ["{{baseUrl}}"], "path": ["api", "users", "me"] }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Vishnu Vardhan Reddy\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/users/me", "host": ["{{baseUrl}}"], "path": ["api", "users", "me"] }
+          }
+        },
+        {
+          "name": "Send Email Verification OTP",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/email/send-verification?email=user@example.com", "host": ["{{baseUrl}}"], "path": ["api", "auth", "email", "send-verification"], "query": [{ "key": "email", "value": "user@example.com" }] }
+          }
+        },
+        {
+          "name": "Verify Email",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/email/verify?otp=123456", "host": ["{{baseUrl}}"], "path": ["api", "auth", "email", "verify"], "query": [{ "key": "otp", "value": "123456" }] }
+          }
+        },
+        {
+          "name": "Send Mobile Verification OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobileNumber\": \"+916345689745\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/mobile/send-otp", "host": ["{{baseUrl}}"], "path": ["api", "auth", "mobile", "send-otp"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📱 Operators",
+      "item": [
+        {
+          "name": "Get All Operators",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/operators", "host": ["{{baseUrl}}"], "path": ["api", "operators"] }
+          }
+        },
+        {
+          "name": "Get Operator by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/operators/1", "host": ["{{baseUrl}}"], "path": ["api", "operators", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📋 Plans",
+      "item": [
+        {
+          "name": "Get Plans by Operator",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/plans/operator/1", "host": ["{{baseUrl}}"], "path": ["api", "plans", "operator", "1"] }
+          }
+        },
+        {
+          "name": "Get Plan by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/plans/1", "host": ["{{baseUrl}}"], "path": ["api", "plans", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "⚡ Recharges",
+      "item": [
+        {
+          "name": "Initiate Recharge",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobileNumber\": \"+916345689745\",\n  \"operatorId\": 1,\n  \"planId\": 1,\n  \"paymentMethod\": \"RAZORPAY\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/recharges", "host": ["{{baseUrl}}"], "path": ["api", "recharges"] }
+          }
+        },
+        {
+          "name": "Get Recharge History",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/recharges?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api", "recharges"], "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] }
+          }
+        },
+        {
+          "name": "Get Recharge by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/recharges/OMNI-XXXXXXXX", "host": ["{{baseUrl}}"], "path": ["api", "recharges", "OMNI-XXXXXXXX"] }
+          }
+        },
+        {
+          "name": "Get Recharge History (Date Filter)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/recharges?page=0&size=10&startDate=2026-04-01T00:00:00&endDate=2026-04-30T23:59:59", "host": ["{{baseUrl}}"], "path": ["api", "recharges"], "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }, { "key": "startDate", "value": "2026-04-01T00:00:00" }, { "key": "endDate", "value": "2026-04-30T23:59:59" }] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💳 Payments",
+      "item": [
+        {
+          "name": "Get Payment History",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/payments?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api", "payments"], "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] }
+          }
+        },
+        {
+          "name": "Verify Payment (Razorpay)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"razorpayOrderId\": \"order_XXXXX\",\n  \"razorpayPaymentId\": \"pay_XXXXX\",\n  \"razorpaySignature\": \"SIGNATURE_HERE\",\n  \"rechargeId\": \"OMNI-XXXXXXXX\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/payments/verify", "host": ["{{baseUrl}}"], "path": ["api", "payments", "verify"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔔 Notifications",
+      "item": [
+        {
+          "name": "Get Notifications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/notifications?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api", "notifications"], "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] }
+          }
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/notifications/unread-count", "host": ["{{baseUrl}}"], "path": ["api", "notifications", "unread-count"] }
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/notifications/1/read", "host": ["{{baseUrl}}"], "path": ["api", "notifications", "1", "read"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🛡️ Admin - Users",
+      "item": [
+        {
+          "name": "Get All Users (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/admin/users?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api", "admin", "users"], "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] }
+          }
+        },
+        {
+          "name": "Get User by ID (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/admin/users/1", "host": ["{{baseUrl}}"], "path": ["api", "admin", "users", "1"] }
+          }
+        },
+        {
+          "name": "Admin Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/admin/dashboard/stats", "host": ["{{baseUrl}}"], "path": ["api", "admin", "dashboard", "stats"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🛡️ Admin - Operators",
+      "item": [
+        {
+          "name": "Get All Operators (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/admin/operators?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api", "admin", "operators"], "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] }
+          }
+        },
+        {
+          "name": "Create Operator (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operatorName\": \"New Operator\",\n  \"operatorType\": \"PREPAID\",\n  \"isActive\": true\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/admin/operators", "host": ["{{baseUrl}}"], "path": ["api", "admin", "operators"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🛡️ Admin - Recharges",
+      "item": [
+        {
+          "name": "Get All Recharges (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/admin/recharges?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api", "admin", "recharges"], "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] }
+          }
+        },
+        {
+          "name": "Get Recharge Stats (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/admin/recharges/stats", "host": ["{{baseUrl}}"], "path": ["api", "admin", "recharges", "stats"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🛡️ Admin - Payments",
+      "item": [
+        {
+          "name": "Get All Payments (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/admin/payments?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api", "admin", "payments"], "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] }
+          }
+        }
+      ]
+    }
+  ]
+}

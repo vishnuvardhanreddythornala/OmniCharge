@@ -1,5 +1,6 @@
 package com.omnicharge.gateway.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -11,25 +12,31 @@ import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * CORS and Security Headers Configuration for API Gateway
  * 
  * This configuration:
- * 1. Enables CORS for frontend (localhost:4200)
+ * 1. Enables CORS for explicitly allowed origins only (localhost + production domain)
  * 2. Adds Cross-Origin-Opener-Policy header to allow Google OAuth popups
  * 3. Ensures all responses include necessary security headers
  */
 @Configuration
 public class CorsConfig {
 
+    @Value("${cors.allowed-origins}")
+    private String allowedOrigins;
+
     @Bean
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        // Allow any origin pattern so it works when deployed to Azure VMs with variable IPs/domains
-        corsConfig.setAllowedOriginPatterns(Arrays.asList("*"));
+        // Only allow explicitly configured origins — no wildcard
+        List<String> origins = Arrays.asList(allowedOrigins.split(","));
+        corsConfig.setAllowedOrigins(origins);
         corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         corsConfig.setAllowedHeaders(Arrays.asList("*"));
+        corsConfig.setExposedHeaders(Arrays.asList("Authorization"));
         corsConfig.setAllowCredentials(true);
         corsConfig.setMaxAge(3600L);
 

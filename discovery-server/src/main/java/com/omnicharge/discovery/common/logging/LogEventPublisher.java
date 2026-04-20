@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
  * Publishes structured LogEvent messages to the centralized logging exchange.
  * 
  * Strategy:
- *   PRIMARY  → RabbitMQ (async, non-blocking)
- *   FALLBACK → Local file via FallbackLogWriter (when RabbitMQ is unavailable)
+ *   PRIMARY  -- RabbitMQ (async, non-blocking)
+ *   FALLBACK -- Local file via FallbackLogWriter (when RabbitMQ is unavailable)
  */
 @Component
 @Slf4j

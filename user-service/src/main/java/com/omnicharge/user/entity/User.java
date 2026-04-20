@@ -24,7 +24,7 @@ public class User extends Auditable {
 
     @Email
     @Column(unique = true, nullable = true)
-    private String email;
+    private String email;  // Unique email (nullable for mobile-only users)
 
     @NotBlank
     @Column(nullable = false)
@@ -35,7 +35,7 @@ public class User extends Auditable {
     private String mobileNumber;
 
     @Column(nullable = true)
-    private String password; // BCrypt hash for LOCAL users, NULL for Google users
+    private String password; // BCrypts hash for LOCAL users, NULL for Google users
 
     @Column(unique = true, nullable = true)
     private String googleId; // Set only for Google users

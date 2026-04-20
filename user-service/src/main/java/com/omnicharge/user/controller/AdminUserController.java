@@ -1,9 +1,8 @@
 package com.omnicharge.user.controller;
 
 import com.omnicharge.user.common.dto.ApiResponse;
-import com.omnicharge.user.common.dto.PagedResponse;
 import com.omnicharge.user.dto.UserProfileResponse;
-import com.omnicharge.user.service.IUserService;
+import com.omnicharge.user.service.InterfaceUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminUserController {
 
-    private final IUserService userService;
+    private final InterfaceUserService userService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<UserProfileResponse>>> getAllUsers(

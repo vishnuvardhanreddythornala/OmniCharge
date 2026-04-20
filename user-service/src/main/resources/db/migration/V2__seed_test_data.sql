@@ -2,9 +2,9 @@
 -- V2: Seed 200 users + 1 admin for production-grade testing
 -- ============================================================
 
--- Admin user (password: Admin@123 bcrypt)
+-- Admin user (password: Login@630 bcrypt)
 INSERT IGNORE INTO users (email, full_name, mobile_number, password, auth_provider, role, is_active, is_mobile_verified, is_email_verified)
-VALUES ('admin@omnicharge.com', 'OmniCharge Admin', '+919999900000',
+VALUES ('vishnuvardhanreddythornala@gmail.com', 'OmniCharge Admin', '+919999900000',
         '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
         'LOCAL', 'ROLE_ADMIN', 1, 1, 1);
 

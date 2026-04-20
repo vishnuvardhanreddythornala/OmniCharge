@@ -2,7 +2,7 @@ package com.omnicharge.user.service;
 
 import com.omnicharge.user.dto.*;
 
-public interface IAuthService {
+public interface InterfaceAuthService {
     
     AdminLoginInitResponse login(LoginRequest request, String ipAddress);
 

@@ -5,6 +5,6 @@
 export const environment = {
   production: false,
   apiBaseUrl: 'http://localhost:8080',
-  razorpayKeyId: 'rzp_test_TzY0Gv36M8v5j2', // Public Live Key
+  razorpayKeyId: 'rzp_live_SUvKCS3WVGspwp', // Public Live Key
   googleClientId: '1084384475158-8sc296epqd9fj6hkplr0725hgbs6sl8h.apps.googleusercontent.com', // Google OAuth Client ID
 };

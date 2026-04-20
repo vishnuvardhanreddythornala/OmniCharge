@@ -7,7 +7,7 @@
 	<artifactId>omnicharge-parent</artifactId>
 	<version>1</version>
 	<packaging>pom</packaging>
-	<name>OmniCharge Parent</name>
+	<name>OmniCharge Backend</name>
 	<description>Root parent POM for OmniCharge Microservices Ecosystem</description>
 
 	<modules>

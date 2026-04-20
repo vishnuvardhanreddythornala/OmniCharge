@@ -51,7 +51,7 @@ public class JwtUtil {
                 .claims(claims)
                 .subject(email)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
+                .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration)) // access token is set during JWT creation
                 .signWith(getSigningKey())
                 .compact();
     }

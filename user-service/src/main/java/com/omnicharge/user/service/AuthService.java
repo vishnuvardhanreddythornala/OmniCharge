@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 import java.security.SecureRandom;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AuthService implements IAuthService {
+public class AuthService implements InterfaceAuthService {
 
     private static final int MAX_DEVICES = 4;
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
@@ -126,7 +125,7 @@ public class AuthService implements IAuthService {
         String redisKey = "public:email:login:otp:" + email;
         redisTemplate.opsForValue().set(redisKey, otp, OTP_EXPIRATION_MINUTES, TimeUnit.MINUTES);
 
-        log.warn("========= PUBLIC EMAIL OTP for {} → {} =========", email, otp);
+        log.warn("========= PUBLIC EMAIL OTP for {}  {} =========", email, otp);
         OtpEvent event = OtpEvent.builder().userId(0L).mobileNumber(email).otp(otp).build();
         rabbitTemplate.convertAndSend(EXCHANGE_NAME, "email.otp.send", event);
 

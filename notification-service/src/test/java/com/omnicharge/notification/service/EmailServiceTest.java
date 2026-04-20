@@ -24,9 +24,12 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class EmailServiceTest {
 
-    @Mock private JavaMailSender mailSender;
-    @Mock private LogEventPublisher logEventPublisher;
-    @Mock private MimeMessage mimeMessage;
+    @Mock
+    private JavaMailSender mailSender;
+    @Mock
+    private LogEventPublisher logEventPublisher;
+    @Mock
+    private MimeMessage mimeMessage;
 
     @InjectMocks
     private EmailService emailService;
@@ -34,7 +37,7 @@ class EmailServiceTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(emailService, "fromEmail", "no-reply@omnicharge.com");
-        ReflectionTestUtils.setField(emailService, "mailPassword", "testpassword123");
+        ReflectionTestUtils.setField(emailService, "mailPassword", "testLogin@630");
     }
 
     // ===== sendPaymentConfirmation =====
@@ -144,7 +147,8 @@ class EmailServiceTest {
         doThrow(new RuntimeException("SMTP ERROR")).when(mailSender).send(mimeMessage);
 
         assertThrows(RuntimeException.class,
-                () -> emailService.sendPlanExpiryReminder("test@test.com", "John", "Airtel", "Unlimited", "9876543210", 3));
+                () -> emailService.sendPlanExpiryReminder("test@test.com", "John", "Airtel", "Unlimited", "9876543210",
+                        3));
         verify(logEventPublisher, times(1)).publish(argThat(log -> log.getEventType().equals("EMAIL_FAILED")));
     }
 
@@ -166,7 +170,8 @@ class EmailServiceTest {
         doThrow(new RuntimeException("SMTP ERROR")).when(mailSender).send(mimeMessage);
 
         assertThrows(RuntimeException.class,
-                () -> emailService.sendPlanExpiredNotification("test@test.com", "John", "Airtel", "Unlimited", "9876543210"));
+                () -> emailService.sendPlanExpiredNotification("test@test.com", "John", "Airtel", "Unlimited",
+                        "9876543210"));
         verify(logEventPublisher, times(1)).publish(argThat(log -> log.getEventType().equals("EMAIL_FAILED")));
     }
 

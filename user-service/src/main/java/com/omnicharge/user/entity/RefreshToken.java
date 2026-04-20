@@ -18,15 +18,16 @@ public class RefreshToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // UUID-based refresh token
+
 
     @Column(unique = true, nullable = false)
     private String token;
 
     @Column(nullable = false)
-    private Instant expiryDate;
+    private Instant expiryDate; // 7 days from creation
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private User user; // Foreign key to User
 }

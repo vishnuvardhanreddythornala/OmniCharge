@@ -16,8 +16,8 @@ describe('LoginComponent', () => {
 
   beforeEach(async () => {
     authSpy = jasmine.createSpyObj('AuthService', [
-      'login', 'sendPublicMobileOtp', 'verifyPublicMobileOtp', 
-      'sendEmailLoginOtp', 'verifyEmailLoginOtp', 
+      'login', 'sendPublicMobileOtp', 'verifyPublicMobileOtp',
+      'sendEmailLoginOtp', 'verifyEmailLoginOtp',
       'verifyAdmin2fa', 'googleAuth'
     ], {
       isAdmin: signal(false),
@@ -42,16 +42,16 @@ describe('LoginComponent', () => {
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
-    
+
     // Mock google global
-    (window as any).google = { 
-        accounts: { 
-            id: { 
-                initialize: jasmine.createSpy('initialize'), 
-                renderButton: jasmine.createSpy('renderButton'), 
-                prompt: jasmine.createSpy('prompt') 
-            } 
-        } 
+    (window as any).google = {
+      accounts: {
+        id: {
+          initialize: jasmine.createSpy('initialize'),
+          renderButton: jasmine.createSpy('renderButton'),
+          prompt: jasmine.createSpy('prompt')
+        }
+      }
     };
 
     fixture = TestBed.createComponent(LoginComponent);
@@ -88,15 +88,15 @@ describe('LoginComponent', () => {
     });
 
     it('should call login and transition to adminOtp state on success', () => {
-      component.adminForm.patchValue({ adminEmail: 'admin@omni.com', password: 'password123' });
+      component.adminForm.patchValue({ adminEmail: 'admin@omni.com', password: 'Login@630' });
       spyOn(component, 'displaySuccess');
       spyOn(component, 'switchViewMode');
-      
+
       authSpy.login.and.returnValue(of({ success: true, message: 'OK', data: { requires2fa: true } as any }));
-      
+
       component.onAdminLogin();
-      
-      expect(authSpy.login).toHaveBeenCalledWith({ email: 'admin@omni.com', password: 'password123' });
+
+      expect(authSpy.login).toHaveBeenCalledWith({ email: 'admin@omni.com', password: 'Login@630' });
       expect(component.switchViewMode).toHaveBeenCalledWith('adminOtp');
       expect(component.displaySuccess).toHaveBeenCalledWith('Credentials verified. OTP sent to email.');
     });
@@ -104,20 +104,20 @@ describe('LoginComponent', () => {
     it('should display error if admin login response is unsuccessful', () => {
       component.adminForm.patchValue({ adminEmail: 'admin@omni.com', password: 'badpassword' });
       spyOn(component, 'displayError');
-      
+
       authSpy.login.and.returnValue(of({ success: false, message: 'Invalid Credentials', data: null as any }));
-      
+
       component.onAdminLogin();
-      
+
       expect(component.displayError).toHaveBeenCalledWith('Invalid Credentials');
     });
 
     it('should handle admin network/500 failures gracefully', () => {
-      component.adminForm.patchValue({ adminEmail: 'admin@omni.com', password: 'password123' });
+      component.adminForm.patchValue({ adminEmail: 'admin@omni.com', password: 'Login@630' });
       authSpy.login.and.returnValue(throwError(() => ({ error: { message: 'Server down' } })));
-      
+
       component.onAdminLogin();
-      
+
       expect(component.errorMessage()).toBe('Server down');
       expect(component.loadingAction()).toBe(''); // Ensure loading stops
     });
@@ -134,9 +134,9 @@ describe('LoginComponent', () => {
       component.mobileForm.patchValue({ mobileNumber: '9876543210' });
       component.selectedCountryCode.set('+1');
       authSpy.sendPublicMobileOtp.and.returnValue(of({ success: true, message: 'Sent', data: null }));
-      
+
       component.onRequestOtp();
-      
+
       expect(authSpy.sendPublicMobileOtp).toHaveBeenCalledWith('+19876543210');
       expect(component.viewMode()).toBe('otp');
     });
@@ -144,9 +144,9 @@ describe('LoginComponent', () => {
     it('should handle mobile OTP network errors safely', () => {
       component.mobileForm.patchValue({ mobileNumber: '9876543210' });
       authSpy.sendPublicMobileOtp.and.returnValue(throwError(() => ({ error: { message: 'SMS Gateway Error' } })));
-      
+
       component.onRequestOtp();
-      
+
       expect(component.errorMessage()).toBe('SMS Gateway Error');
     });
   });
@@ -163,12 +163,12 @@ describe('LoginComponent', () => {
       component.mobileForm.patchValue({ mobileNumber: '9876543210' });
       component.selectedCountryCode.set('+91');
       component.otp = '123456';
-      
+
       authSpy.verifyPublicMobileOtp.and.returnValue(of({ success: true, message: '', data: {} as any }));
       (authSpy.isAdmin as any).set(false);
-      
+
       component.onVerifyMobileOtp();
-      
+
       expect(authSpy.verifyPublicMobileOtp).toHaveBeenCalledWith('+919876543210', '123456');
       expect(routerSpy.navigateByUrl).toHaveBeenCalledWith('/dashboard'); // returnUrl fallback
     });
@@ -177,10 +177,10 @@ describe('LoginComponent', () => {
       activatedRouteStub.snapshot.queryParams['returnUrl'] = '/checkout/123';
       component.mobileForm.patchValue({ mobileNumber: '9876543210' });
       component.otp = '123456';
-      
+
       authSpy.verifyPublicMobileOtp.and.returnValue(of({ success: true, message: '', data: {} as any }));
       component.onVerifyMobileOtp();
-      
+
       expect(routerSpy.navigateByUrl).toHaveBeenCalledWith('/checkout/123');
     });
 
@@ -188,9 +188,9 @@ describe('LoginComponent', () => {
       component.mobileForm.patchValue({ mobileNumber: '9876543210' });
       component.otp = '000000';
       authSpy.verifyPublicMobileOtp.and.returnValue(throwError(() => ({ error: { message: 'Wrong OTP' } })));
-      
+
       component.onVerifyMobileOtp();
-      
+
       expect(component.errorMessage()).toBe('Wrong OTP');
       expect(component.loadingAction()).toBe('');
     });
@@ -200,9 +200,9 @@ describe('LoginComponent', () => {
     it('should send email OTP and transition properly', () => {
       component.emailForm.patchValue({ publicEmail: 'test@example.com' });
       authSpy.sendEmailLoginOtp.and.returnValue(of({ success: true, message: 'Sent', data: null }));
-      
+
       component.onRequestEmailOtp();
-      
+
       expect(authSpy.sendEmailLoginOtp).toHaveBeenCalledWith('test@example.com');
       expect(component.viewMode()).toBe('emailOtp');
     });
@@ -219,9 +219,9 @@ describe('LoginComponent', () => {
       component.otp = '123456';
       authSpy.verifyEmailLoginOtp.and.returnValue(of({ success: true, message: '', data: {} as any }));
       (authSpy.isAdmin as any).set(false);
-      
+
       component.onVerifyEmailOtp();
-      
+
       expect(authSpy.verifyEmailLoginOtp).toHaveBeenCalledWith('test@example.com', '123456');
       expect(routerSpy.navigateByUrl).toHaveBeenCalledWith('/dashboard');
     });
@@ -232,12 +232,12 @@ describe('LoginComponent', () => {
       component.adminForm.patchValue({ adminEmail: 'admin@omni.com' });
       component.viewMode.set('adminOtp');
       component.otp = '654321';
-      
+
       authSpy.verifyAdmin2fa.and.returnValue(of({ success: true, message: 'Valid', data: {} as any }));
       (authSpy.isAdmin as any).set(true);
-      
+
       component.onVerifyAdmin2fa();
-      
+
       expect(authSpy.verifyAdmin2fa).toHaveBeenCalledWith('admin@omni.com', '654321');
       expect(routerSpy.navigateByUrl).toHaveBeenCalledWith('/admin');
     });
@@ -246,7 +246,7 @@ describe('LoginComponent', () => {
       component.adminForm.patchValue({ adminEmail: 'admin@omni.com' });
       component.otp = '111111';
       authSpy.verifyAdmin2fa.and.returnValue(of({ success: false, message: 'Expired OTP', data: {} as any }));
-      
+
       component.onVerifyAdmin2fa();
       expect(component.errorMessage()).toBe('Expired OTP');
     });
@@ -255,7 +255,7 @@ describe('LoginComponent', () => {
       component.adminForm.patchValue({ adminEmail: 'admin@omni.com' });
       component.otp = '111111';
       authSpy.verifyAdmin2fa.and.returnValue(throwError(() => ({ error: { message: 'Network error' } })));
-      
+
       component.onVerifyAdmin2fa();
       expect(component.errorMessage()).toBe('Network error');
       expect(component.loadingAction()).toBe('');
@@ -283,7 +283,7 @@ describe('LoginComponent', () => {
     it('onOtpPaste should populate digits', () => {
       const clipboardEvent = new Event('paste') as any;
       clipboardEvent.clipboardData = { getData: () => '123456' };
-      clipboardEvent.preventDefault = () => {};
+      clipboardEvent.preventDefault = () => { };
       component.onOtpPaste(clipboardEvent);
       expect(component.otp).toBe('123456');
     });

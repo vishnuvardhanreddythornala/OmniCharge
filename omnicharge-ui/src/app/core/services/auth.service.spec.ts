@@ -76,7 +76,7 @@ describe('AuthService', () => {
 
   describe('login()', () => {
     it('should initialize login via email/password successfully', fakeAsync(() => {
-      const credentials = { email: 'admin@omnicharge.com', password: 'password123' };
+      const credentials = { email: 'vishnuvardhanreddythornala@gmail.com', password: 'Login@630' };
 
       service.login(credentials).subscribe(res => {
         expect(res.success).toBeTrue();
@@ -88,7 +88,7 @@ describe('AuthService', () => {
       const req = httpMock.expectOne(`${environment.apiBaseUrl}/api/auth/login`);
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(credentials);
-      req.flush({ success: true, message: 'OK', data: { requires2fa: true, email: 'admin@omnicharge.com' } });
+      req.flush({ success: true, message: 'OK', data: { requires2fa: true, email: 'vishnuvardhanreddythornala@gmail.com' } });
 
       flush();
     }));

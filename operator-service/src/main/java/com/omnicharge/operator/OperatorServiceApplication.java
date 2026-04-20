@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-@SpringBootApplication(scanBasePackages = {"com.omnicharge.operator", "com.omnicharge.common"})
+@SpringBootApplication(scanBasePackages = {"com.omnicharge.operator", "com.omnicharge"})
 @EnableDiscoveryClient
 public class OperatorServiceApplication {
 

@@ -332,6 +332,7 @@ type FlowStep = 'input' | 'plans' | 'processing' | 'receipt';
                     <p class="text-xs text-surface-400">₹{{ plan.price }} • {{ plan.validityDays }} days</p>
                   </div>
                 </div>
+
                 <button (click)="onProceedToCheckout()" class="btn-primary !py-3 !px-6 shrink-0 flex items-center gap-2">
                   <span>Pay ₹{{ plan.price }}</span>
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -416,7 +417,7 @@ type FlowStep = 'input' | 'plans' | 'processing' | 'receipt';
             <button (click)="closeVerificationModal()" class="absolute top-4 right-4 text-surface-400 hover:text-white transition" [disabled]="isVerifying()">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
-            
+
             <div class="text-center mb-6">
               <div class="w-16 h-16 rounded-full bg-omni-500/10 flex items-center justify-center mx-auto mb-4 border border-omni-500/20 shadow-[0_0_15px_rgba(139,92,246,0.2)]">
                 <svg class="w-8 h-8 text-omni-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -574,7 +575,7 @@ export class RechargeFlowComponent implements OnInit, HasUnsavedChanges {
   verificationError = signal<string>('');
   isVerifying = signal<boolean>(false);
   verificationMobileInput = '';
-  
+
   verificationOtpDigits: string[] = ['', '', '', '', '', ''];
   get verificationOtpInput(): string {
     return this.verificationOtpDigits.join('');
@@ -596,16 +597,16 @@ export class RechargeFlowComponent implements OnInit, HasUnsavedChanges {
   /** Filtered plans based on active tab and search query */
   filteredPlans = computed(() => {
     let plans = this.operatorService.plans();
-    
+
     // 1. Filter by category
     if (this.activeCategory() !== 'ALL') {
       plans = plans.filter(p => p.category === this.activeCategory());
     }
-    
+
     // 2. Filter by search query
     const q = this.searchQuery().toLowerCase().trim();
     if (q) {
-      plans = plans.filter(p => 
+      plans = plans.filter(p =>
         p.planName?.toLowerCase().includes(q) ||
         p.price.toString().includes(q) ||
         p.dataLimit?.toLowerCase().includes(q) ||
@@ -613,7 +614,7 @@ export class RechargeFlowComponent implements OnInit, HasUnsavedChanges {
         p.validityDays?.toString().includes(q)
       );
     }
-    
+
     return plans;
   });
 
@@ -627,10 +628,10 @@ export class RechargeFlowComponent implements OnInit, HasUnsavedChanges {
     // Pre-fill from query params (if coming from landing page)
     const mobile = this.route.snapshot.queryParams['mobile'];
     const passedOperatorId = this.route.snapshot.queryParams['operatorId'];
-    
+
     if (mobile && mobile.length === 10) {
       this.mobileNumber = mobile;
-      
+
       if (passedOperatorId) {
         // Find and set the operator manually
         this.operatorService.loadActiveOperators(); // Ensure operators are loaded
@@ -766,7 +767,7 @@ export class RechargeFlowComponent implements OnInit, HasUnsavedChanges {
 
   onOtpInput(index: number, event: any): void {
     const value = event.target.value;
-    
+
     if (value && index < 5 && /^\d$/.test(value)) {
       const nextInput = document.getElementById(`otp-input-${index + 1}`) as HTMLInputElement;
       if (nextInput) {
@@ -790,11 +791,11 @@ export class RechargeFlowComponent implements OnInit, HasUnsavedChanges {
     event.preventDefault();
     const pastedData = event.clipboardData?.getData('text') || '';
     const chars = pastedData.split('').filter(c => /^\d$/.test(c)).slice(0, 6);
-    
+
     for (let i = 0; i < chars.length; i++) {
         this.verificationOtpDigits[i] = chars[i];
     }
-    
+
     const focusIndex = Math.min(chars.length, 5);
     const focusInput = document.getElementById(`otp-input-${focusIndex === 6 ? 5 : focusIndex}`) as HTMLInputElement;
     if (focusInput) focusInput.focus();
@@ -812,7 +813,7 @@ export class RechargeFlowComponent implements OnInit, HasUnsavedChanges {
       await firstValueFrom(this.authService.verifyMobileOtp(`+91${this.verificationMobileInput}`, otp));
       this.authService.loadProfile();
       this.showVerificationModal.set(false);
-      
+
       // Proceed to payment after successful verification
       await this.initiatePaymentFlow();
     } catch (err: any) {

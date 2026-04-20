@@ -58,7 +58,7 @@ Start-Sleep -Seconds 2
 Write-Host "[Test 3/8] Testing LOGIN_ATTEMPT (FAILURE)..." -ForegroundColor Yellow
 $failedLoginPayload = @{
     email = $testEmail
-    password = "WrongPassword123"
+    password = "WrongLogin@630"
 } | ConvertTo-Json
 
 try {

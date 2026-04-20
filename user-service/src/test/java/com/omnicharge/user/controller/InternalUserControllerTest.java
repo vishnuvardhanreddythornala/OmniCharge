@@ -1,7 +1,7 @@
 package com.omnicharge.user.controller;
 
 import com.omnicharge.user.dto.UserProfileResponse;
-import com.omnicharge.user.service.IUserService;
+import com.omnicharge.user.service.InterfaceUserService;
 import com.omnicharge.user.common.logging.LogEventPublisher;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ class InternalUserControllerTest {
     @MockitoBean private JpaMetamodelMappingContext jpaMappingContext;
     @MockitoBean(name = "logEventPublisher") private LogEventPublisher logEventPublisher;
     private final MockMvc mockMvc;
-    @MockitoBean private IUserService userService;
+    @MockitoBean private InterfaceUserService userService;
 
 
 

@@ -1,10 +1,9 @@
 package com.omnicharge.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.omnicharge.user.dto.ChangePasswordRequest;
 import com.omnicharge.user.dto.UpdateProfileRequest;
 import com.omnicharge.user.dto.UserProfileResponse;
-import com.omnicharge.user.service.IUserService;
+import com.omnicharge.user.service.InterfaceUserService;
 import com.omnicharge.user.common.logging.LogEventPublisher;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,7 @@ class UserControllerTest {
     @MockitoBean(name = "logEventPublisher") private LogEventPublisher logEventPublisher;
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
-    @MockitoBean private IUserService userService;
+    @MockitoBean private InterfaceUserService userService;
 
 
 

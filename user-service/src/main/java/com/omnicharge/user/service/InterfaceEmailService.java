@@ -1,6 +1,6 @@
 package com.omnicharge.user.service;
 
-public interface IEmailService {
+public interface InterfaceEmailService {
     
     void sendOtpEmail(String toEmail, String otp);
 }

@@ -30,6 +30,9 @@ public class SmsService implements ISmsService {
     @Value("${twilio.phone.number}")
     private String fromNumber;
 
+    @Value("${twilio.messaging.service.sid:#{null}}")
+    private String messagingServiceSid;
+
     @PostConstruct
     public void init() {
         // Initialize Twilio once when service starts
@@ -46,11 +49,20 @@ public class SmsService implements ISmsService {
             log.info("Sending SMS to: {}", toNumber);
             
             // Send SMS via Twilio
-            Message twilioMessage = Message.creator(
-                new PhoneNumber(toNumber),      // To (recipient)
-                new PhoneNumber(fromNumber),    // From (Twilio number)
-                message                         // Message body
-            ).create();
+            Message twilioMessage;
+            if (messagingServiceSid != null && !messagingServiceSid.trim().isEmpty()) {
+                twilioMessage = Message.creator(
+                    new PhoneNumber(toNumber),      // To (recipient)
+                    messagingServiceSid,            // Messaging Service SID
+                    message                         // Message body
+                ).create();
+            } else {
+                twilioMessage = Message.creator(
+                    new PhoneNumber(toNumber),      // To (recipient)
+                    new PhoneNumber(fromNumber),    // From (Twilio number)
+                    message                         // Message body
+                ).create();
+            }
 
             log.info("✅ SMS sent successfully!");
             log.info("   To: {}", toNumber);

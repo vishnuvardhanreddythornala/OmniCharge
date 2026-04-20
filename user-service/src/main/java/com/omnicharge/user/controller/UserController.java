@@ -1,10 +1,9 @@
 package com.omnicharge.user.controller;
 
 import com.omnicharge.user.common.dto.ApiResponse;
-import com.omnicharge.user.dto.ChangePasswordRequest;
 import com.omnicharge.user.dto.UpdateProfileRequest;
 import com.omnicharge.user.dto.UserProfileResponse;
-import com.omnicharge.user.service.IUserService;
+import com.omnicharge.user.service.InterfaceUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final IUserService userService;
+    private final InterfaceUserService userService;
 
     @GetMapping("/profile")
     public ResponseEntity<ApiResponse<UserProfileResponse>> getProfile(
@@ -31,12 +30,5 @@ public class UserController {
         UserProfileResponse profile = userService.updateProfile(userId, request);
         return ResponseEntity.ok(ApiResponse.success("Profile updated successfully", profile));
     }
-
-    @PutMapping("/change-password")
-    public ResponseEntity<ApiResponse<Void>> changePassword(
-            @RequestHeader("X-User-Id") Long userId,
-            @Valid @RequestBody ChangePasswordRequest request) {
-        userService.changePassword(userId, request);
-        return ResponseEntity.ok(ApiResponse.success("Password changed successfully", null));
-    }
 }
+

@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 
-@SpringBootApplication(scanBasePackages = {"com.omnicharge.user", "com.omnicharge.common"})
+@SpringBootApplication(scanBasePackages = {"com.omnicharge.user"})
 @EnableDiscoveryClient
 
 public class UserServiceApplication {

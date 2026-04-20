@@ -1,12 +1,10 @@
 package com.omnicharge.user.service;
 
 import com.omnicharge.user.common.exception.BadRequestException;
-import com.omnicharge.user.common.exception.DuplicateResourceException;
 import com.omnicharge.user.common.exception.ResourceNotFoundException;
 import com.omnicharge.user.common.exception.UnauthorizedException;
 import com.omnicharge.user.common.logging.LogEvent;
 import com.omnicharge.user.common.logging.LogEventPublisher;
-import com.omnicharge.user.dto.ChangePasswordRequest;
 import com.omnicharge.user.dto.UpdateProfileRequest;
 import com.omnicharge.user.dto.UserProfileResponse;
 import com.omnicharge.user.entity.AuthProvider;
@@ -31,7 +29,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class UserService implements IUserService {
+public class UserService implements InterfaceUserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;

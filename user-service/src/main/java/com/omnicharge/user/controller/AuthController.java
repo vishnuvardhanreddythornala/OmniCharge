@@ -2,7 +2,7 @@ package com.omnicharge.user.controller;
 
 import com.omnicharge.user.common.dto.ApiResponse;
 import com.omnicharge.user.dto.*;
-import com.omnicharge.user.service.IAuthService;
+import com.omnicharge.user.service.InterfaceAuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final IAuthService authService;
+    private final InterfaceAuthService authService;
     private final com.omnicharge.user.service.EmailVerificationService emailVerificationService;
     private final com.omnicharge.user.util.JwtUtil jwtUtil;
 
