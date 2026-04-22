@@ -74,43 +74,6 @@ public class UserService implements InterfaceUserService {
         return mapToProfileResponse(user);
     }
 
-    @Transactional
-    public void changePassword(Long userId, ChangePasswordRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-        // Verify auth provider is LOCAL
-        if (user.getAuthProvider() != AuthProvider.LOCAL) {
-            throw new BadRequestException("Password change is only available for manual registration accounts");
-        }
-
-        // Verify current password
-        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-            throw new UnauthorizedException("Current password is incorrect");
-        }
-
-        // Update password
-        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        userRepository.save(user);
-
-        // SECURITY: Revoke ALL refresh tokens for this user (force logout from all devices)
-        List<RefreshToken> allTokens = refreshTokenRepository.findByUserOrderByExpiryDateAsc(user);
-        for (RefreshToken rt : allTokens) {
-            String redisKey = "refresh:" + user.getId() + ":" + rt.getToken();
-            redisTemplate.delete(redisKey);
-        }
-        refreshTokenRepository.deleteByUser(user);
-        log.info("Password changed for user: {}. All {} refresh tokens revoked (global logout).", userId, allTokens.size());
-        
-        // Log business operation
-        Map<String, Object> context = new HashMap<>();
-        context.put("userId", userId);
-        context.put("email", user.getEmail());
-        context.put("devicesLoggedOut", allTokens.size());
-        publishBusinessLog("PASSWORD_CHANGE_GLOBAL_LOGOUT",
-            "User password changed & all sessions revoked: userId=" + userId + ", devicesLoggedOut=" + allTokens.size(),
-            context);
-    }
 
     // Admin methods
     public Page<UserProfileResponse> getAllUsers(String search, String status, Pageable pageable) {

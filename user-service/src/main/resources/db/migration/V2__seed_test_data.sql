@@ -2,11 +2,6 @@
 -- V2: Seed 200 users + 1 admin for production-grade testing
 -- ============================================================
 
--- Admin user (password: Login@630 bcrypt)
-INSERT IGNORE INTO users (email, full_name, mobile_number, password, auth_provider, role, is_active, is_mobile_verified, is_email_verified)
-VALUES ('vishnuvardhanreddythornala@gmail.com', 'OmniCharge Admin', '+919999900000',
-        '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
-        'LOCAL', 'ROLE_ADMIN', 1, 1, 1);
 
 -- Seed 200 dummy users with realistic Indian names & +91 numbers
 -- Using a deterministic pattern: email = userN@omnicharge.com, mobile = +919800000N

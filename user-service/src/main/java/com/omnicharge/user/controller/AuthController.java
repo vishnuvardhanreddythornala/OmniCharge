@@ -1,5 +1,10 @@
 package com.omnicharge.user.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import com.omnicharge.user.common.dto.ApiResponse;
 import com.omnicharge.user.dto.*;
 import com.omnicharge.user.service.InterfaceAuthService;
@@ -12,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Tag(name = "Authentication", description = "Authentication and Authorization endpoints")
 public class AuthController {
 
     private final InterfaceAuthService authService;
