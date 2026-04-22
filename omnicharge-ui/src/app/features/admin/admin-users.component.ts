@@ -309,15 +309,22 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
   }
 
   fetchUserStats() {
-    this.adminService.getAllUsers(0, 1, undefined, 'ALL').subscribe(res => {
-      if (res.success && res.data) this.totalUsersCount.set(res.data.totalElements);
-    });
     this.adminService.getAllUsers(0, 1, undefined, 'ACTIVE').subscribe(res => {
-      if (res.success && res.data) this.activeUsersCount.set(res.data.totalElements);
+      if (res.success && res.data) {
+        this.activeUsersCount.set(res.data.totalElements);
+        this.updateTotalCount();
+      }
     });
     this.adminService.getAllUsers(0, 1, undefined, 'SUSPENDED').subscribe(res => {
-      if (res.success && res.data) this.suspendedUsersCount.set(res.data.totalElements);
+      if (res.success && res.data) {
+        this.suspendedUsersCount.set(res.data.totalElements);
+        this.updateTotalCount();
+      }
     });
+  }
+
+  private updateTotalCount() {
+    this.totalUsersCount.set(this.activeUsersCount() + this.suspendedUsersCount());
   }
 
   ngOnDestroy() {

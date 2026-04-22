@@ -31,6 +31,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/operators/{id}").permitAll()
                         .requestMatchers("/api/plans/{id}").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         // All other endpoints require authentication (handled by gateway headers)
                         .anyRequest().authenticated()
                 )

@@ -25,7 +25,11 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class JwtAuthenticationFilterTest {
@@ -45,7 +49,7 @@ class JwtAuthenticationFilterTest {
     private final String secret = "12345678901234567890123456789012abcdefGHIJKL"; // 256 bits
 
     @BeforeEach
-    void setUp() {
+    void setUp()  {
         ReflectionTestUtils.setField(jwtAuthenticationFilter, "jwtSecret", secret);
     }
 

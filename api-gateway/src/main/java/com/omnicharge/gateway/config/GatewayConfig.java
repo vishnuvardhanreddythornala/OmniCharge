@@ -33,8 +33,9 @@ public class GatewayConfig {
         return builder.routes()
                 // User Service routes with rate limiting
                 .route("user-service", r -> r
-                        .path("/api/auth/**", "/api/users/**")
+                        .path("/api/auth/**", "/api/users/**", "/api/admin/users/**", "/api/admin/dashboard/**", "/v3/api-docs/user-service")
                         .filters(f -> f
+                                .rewritePath("/v3/api-docs/user-service", "/v3/api-docs")
                                 .requestRateLimiter(c -> c
                                         .setRateLimiter(rateLimiter)
                                         .setKeyResolver(keyResolver)
@@ -43,8 +44,9 @@ public class GatewayConfig {
                 
                 // Payment Service routes with rate limiting
                 .route("payment-service", r -> r
-                        .path("/api/payments/**", "/api/admin/payments/**")
+                        .path("/api/payments/**", "/api/admin/payments/**", "/v3/api-docs/payment-service")
                         .filters(f -> f
+                                .rewritePath("/v3/api-docs/payment-service", "/v3/api-docs")
                                 .requestRateLimiter(c -> c
                                         .setRateLimiter(rateLimiter)
                                         .setKeyResolver(keyResolver)
@@ -53,8 +55,9 @@ public class GatewayConfig {
                 
                 // Operator Service routes with rate limiting
                 .route("operator-service", r -> r
-                        .path("/api/operators/**", "/api/plans/**", "/api/admin/operators/**")
+                        .path("/api/operators/**", "/api/plans/**", "/api/admin/operators/**", "/api/admin/system/**", "/v3/api-docs/operator-service")
                         .filters(f -> f
+                                .rewritePath("/v3/api-docs/operator-service", "/v3/api-docs")
                                 .requestRateLimiter(c -> c
                                         .setRateLimiter(rateLimiter)
                                         .setKeyResolver(keyResolver)
@@ -63,8 +66,9 @@ public class GatewayConfig {
                 
                 // Recharge Service routes with rate limiting
                 .route("recharge-service", r -> r
-                        .path("/api/recharges/**", "/api/admin/recharges/**")
+                        .path("/api/recharges/**", "/api/admin/recharges/**", "/v3/api-docs/recharge-service")
                         .filters(f -> f
+                                .rewritePath("/v3/api-docs/recharge-service", "/v3/api-docs")
                                 .requestRateLimiter(c -> c
                                         .setRateLimiter(rateLimiter)
                                         .setKeyResolver(keyResolver)
@@ -73,8 +77,9 @@ public class GatewayConfig {
                 
                 // Notification Service routes with rate limiting
                 .route("notification-service", r -> r
-                        .path("/api/notifications/**", "/api/admin/notifications/**")
+                        .path("/api/notifications/**", "/api/admin/notifications/**", "/v3/api-docs/notification-service")
                         .filters(f -> f
+                                .rewritePath("/v3/api-docs/notification-service", "/v3/api-docs")
                                 .requestRateLimiter(c -> c
                                         .setRateLimiter(rateLimiter)
                                         .setKeyResolver(keyResolver)

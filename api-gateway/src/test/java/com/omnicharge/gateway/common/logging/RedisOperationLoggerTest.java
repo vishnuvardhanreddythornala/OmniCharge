@@ -1,5 +1,6 @@
 package com.omnicharge.gateway.common.logging;
 
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,8 +10,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.argThat;
 
 @org.mockito.junit.jupiter.MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
 @ExtendWith(MockitoExtension.class)
@@ -21,7 +26,7 @@ class RedisOperationLoggerTest {
     @InjectMocks private RedisOperationLogger logger;
 
     @BeforeEach
-    void setUp() {
+    void setUp()  {
         ReflectionTestUtils.setField(logger, "serviceName", "api-gateway");
     }
 

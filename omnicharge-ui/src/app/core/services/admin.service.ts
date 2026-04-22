@@ -132,7 +132,12 @@ export class AdminService {
     if (status && status !== 'ALL') {
       params = params.set('status', status);
     }
-    return this.http.get<ApiResponse<PagedResponse<UserProfileResponse>>>(this.ADMIN_USERS_API, { params });
+    
+    // Add cache-busting to prevent stale data
+    params = params.set('_t', new Date().getTime().toString());
+    const headers = { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' };
+    
+    return this.http.get<ApiResponse<PagedResponse<UserProfileResponse>>>(this.ADMIN_USERS_API, { params, headers });
   }
 
   toggleUserStatus(userId: number, active: boolean): Observable<ApiResponse<void>> {

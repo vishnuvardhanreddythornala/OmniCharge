@@ -12,8 +12,16 @@ import org.springframework.mail.javamail.JavaMailSender;
 
 import jakarta.mail.internet.MimeMessage;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class OtpEventConsumerTest {
@@ -30,7 +38,7 @@ class OtpEventConsumerTest {
 
     @Test
     @DisplayName("SMS OTP: Routes to SMS service for mobile numbers")
-    void consumeOtpEvent_SmsOtp() {
+    void consumeOtpEvent_SmsOtp()  {
         OtpEvent event = new OtpEvent();
         event.setMobileNumber("+919876543210");
         event.setOtp("123456");
@@ -65,7 +73,7 @@ class OtpEventConsumerTest {
         doThrow(new RuntimeException("Twilio down")).when(smsService).sendSms(anyString(), anyString());
 
         // Should not throw
-        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> {
+        assertDoesNotThrow(() -> {
             otpEventConsumer.consumeOtpEvent(event);
         });
     }

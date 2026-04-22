@@ -16,9 +16,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 @org.mockito.junit.jupiter.MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
 @ExtendWith(MockitoExtension.class)
@@ -35,7 +39,7 @@ class EmailServiceTest {
     private EmailService emailService;
 
     @BeforeEach
-    void setUp() {
+    void setUp()  {
         ReflectionTestUtils.setField(emailService, "fromEmail", "no-reply@omnicharge.com");
         ReflectionTestUtils.setField(emailService, "mailPassword", "testLogin@630");
     }
@@ -43,7 +47,7 @@ class EmailServiceTest {
     // ===== sendPaymentConfirmation =====
 
     @Test
-    void sendPaymentConfirmation_Success() {
+    void sendPaymentConfirmation_Success() throws Exception {
         PaymentCompletedEvent event = PaymentCompletedEvent.builder()
                 .transactionId("txn-1").rechargeId("rec-1").status("SUCCESS")
                 .amount(new BigDecimal("100")).mobileNumber("9876543210")
@@ -59,7 +63,7 @@ class EmailServiceTest {
     }
 
     @Test
-    void sendPaymentConfirmation_FailedStatus() {
+    void sendPaymentConfirmation_FailedStatus() throws Exception {
         PaymentCompletedEvent event = PaymentCompletedEvent.builder()
                 .transactionId("txn-2").rechargeId("rec-2").status("FAILED")
                 .amount(new BigDecimal("200")).mobileNumber("9876543210")
@@ -74,7 +78,7 @@ class EmailServiceTest {
     }
 
     @Test
-    void sendPaymentConfirmation_SmtpFailure() {
+    void sendPaymentConfirmation_SmtpFailure() throws Exception {
         PaymentCompletedEvent event = PaymentCompletedEvent.builder()
                 .transactionId("txn-1").status("SUCCESS").amount(new BigDecimal("100"))
                 .timestamp(LocalDateTime.now()).build();
@@ -89,7 +93,7 @@ class EmailServiceTest {
     // ===== sendRechargeConfirmation =====
 
     @Test
-    void sendRechargeConfirmation_Success() {
+    void sendRechargeConfirmation_Success() throws Exception {
         RechargeCompletedEvent event = RechargeCompletedEvent.builder()
                 .rechargeId("rec-1").status("SUCCESS").amount(new BigDecimal("199"))
                 .mobileNumber("9876543210").operatorName("Vi").planName("Unlimited")
@@ -104,7 +108,7 @@ class EmailServiceTest {
     }
 
     @Test
-    void sendRechargeConfirmation_FailedStatus() {
+    void sendRechargeConfirmation_FailedStatus() throws Exception {
         RechargeCompletedEvent event = RechargeCompletedEvent.builder()
                 .rechargeId("rec-2").status("FAILED").amount(new BigDecimal("199"))
                 .mobileNumber("9876543210").operatorName("BSNL").planName("Basic")
@@ -118,7 +122,7 @@ class EmailServiceTest {
     }
 
     @Test
-    void sendRechargeConfirmation_SmtpFailure() {
+    void sendRechargeConfirmation_SmtpFailure() throws Exception {
         RechargeCompletedEvent event = RechargeCompletedEvent.builder()
                 .rechargeId("rec-1").status("SUCCESS").timestamp(LocalDateTime.now()).build();
 
@@ -132,7 +136,7 @@ class EmailServiceTest {
     // ===== sendPlanExpiryReminder =====
 
     @Test
-    void sendPlanExpiryReminder_Success() {
+    void sendPlanExpiryReminder_Success() throws Exception {
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
 
         emailService.sendPlanExpiryReminder("test@test.com", "John", "Airtel", "Unlimited", "9876543210", 5);
@@ -142,7 +146,7 @@ class EmailServiceTest {
     }
 
     @Test
-    void sendPlanExpiryReminder_SmtpFailure() {
+    void sendPlanExpiryReminder_SmtpFailure() throws Exception {
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
         doThrow(new RuntimeException("SMTP ERROR")).when(mailSender).send(mimeMessage);
 
@@ -155,7 +159,7 @@ class EmailServiceTest {
     // ===== sendPlanExpiredNotification =====
 
     @Test
-    void sendPlanExpiredNotification_Success() {
+    void sendPlanExpiredNotification_Success() throws Exception {
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
 
         emailService.sendPlanExpiredNotification("test@test.com", "John", "Airtel", "Unlimited", "9876543210");
@@ -165,7 +169,7 @@ class EmailServiceTest {
     }
 
     @Test
-    void sendPlanExpiredNotification_SmtpFailure() {
+    void sendPlanExpiredNotification_SmtpFailure() throws Exception {
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
         doThrow(new RuntimeException("SMTP ERROR")).when(mailSender).send(mimeMessage);
 
@@ -178,18 +182,18 @@ class EmailServiceTest {
     // ===== init =====
 
     @Test
-    void init_LogsConfiguration() {
+    void init_LogsConfiguration()  {
         assertDoesNotThrow(() -> emailService.init());
     }
 
     @Test
-    void init_NullPassword() {
+    void init_NullPassword()  {
         ReflectionTestUtils.setField(emailService, "mailPassword", null);
         assertDoesNotThrow(() -> emailService.init());
     }
 
     @Test
-    void init_ShortPassword() {
+    void init_ShortPassword()  {
         ReflectionTestUtils.setField(emailService, "mailPassword", "ab");
         assertDoesNotThrow(() -> emailService.init());
     }

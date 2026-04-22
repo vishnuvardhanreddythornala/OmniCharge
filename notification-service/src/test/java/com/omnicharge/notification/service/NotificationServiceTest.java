@@ -10,6 +10,9 @@ import com.omnicharge.notification.entity.NotificationStatus;
 import com.omnicharge.notification.entity.NotificationType;
 import com.omnicharge.notification.repository.NotificationRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -19,9 +22,18 @@ import org.springframework.data.domain.*;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
 
 @org.mockito.junit.jupiter.MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
 @ExtendWith(MockitoExtension.class)
@@ -163,57 +175,24 @@ class NotificationServiceTest {
 
     // ===== getAllNotifications =====
 
-    @Test
-    void getAllNotifications_CategoryNull() {
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"ALL", "INVALID_GARBAGE"})
+    void getAllNotifications_FallsBackToAll(String category) {
         Page<Notification> page = new PageImpl<>(List.of());
         when(notificationRepository.findAll(any(Pageable.class))).thenReturn(page);
 
-        Page<NotificationResponse> result = notificationService.getAllNotifications(null, PageRequest.of(0, 10));
+        Page<NotificationResponse> result = notificationService.getAllNotifications(category, PageRequest.of(0, 10));
         assertNotNull(result);
     }
 
-    @Test
-    void getAllNotifications_CategoryAll() {
-        Page<Notification> page = new PageImpl<>(List.of());
-        when(notificationRepository.findAll(any(Pageable.class))).thenReturn(page);
-
-        Page<NotificationResponse> result = notificationService.getAllNotifications("ALL", PageRequest.of(0, 10));
-        assertNotNull(result);
-    }
-
-    @Test
-    void getAllNotifications_CategoryUser() {
+    @ParameterizedTest
+    @ValueSource(strings = {"USER", "SYSTEM", "PAYMENT_SUCCESS"})
+    void getAllNotifications_WithCategory(String category) {
         Page<Notification> page = new PageImpl<>(List.of());
         when(notificationRepository.findByCategoryIn(anyList(), any())).thenReturn(page);
 
-        Page<NotificationResponse> result = notificationService.getAllNotifications("USER", PageRequest.of(0, 10));
-        assertNotNull(result);
-    }
-
-    @Test
-    void getAllNotifications_CategorySystem() {
-        Page<Notification> page = new PageImpl<>(List.of());
-        when(notificationRepository.findByCategoryIn(anyList(), any())).thenReturn(page);
-
-        Page<NotificationResponse> result = notificationService.getAllNotifications("SYSTEM", PageRequest.of(0, 10));
-        assertNotNull(result);
-    }
-
-    @Test
-    void getAllNotifications_DirectCategory() {
-        Page<Notification> page = new PageImpl<>(List.of());
-        when(notificationRepository.findByCategoryIn(anyList(), any())).thenReturn(page);
-
-        Page<NotificationResponse> result = notificationService.getAllNotifications("PAYMENT_SUCCESS", PageRequest.of(0, 10));
-        assertNotNull(result);
-    }
-
-    @Test
-    void getAllNotifications_UnknownCategory_FallsBackToAll() {
-        Page<Notification> page = new PageImpl<>(List.of());
-        when(notificationRepository.findAll(any(Pageable.class))).thenReturn(page);
-
-        Page<NotificationResponse> result = notificationService.getAllNotifications("INVALID_GARBAGE", PageRequest.of(0, 10));
+        Page<NotificationResponse> result = notificationService.getAllNotifications(category, PageRequest.of(0, 10));
         assertNotNull(result);
     }
 }

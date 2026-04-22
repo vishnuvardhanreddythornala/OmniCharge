@@ -50,9 +50,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints - actuator for health checks
                 .requestMatchers("/actuator/**").permitAll()
-                
-                // Test endpoints - allow without authentication for testing
+                .requestMatchers("/api/internal/**").permitAll()
                 .requestMatchers("/api/test/**").permitAll()
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
                 
                 // All other requests require authentication
                 .anyRequest().authenticated()

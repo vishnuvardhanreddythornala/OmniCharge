@@ -15,9 +15,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 
 @org.mockito.junit.jupiter.MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
 @ExtendWith(MockitoExtension.class)
@@ -29,7 +36,7 @@ class FallbackLogReplayerFullTest {
     private static final ObjectMapper MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @BeforeEach
-    void setUp() {
+    void setUp()  {
         replayer = new FallbackLogReplayer(rabbitTemplate);
         ReflectionTestUtils.setField(replayer, "serviceName", "notification-service");
         ReflectionTestUtils.setField(replayer, "fallbackDir", tempDir.toString());
@@ -42,7 +49,7 @@ class FallbackLogReplayerFullTest {
     }
 
     @Test
-    void replayLogs_NoFiles() throws Exception {
+    void replayLogs_NoFiles()  throws Exception {
         invokeReplayLogs();
         verify(rabbitTemplate, never()).convertAndSend(anyString(), anyString(), any(LogEvent.class));
     }

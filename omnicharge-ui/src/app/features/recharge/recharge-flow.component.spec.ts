@@ -259,29 +259,36 @@ describe('RechargeFlowComponent', () => {
     });
 
     it('onOtpInput should focus next input on valid digit', () => {
-      document.body.innerHTML = `
+      const container = document.createElement('div');
+      container.innerHTML = `
         <input id="otp-input-0" type="text" />
         <input id="otp-input-1" type="text" />
       `;
+      document.body.appendChild(container);
       const nextSpy = spyOn(document.getElementById('otp-input-1') as HTMLInputElement, 'focus');
       component.onOtpInput(0, { target: { value: '5' } });
       expect(nextSpy).toHaveBeenCalled();
+      container.remove();
     });
 
     it('onOtpKeydown should focus prev input and clear on Backspace', () => {
-      document.body.innerHTML = `
+      const container = document.createElement('div');
+      container.innerHTML = `
         <input id="otp-input-0" type="text" />
         <input id="otp-input-1" type="text" />
       `;
+      document.body.appendChild(container);
       component.verificationOtpDigits = ['1', '', '', '', '', ''];
       const prevSpy = spyOn(document.getElementById('otp-input-0') as HTMLInputElement, 'focus');
       component.onOtpKeydown(1, new KeyboardEvent('keydown', { key: 'Backspace' }));
       expect(prevSpy).toHaveBeenCalled();
       expect(component.verificationOtpDigits[0]).toBe('');
+      container.remove();
     });
 
     it('onOtpPaste should populate digits and focus last input', () => {
-      document.body.innerHTML = `
+      const container = document.createElement('div');
+      container.innerHTML = `
         <input id="otp-input-0" type="text" />
         <input id="otp-input-1" type="text" />
         <input id="otp-input-2" type="text" />
@@ -289,6 +296,7 @@ describe('RechargeFlowComponent', () => {
         <input id="otp-input-4" type="text" />
         <input id="otp-input-5" type="text" />
       `;
+      document.body.appendChild(container);
       const focusSpy = spyOn(document.getElementById('otp-input-5') as HTMLInputElement, 'focus');
       
       const clipboardEvent = new Event('paste') as any;
@@ -297,6 +305,7 @@ describe('RechargeFlowComponent', () => {
       component.onOtpPaste(clipboardEvent);
       expect(component.verificationOtpDigits).toEqual(['1', '2', '3', '4', '5', '6']);
       expect(focusSpy).toHaveBeenCalled();
+      container.remove();
     });
 
     it('requestVerificationOtp should validate mobile before sending', async () => {

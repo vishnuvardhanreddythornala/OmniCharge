@@ -9,8 +9,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @org.mockito.junit.jupiter.MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
 @ExtendWith(MockitoExtension.class)
@@ -23,7 +27,7 @@ class SmsServiceTest {
     private SmsService smsService;
 
     @BeforeEach
-    void setUp() {
+    void setUp()  {
         ReflectionTestUtils.setField(smsService, "accountSid", "invalid_sid");
         ReflectionTestUtils.setField(smsService, "authToken", "invalid_token");
         ReflectionTestUtils.setField(smsService, "fromNumber", "+1234567890");
@@ -57,7 +61,7 @@ class SmsServiceTest {
         doThrow(new RuntimeException("Log publish failed")).when(logEventPublisher).publish(any());
 
         // Even if log publisher fails, sendSms should handle it gracefully
-        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> {
+        assertDoesNotThrow(() -> {
             smsService.sendSms("9876543210", "Test Message");
         });
     }

@@ -1,5 +1,6 @@
 package com.omnicharge.logging.service;
 
+
 import com.omnicharge.logging.common.logging.LogEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @ExtendWith(MockitoExtension.class)
 class LogFileWriterServiceTest {
@@ -23,7 +25,7 @@ class LogFileWriterServiceTest {
     @TempDir Path tempDir;
 
     @BeforeEach
-    void setUp() {
+    void setUp()  {
         ReflectionTestUtils.setField(service, "logBaseDir", tempDir.toString());
     }
 

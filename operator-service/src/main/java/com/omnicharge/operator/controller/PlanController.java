@@ -4,6 +4,10 @@ import com.omnicharge.operator.common.dto.ApiResponse;
 import com.omnicharge.operator.dto.PlanResponse;
 import com.omnicharge.operator.entity.PlanCategory;
 import com.omnicharge.operator.service.PlanQueryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +21,8 @@ import java.math.BigDecimal;
 @RestController
 @RequestMapping("/api/plans")
 @RequiredArgsConstructor
+@Tag(name = "Plans", description = "User-facing: Search and view recharge plans")
+@SecurityRequirement(name = "bearerAuth")
 public class PlanController {
 
     private final PlanQueryService planQueryService;

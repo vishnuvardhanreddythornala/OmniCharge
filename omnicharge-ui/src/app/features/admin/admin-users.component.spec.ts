@@ -40,16 +40,15 @@ describe('AdminUsersComponent', () => {
   it('should create and load data on init', () => {
     fixture.detectChanges();
     
-    // Stats fetched 3 times (ALL, ACTIVE, SUSPENDED)
-    expect(adminSpy.getAllUsers).toHaveBeenCalledWith(0, 1, undefined, 'ALL');
+    // Stats fetched for ACTIVE and SUSPENDED counts
     expect(adminSpy.getAllUsers).toHaveBeenCalledWith(0, 1, undefined, 'ACTIVE');
     expect(adminSpy.getAllUsers).toHaveBeenCalledWith(0, 1, undefined, 'SUSPENDED');
     
-    // Load users fetched
+    // Load users fetched with default 'ALL' filter
     expect(adminSpy.getAllUsers).toHaveBeenCalledWith(0, 10, undefined, 'ALL');
     
     expect(component.users().length).toBe(2);
-    expect(component.totalUsersCount()).toBe(2);
+    expect(component.totalUsersCount()).toBe(4); // activeCount(2) + suspendedCount(2)
   });
 
   it('should update search query via subject', fakeAsync(() => {

@@ -1,4 +1,6 @@
 package com.omnicharge.notification.controller;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import com.omnicharge.notification.common.logging.LogEventPublisher;
 import com.omnicharge.notification.dto.NotificationResponse;
@@ -18,10 +20,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = AdminNotificationController.class, excludeAutoConfiguration = {
         JpaRepositoriesAutoConfiguration.class, DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
@@ -32,7 +33,6 @@ class AdminNotificationControllerTest {
     @MockitoBean(name = "logEventPublisher") private LogEventPublisher logEventPublisher;
     private final MockMvc mockMvc;
     @MockitoBean private INotificationService notificationService;
-
 
 
     @Autowired

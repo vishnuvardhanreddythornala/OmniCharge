@@ -69,7 +69,11 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             "/api/operators/active",
             "/api/operators/",
             "/api/plans/",
-            "/actuator"
+            "/actuator",
+            "/v3/api-docs",
+            "/swagger-ui",
+            "/swagger-ui.html",
+            "/webjars"
     );
     
     private static final List<String> PROFILE_INCOMPLETE_ALLOWED_PATHS = Arrays.asList(

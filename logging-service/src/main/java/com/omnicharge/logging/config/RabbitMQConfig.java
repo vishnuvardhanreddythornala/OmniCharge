@@ -47,14 +47,37 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+    public MessageConverter jsonMessageConverter(ObjectMapper objectMapper) {
+        Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter(objectMapper);
+        
+        // Instruct the type mapper to always return the local LogEvent type.
+        // This completely bypasses the __TypeId__ header from the publisher,
+        // preventing ClassNotFoundExceptions when packages don't match.
+        org.springframework.amqp.support.converter.DefaultJackson2JavaTypeMapper typeMapper = 
+            new org.springframework.amqp.support.converter.DefaultJackson2JavaTypeMapper() {
+                @Override
+                public com.fasterxml.jackson.databind.JavaType toJavaType(org.springframework.amqp.core.MessageProperties properties) {
+                    return com.fasterxml.jackson.databind.type.TypeFactory.defaultInstance()
+                            .constructType(com.omnicharge.logging.common.logging.LogEvent.class);
+                }
+            };
+        converter.setJavaTypeMapper(typeMapper);
+        
+        return converter;
     }
 
     @Bean
-    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, MessageConverter jsonMessageConverter) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
-        template.setMessageConverter(jsonMessageConverter());
+        template.setMessageConverter(jsonMessageConverter);
         return template;
+    }
+
+    @Bean
+    public org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(ConnectionFactory connectionFactory, MessageConverter jsonMessageConverter) {
+        org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory factory = new org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory();
+        factory.setConnectionFactory(connectionFactory);
+        factory.setMessageConverter(jsonMessageConverter);
+        return factory;
     }
 }

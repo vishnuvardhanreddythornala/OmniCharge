@@ -1,0 +1,57 @@
+# OmniCharge OpenAPI (Swagger) Documentation Implementation
+
+A full audit of the OmniCharge platform revealed that while the `springdoc-openapi` dependencies were present in the `pom.xml` files, **zero OpenAPI annotations or configurations** existed in the codebase. Swagger UI was completely broken across the entire platform.
+
+I have implemented a **production-grade OpenAPI documentation system** across the core microservices and aggregated them into a single, unified Swagger Portal via the API Gateway.
+
+---
+
+## 1. Unified Swagger Portal (API Gateway)
+
+Instead of navigating to 5 different ports to view documentation, the API Gateway now serves as the centralized portal. 
+
+- **Configured Aggregation**: Updated `api-gateway.properties` in the `config-repo` to map downstream swagger definitions.
+- **Security Bypass**: Added `/v3/api-docs` and `/swagger-ui/**` to the `PUBLIC_PATHS` whitelist inside `JwtAuthenticationFilter.java` so developers can view documentation without needing an active JWT.
+- **Shared Configuration**: Standardized `springdoc.api-docs.path=/v3/api-docs` across all services via the shared `application.properties`.
+
+> [!TIP]
+> The single Swagger portal will be available at **`http://localhost:8080/webjars/swagger-ui/index.html`** (or `/swagger-ui.html`) once the API Gateway reboots. A dropdown in the top right will allow you to switch between User, Payment, Operator, and Recharge APIs.
+
+---
+
+## 2. Microservice Implementations
+
+For each core service (`user-service`, `payment-service`, `recharge-service`, `operator-service`), I implemented the following:
+
+### 🛡️ OpenAPI Configurations (`OpenApiConfig.java`)
+Added explicit `@Configuration` beans defining:
+- Rich descriptions of the service's role in the architecture
+- Dynamic server routing (Direct Local, Gateway Local, and Production URL schemas)
+- Global JWT Bearer Authentication schema definition (`bearerAuth`)
+
+### 📝 Controller Annotations
+Heavily annotated the REST Controllers with the OpenAPI specification:
+- **`@Tag`**: Grouped endpoints by logical domains (e.g., "Authentication", "Admin — Users").
+- **`@Operation`**: Added clear summaries and detailed multi-line descriptions of internal behavior (e.g., explaining SAGA steps).
+- **`@Parameter`**: Described query parameters, path variables, and hid internal headers like `X-User-Id` that are injected by the API Gateway.
+- **`@ApiResponses`**: Defined strict HTTP response codes (`200`, `201`, `400`, `401`, `403`, `404`) and error structures.
+- **`@SecurityRequirement`**: Secured protected endpoints with the defined JWT schema.
+
+#### Annotated Controllers:
+- `user-service`: `AuthController`, `UserController`, `AdminUserController`
+- `payment-service`: `PaymentController`, `AdminPaymentController`
+- `recharge-service`: `RechargeController`
+- `operator-service`: `PlanController`, `AdminOperatorController`
+
+---
+
+## 3. How to Verify
+
+1. The project is currently being rebuilt (`mvn clean package`). Once completed, you will need to restart the Docker cluster.
+2. Navigate to `http://localhost:8080/webjars/swagger-ui/index.html` (or your gateway's swagger-ui path).
+3. Use the **"Select a definition"** dropdown to view different microservices.
+4. Click the **"Authorize"** button and inject a JWT token (obtained from the User Service login endpoint).
+5. Use the **"Try it out"** feature to execute API calls directly from the browser.
+
+> [!IMPORTANT]
+> Because the API Gateway routes requests to downstream services using `/api/<domain>`, the Swagger UI configured in the Gateway will automatically prefix requests correctly through the Gateway's routing engine.

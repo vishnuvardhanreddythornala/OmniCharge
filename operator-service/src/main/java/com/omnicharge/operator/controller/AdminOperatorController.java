@@ -8,6 +8,10 @@ import com.omnicharge.operator.dto.PlanResponse;
 import com.omnicharge.operator.entity.PlanCategory;
 import com.omnicharge.operator.service.IOperatorService;
 import com.omnicharge.operator.service.IPlanService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +29,8 @@ import java.util.List;
 @RequestMapping("/api/admin/operators")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
+@Tag(name = "Admin — Operators", description = "Admin-only operations")
+@SecurityRequirement(name = "bearerAuth")
 public class AdminOperatorController {
 
     private final IOperatorService operatorService;

@@ -17,8 +17,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -42,7 +43,7 @@ class NotificationControllerTest {
         ResponseEntity<ApiResponse<Page<NotificationResponse>>> response = notificationController.getUserNotifications(
                 1L, 0, 10, "createdDate", "DESC");
                 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertTrue(response.getBody().isSuccess());
     }
 
@@ -55,7 +56,7 @@ class NotificationControllerTest {
         ResponseEntity<ApiResponse<Page<NotificationResponse>>> response = notificationController.getUserNotifications(
                 1L, 0, 10, "createdDate", "ASC");
                 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertTrue(response.getBody().isSuccess());
     }
 
@@ -63,7 +64,7 @@ class NotificationControllerTest {
     void markAsRead() {
         doNothing().when(notificationService).markAsRead(10L, 1L);
         ResponseEntity<ApiResponse<Void>> response = notificationController.markAsRead(10L, 1L);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         verify(notificationService, times(1)).markAsRead(10L, 1L);
     }
 
@@ -71,7 +72,7 @@ class NotificationControllerTest {
     void getUnreadCount() {
         when(notificationService.getUnreadCount(1L)).thenReturn(5L);
         ResponseEntity<ApiResponse<Long>> response = notificationController.getUnreadCount(1L);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals(5L, response.getBody().getData());
     }
 }

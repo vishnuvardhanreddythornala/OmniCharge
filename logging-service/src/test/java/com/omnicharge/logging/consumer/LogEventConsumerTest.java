@@ -14,7 +14,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
 class LogEventConsumerTest {
@@ -41,7 +44,7 @@ class LogEventConsumerTest {
 
     @Test
     @DisplayName("SUCCESS: Dispatches event to both file writer and persistence")
-    void consumeLogEvent_Success() {
+    void consumeLogEvent_Success()  {
         logEventConsumer.consumeLogEvent(validEvent);
 
         verify(logFileWriterService, times(1)).writeToFile(validEvent);
@@ -50,7 +53,7 @@ class LogEventConsumerTest {
 
     @Test
     @DisplayName("FAIL: File writer failure does not crash consumer")
-    void consumeLogEvent_FileWriterFailure() {
+    void consumeLogEvent_FileWriterFailure()  {
         doThrow(new RuntimeException("Disk full")).when(logFileWriterService).writeToFile(any());
 
         assertDoesNotThrow(() -> logEventConsumer.consumeLogEvent(validEvent));
