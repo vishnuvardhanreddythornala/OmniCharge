@@ -1,4 +1,8 @@
 package com.omnicharge.user.controller;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import com.omnicharge.user.dto.UserProfileResponse;
 import com.omnicharge.user.service.InterfaceUserService;
@@ -18,10 +22,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = AdminUserController.class, excludeAutoConfiguration = {
         JpaRepositoriesAutoConfiguration.class, DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
@@ -32,7 +34,6 @@ class AdminUserControllerTest {
     @MockitoBean(name = "logEventPublisher") private LogEventPublisher logEventPublisher;
     private final MockMvc mockMvc;
     @MockitoBean private InterfaceUserService userService;
-
 
 
     @Autowired

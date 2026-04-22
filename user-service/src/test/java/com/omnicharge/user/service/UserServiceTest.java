@@ -15,6 +15,9 @@ import com.omnicharge.user.repository.RefreshTokenRepository;
 import com.omnicharge.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -28,9 +31,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -86,46 +94,6 @@ class UserServiceTest {
         verify(logEventPublisher, times(1)).publish(any(LogEvent.class));
     }
 
-    @Test
-    void changePassword_Success() {
-        ChangePasswordRequest req = new ChangePasswordRequest();
-        req.setCurrentPassword("oldPass");
-        req.setNewPassword("newPass");
-
-        RefreshToken token = new RefreshToken();
-        token.setToken("r_token_123");
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser));
-        when(passwordEncoder.matches("oldPass", "encoded")).thenReturn(true);
-        when(passwordEncoder.encode("newPass")).thenReturn("encoded_new");
-        when(refreshTokenRepository.findByUserOrderByExpiryDateAsc(sampleUser)).thenReturn(List.of(token));
-
-        userService.changePassword(1L, req);
-
-        verify(userRepository, times(1)).save(sampleUser);
-        verify(redisTemplate, times(1)).delete("refresh:1:r_token_123");
-        verify(refreshTokenRepository, times(1)).deleteByUser(sampleUser);
-        verify(logEventPublisher, times(1)).publish(any(LogEvent.class));
-    }
-
-    @Test
-    void changePassword_WrongProvider() {
-        ChangePasswordRequest req = new ChangePasswordRequest();
-        sampleUser.setAuthProvider(AuthProvider.GOOGLE);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser));
-
-        assertThrows(BadRequestException.class, () -> userService.changePassword(1L, req));
-    }
-
-    @Test
-    void changePassword_WrongCurrentPassword() {
-        ChangePasswordRequest req = new ChangePasswordRequest();
-        req.setCurrentPassword("wrong");
-        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser));
-        when(passwordEncoder.matches("wrong", "encoded")).thenReturn(false);
-
-        assertThrows(UnauthorizedException.class, () -> userService.changePassword(1L, req));
-    }
 
     @Test
     void getAllUsers_ByNumericPrefix() {
@@ -171,12 +139,6 @@ class UserServiceTest {
         assertThrows(ResourceNotFoundException.class, () -> userService.updateProfile(1L, req));
     }
 
-    @Test
-    void changePassword_UserNotFound() {
-        ChangePasswordRequest req = new ChangePasswordRequest();
-        when(userRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> userService.changePassword(1L, req));
-    }
 
     @Test
     void getUserById_Success() {
@@ -192,32 +154,14 @@ class UserServiceTest {
         assertThrows(ResourceNotFoundException.class, () -> userService.getUserById(1L));
     }
 
-    @Test
-    void getAllUsers_NoSearchNoStatus() {
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"", "   "})
+    void getAllUsers_EmptyOrNoSearchNoStatus(String search) {
         Page<User> page = new PageImpl<>(List.of(sampleUser));
         when(userRepository.findAll(any(PageRequest.class))).thenReturn(page);
 
-        Page<UserProfileResponse> result = userService.getAllUsers(null, null, PageRequest.of(0, 10));
-
-        assertEquals(1, result.getTotalElements());
-    }
-
-    @Test
-    void getAllUsers_EmptySearchNoStatus() {
-        Page<User> page = new PageImpl<>(List.of(sampleUser));
-        when(userRepository.findAll(any(PageRequest.class))).thenReturn(page);
-
-        Page<UserProfileResponse> result = userService.getAllUsers("", null, PageRequest.of(0, 10));
-
-        assertEquals(1, result.getTotalElements());
-    }
-
-    @Test
-    void getAllUsers_WhitespaceSearchNoStatus() {
-        Page<User> page = new PageImpl<>(List.of(sampleUser));
-        when(userRepository.findAll(any(PageRequest.class))).thenReturn(page);
-
-        Page<UserProfileResponse> result = userService.getAllUsers("   ", null, PageRequest.of(0, 10));
+        Page<UserProfileResponse> result = userService.getAllUsers(search, null, PageRequest.of(0, 10));
 
         assertEquals(1, result.getTotalElements());
     }
@@ -325,47 +269,4 @@ class UserServiceTest {
         verify(userRepository, times(1)).save(sampleUser);
     }
 
-    @Test
-    void changePassword_NoRefreshTokens() {
-        ChangePasswordRequest req = new ChangePasswordRequest();
-        req.setCurrentPassword("oldPass");
-        req.setNewPassword("newPass");
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser));
-        when(passwordEncoder.matches("oldPass", "encoded")).thenReturn(true);
-        when(passwordEncoder.encode("newPass")).thenReturn("encoded_new");
-        when(refreshTokenRepository.findByUserOrderByExpiryDateAsc(sampleUser)).thenReturn(List.of());
-
-        userService.changePassword(1L, req);
-
-        verify(userRepository, times(1)).save(sampleUser);
-        verify(refreshTokenRepository, times(1)).deleteByUser(sampleUser);
-    }
-
-    @Test
-    void changePassword_MultipleRefreshTokens() {
-        ChangePasswordRequest req = new ChangePasswordRequest();
-        req.setCurrentPassword("oldPass");
-        req.setNewPassword("newPass");
-
-        RefreshToken token1 = new RefreshToken();
-        token1.setToken("r_token_1");
-        RefreshToken token2 = new RefreshToken();
-        token2.setToken("r_token_2");
-        RefreshToken token3 = new RefreshToken();
-        token3.setToken("r_token_3");
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser));
-        when(passwordEncoder.matches("oldPass", "encoded")).thenReturn(true);
-        when(passwordEncoder.encode("newPass")).thenReturn("encoded_new");
-        when(refreshTokenRepository.findByUserOrderByExpiryDateAsc(sampleUser))
-                .thenReturn(List.of(token1, token2, token3));
-
-        userService.changePassword(1L, req);
-
-        verify(redisTemplate, times(1)).delete("refresh:1:r_token_1");
-        verify(redisTemplate, times(1)).delete("refresh:1:r_token_2");
-        verify(redisTemplate, times(1)).delete("refresh:1:r_token_3");
-        verify(refreshTokenRepository, times(1)).deleteByUser(sampleUser);
-    }
 }

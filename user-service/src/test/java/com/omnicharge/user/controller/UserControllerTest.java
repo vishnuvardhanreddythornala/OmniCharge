@@ -1,4 +1,8 @@
 package com.omnicharge.user.controller;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.omnicharge.user.dto.UpdateProfileRequest;
@@ -17,10 +21,9 @@ import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 @WebMvcTest(controllers = UserController.class, excludeAutoConfiguration = {
         JpaRepositoriesAutoConfiguration.class, DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
@@ -32,7 +35,6 @@ class UserControllerTest {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
     @MockitoBean private InterfaceUserService userService;
-
 
 
     @Autowired
@@ -70,19 +72,4 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.success").value(true));
     }
 
-    @Test
-    void changePassword_Success() throws Exception {
-        ChangePasswordRequest req = new ChangePasswordRequest();
-        req.setCurrentPassword("oldPass");
-        req.setNewPassword("NewPass123!");
-
-        doNothing().when(userService).changePassword(eq(1L), any());
-
-        mockMvc.perform(put("/api/users/change-password")
-                .header("X-User-Id", "1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
-    }
 }

@@ -1,5 +1,6 @@
 package com.omnicharge.user.service;
 
+
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.omnicharge.user.common.exception.BadRequestException;
@@ -29,11 +30,21 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.mock;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -159,7 +170,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void sendEmailOtp_Success() {
+    void sendEmailOtp_Success() throws Exception {
         SendEmailOtpRequest req = new SendEmailOtpRequest();
         req.setEmail("user@test.com");
 
@@ -173,7 +184,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void sendEmailOtp_AdminForbidden() {
+    void sendEmailOtp_AdminForbidden()  {
         SendEmailOtpRequest req = new SendEmailOtpRequest();
         req.setEmail("admin@test.com");
 
@@ -183,7 +194,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void verifyEmailOtp_Success() {
+    void verifyEmailOtp_Success()  {
         VerifyEmailOtpRequest req = new VerifyEmailOtpRequest();
         req.setEmail("user@test.com");
         req.setOtp("123456");
@@ -246,7 +257,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void verifyMobileOtp_Success() {
+    void verifyMobileOtp_Success()  {
         VerifyMobileOtpRequest req = new VerifyMobileOtpRequest();
         req.setMobileNumber("9876543210");
         req.setOtp("123456");
@@ -260,7 +271,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void sendMobileOtp_Success() {
+    void sendMobileOtp_Success() throws Exception {
         SendMobileOtpRequest req = new SendMobileOtpRequest();
         req.setMobileNumber("9876543210");
 

@@ -1,4 +1,6 @@
 package com.omnicharge.user.controller;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import com.omnicharge.user.dto.UserProfileResponse;
 import com.omnicharge.user.service.InterfaceUserService;
@@ -16,7 +18,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = InternalUserController.class, excludeAutoConfiguration = {
         JpaRepositoriesAutoConfiguration.class, DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
@@ -27,7 +28,6 @@ class InternalUserControllerTest {
     @MockitoBean(name = "logEventPublisher") private LogEventPublisher logEventPublisher;
     private final MockMvc mockMvc;
     @MockitoBean private InterfaceUserService userService;
-
 
 
     @Autowired

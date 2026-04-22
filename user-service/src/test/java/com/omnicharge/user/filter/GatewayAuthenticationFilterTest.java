@@ -16,8 +16,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class GatewayAuthenticationFilterTest {
@@ -38,12 +43,12 @@ class GatewayAuthenticationFilterTest {
     private GatewayAuthenticationFilter filter;
 
     @BeforeEach
-    void setUp() {
+    void setUp()  {
         SecurityContextHolder.clearContext();
     }
 
     @AfterEach
-    void tearDown() {
+    void tearDown()  {
         SecurityContextHolder.clearContext();
     }
 

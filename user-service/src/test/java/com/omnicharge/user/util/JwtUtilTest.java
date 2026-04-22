@@ -5,14 +5,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class JwtUtilTest {
 
     private JwtUtil jwtUtil;
 
     @BeforeEach
-    void setUp() {
+    void setUp()  {
         jwtUtil = new JwtUtil();
         // Inject variables mimicking @Value annotation behaviour
         ReflectionTestUtils.setField(jwtUtil, "jwtSecret", "omnicharge-super-secret-key-for-jwt-token-generation-minimum-256-bits");

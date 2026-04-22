@@ -24,8 +24,12 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class EmailVerificationServiceTest {
@@ -43,7 +47,7 @@ class EmailVerificationServiceTest {
     private User sampleUser;
 
     @BeforeEach
-    void setUp() {
+    void setUp()  {
         sampleUser = new User();
         sampleUser.setId(1L);
         sampleUser.setEmail("test@ex.com");
@@ -51,7 +55,7 @@ class EmailVerificationServiceTest {
     }
 
     @Test
-    void sendVerificationOtp_Success() {
+    void sendVerificationOtp_Success() throws Exception {
         when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser));
         when(userRepository.existsByEmail("new@ex.com")).thenReturn(false);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
@@ -66,7 +70,7 @@ class EmailVerificationServiceTest {
     }
 
     @Test
-    void sendVerificationOtp_DuplicateEmail() {
+    void sendVerificationOtp_DuplicateEmail()  {
         User otherUser = new User();
         otherUser.setId(2L);
         otherUser.setEmail("new@ex.com");
@@ -78,7 +82,7 @@ class EmailVerificationServiceTest {
     }
 
     @Test
-    void sendVerificationOtp_MailFailureThrowsException() {
+    void sendVerificationOtp_MailFailureThrowsException() throws Exception {
         when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser));
         when(userRepository.existsByEmail("new@ex.com")).thenReturn(false);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
@@ -90,7 +94,7 @@ class EmailVerificationServiceTest {
     }
 
     @Test
-    void verifyEmail_Success() {
+    void verifyEmail_Success()  {
         when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser));
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get("email-verify:1")).thenReturn("123456");

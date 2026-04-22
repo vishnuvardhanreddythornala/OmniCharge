@@ -24,7 +24,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -59,7 +62,7 @@ class AuthControllerTest {
         }
 
         @BeforeEach
-        void setUp() {
+        void setUp()  {
                 mockAuthResponse = AuthResponse.builder()
                                 .accessToken("mock_access_token")
                                 .refreshToken("mock_refresh_token")
@@ -294,7 +297,7 @@ class AuthControllerTest {
         }
 
         @Test
-        void verifyEmail_Success() throws Exception {
+        void verifyEmail_Success()  throws Exception {
                 io.jsonwebtoken.Claims claims = mock(io.jsonwebtoken.Claims.class);
                 when(claims.get("userId", String.class)).thenReturn("1");
                 when(jwtUtil.validateToken(anyString())).thenReturn(claims);
