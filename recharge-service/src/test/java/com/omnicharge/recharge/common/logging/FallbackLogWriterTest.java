@@ -1,5 +1,6 @@
 package com.omnicharge.recharge.common.logging;
 
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +14,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class FallbackLogWriterTest {
@@ -22,7 +24,7 @@ class FallbackLogWriterTest {
     @TempDir Path tempDir;
 
     @BeforeEach
-    void setUp() {
+    void setUp()  {
         ReflectionTestUtils.setField(fallbackLogWriter, "fallbackDir", tempDir.toString());
         ReflectionTestUtils.setField(fallbackLogWriter, "serviceName", "user-service");
     }
@@ -56,7 +58,7 @@ class FallbackLogWriterTest {
     }
 
     @Test
-    void writeToFallbackFile_InvalidDir_HandlesGracefully() {
+    void writeToFallbackFile_InvalidDir_HandlesGracefully()  {
         ReflectionTestUtils.setField(fallbackLogWriter, "fallbackDir", "NUL\\\\invalid");
         LogEvent event = new LogEvent(); event.setMessage("Lost"); event.setTimestamp(LocalDateTime.now());
         assertDoesNotThrow(() -> fallbackLogWriter.writeToFallbackFile(event));

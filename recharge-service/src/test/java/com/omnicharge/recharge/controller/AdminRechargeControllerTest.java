@@ -1,4 +1,6 @@
 package com.omnicharge.recharge.controller;
+import static org.mockito.ArgumentMatchers.isNull;
+
 
 import com.omnicharge.recharge.common.dto.ApiResponse;
 import com.omnicharge.recharge.dto.RechargeResponse;
@@ -18,10 +20,12 @@ import org.springframework.http.ResponseEntity;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+
+import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AdminRechargeControllerTest {
@@ -55,7 +59,7 @@ class AdminRechargeControllerTest {
                 0, 10, "createdDate", "DESC",
                 LocalDateTime.now().minusDays(1), LocalDateTime.now(), "SUCCESS");
                 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertTrue(response.getBody().isSuccess());
         assertEquals(1, response.getBody().getData().getTotalElements());
     }
@@ -72,7 +76,7 @@ class AdminRechargeControllerTest {
                 0, 10, "amount", "ASC",
                 null, null, null);
                 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertTrue(response.getBody().isSuccess());
         assertEquals(1, response.getBody().getData().getTotalElements());
     }
@@ -87,7 +91,7 @@ class AdminRechargeControllerTest {
         
         ResponseEntity<ApiResponse<RechargeStatsResponse>> response = adminRechargeController.getRechargeStats();
         
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertTrue(response.getBody().isSuccess());
         assertEquals(100L, response.getBody().getData().getTotalRecharges());
     }

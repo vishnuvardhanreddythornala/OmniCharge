@@ -19,8 +19,15 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.doNothing;
 
 @ExtendWith(MockitoExtension.class)
 class InternalRechargeControllerTest {
@@ -59,7 +66,7 @@ class InternalRechargeControllerTest {
 
         ResponseEntity<ApiResponse<RechargeResponse>> response = internalRechargeController.getRechargeByIdInternal("REC123");
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertTrue(response.getBody().isSuccess());
         assertNotNull(response.getBody().getData());
         assertEquals("REC123", response.getBody().getData().getRechargeId());
@@ -72,7 +79,7 @@ class InternalRechargeControllerTest {
 
         ResponseEntity<ApiResponse<RechargeResponse>> response = internalRechargeController.getRechargeByIdInternal("REC404");
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertFalse(response.getBody().isSuccess());
         assertEquals("Recharge not found", response.getBody().getMessage());
         assertNull(response.getBody().getData());
@@ -84,7 +91,7 @@ class InternalRechargeControllerTest {
 
         ResponseEntity<ApiResponse<List<ExpiringRechargeResponse>>> response = internalRechargeController.getExpiringRecharges(5);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertTrue(response.getBody().isSuccess());
         assertEquals(1, response.getBody().getData().size());
     }
@@ -95,7 +102,7 @@ class InternalRechargeControllerTest {
 
         ResponseEntity<ApiResponse<List<ExpiringRechargeResponse>>> response = internalRechargeController.getExpiredToday();
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertTrue(response.getBody().isSuccess());
         assertEquals(1, response.getBody().getData().size());
     }
@@ -106,7 +113,7 @@ class InternalRechargeControllerTest {
 
         ResponseEntity<ApiResponse<Void>> response = internalRechargeController.markAsExpired("REC123");
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertTrue(response.getBody().isSuccess());
         verify(rechargeService, times(1)).markAsExpired("REC123");
     }

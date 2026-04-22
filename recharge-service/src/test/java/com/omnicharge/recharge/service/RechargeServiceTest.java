@@ -29,10 +29,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
 class RechargeServiceTest {
@@ -215,7 +224,7 @@ class RechargeServiceTest {
         when(rechargeRepository.findByUserIdWithDateFilters(eq(1L), any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class)))
                 .thenReturn(page);
         
-        Page<RechargeResponse> response = rechargeService.getRechargeHistory(1L, null, null, Pageable.unpaged());
+        Page<RechargeResponse> response = rechargeService.getRechargeHistory(1L, LocalDateTime.now().minusDays(1), LocalDateTime.now(), Pageable.unpaged());
         assertNotNull(response);
         assertEquals(1, response.getContent().size());
     }

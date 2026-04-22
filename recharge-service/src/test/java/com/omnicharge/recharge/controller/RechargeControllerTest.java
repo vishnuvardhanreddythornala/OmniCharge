@@ -45,7 +45,6 @@ class RechargeControllerTest {
     private LogEventPublisher logEventPublisher;
 
 
-
     @Autowired
     public RechargeControllerTest(MockMvc mockMvc, ObjectMapper objectMapper) {
         this.mockMvc = mockMvc;
