@@ -1,62 +1,151 @@
-# OmniCharge Microservices Ecosystem
+<div align="center">
+  <img src="https://img.icons8.com/color/128/000000/flash-on.png" alt="OmniCharge Logo">
+  <h1>⚡ OmniCharge Platform</h1>
+  <p><strong>Enterprise-Grade Microservices Mobile Recharge Ecosystem</strong></p>
 
-OmniCharge is a robust, cloud-native telecom recharge and payment processing platform. Built using Spring Boot and following a strict microservices architecture, it leverages Netflix Eureka for service discovery, Spring Cloud Config for centralized configurations, RabbitMQ for asynchronous event-driven sagas, and the ELK stack for enterprise-grade observability.
+  [![Java 17](https://img.shields.io/badge/Java-17-orange.svg)](https://java.com)
+  [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
+  [![Angular](https://img.shields.io/badge/Angular-17-red.svg)](https://angular.io)
+  [![RabbitMQ](https://img.shields.io/badge/RabbitMQ-Event--Driven-ff6600.svg)](https://rabbitmq.com)
+  [![Redis](https://img.shields.io/badge/Redis-CQRS--Cache-dc382d.svg)](https://redis.io)
+  [![MySQL](https://img.shields.io/badge/MySQL-Database--per--service-blue.svg)](https://mysql.com)
+</div>
 
----
+<br/>
 
-## 🏛️ Architecture Overview
+OmniCharge is a highly scalable, fault-tolerant mobile recharge platform architected for the cloud. It orchestrates the complete recharge lifecycle—from network operator detection and plan selection to secure Razorpay checkout and instant notification delivery.
 
-The system is split into independent domains, securely communicating via an API Gateway and internally executing cross-domain workflows via sagas.
-
-### Core Services
-- **API Gateway (`:8080`)**: Entry point for all clients. Implements reactive routing, JWT authentication filtering, and CORS policies.
-- **Config Server (`:8888`)**: Centralized configuration management reading from `file:./config-repo`.
-- **Discovery Server (Eureka) (`:8761`)**: Service registry for dynamic load balancing and resolution.
-- **User Service**: Manages customer profiles, registration, and JWT token generation (including Google Auth OAuth2 integrations).
-- **Operator Service**: Maintains telecom operators and dynamically handles complex plan caching using Redis.
-- **Recharge Service**: Initiates the telecom recharge saga flow.
-- **Payment Service**: Validates payments uniquely identifying Razorpay transactions before validating the recharge saga.
-- **Notification Service**: Listens to RabbitMQ events to dispatch Email/SMS notifications asynchronously.
-- **Logging Service**: Listens to RabbitMQ for raw service logs and pipes complex logging events into Logstash for ELK monitoring.
-
-### Infrastructure (Dockerized)
-- **MySQL (8.0)**: Relational data store shared systematically across independent logical schemas.
-- **Redis (7.0)**: Used heavily for operator plan caching and distributed state.
-- **RabbitMQ**: The messaging backbone handling saga logic and log streaming.
-- **ELK Stack**: Elasticsearch, Logstash, and Kibana for centralized monitoring and observability.
-- **Zipkin & Prometheus/Grafana**: Distributed tracing and metrics infrastructure.
+It implements modern distributed system patterns including **SAGA Choreography, CQRS (Command Query Responsibility Segregation), the Outbox Pattern**, and **Service Mesh Routing**.
 
 ---
 
-## 🚀 Local Development Setup
+## 🚀 Key Features
 
-### Prerequisites
-- Docker & Docker Compose (Ensure Docker Desktop allocates **8GB - 12GB of RAM**).
-- Maven 3.8+ (For manual compilation).
-- Java 17.
+*   **📱 Instant Operator Detection:** Integrates with the Numverify API to automatically detect telecom operators based on mobile numbers, backed by aggressive Redis caching.
+*   **⚡ Sub-Millisecond Plan Retrieval:** Uses a CQRS read-model in Redis to serve massive read volumes for recharge plans without hitting the SQL database.
+*   **💸 Secure Payment Processing:** Integrates Razorpay with robust SAGA event-driven transaction fulfillment and automated rollback sweeps for abandoned checkouts.
+*   **🔐 Zero-Trust Security:** API Gateway validates stateless JWTs against a Redis Blacklist, injecting trust headers downstream. Supports Google OAuth 2.0 and OTP authentication.
+*   **🛡️ Ironclad Fault Tolerance:** Implements Resilience4j Circuit Breakers, Retry policies, and Fallback methods for all inter-service HTTP communication (OpenFeign).
+*   **📊 100% Audit Logging:** Implements the **Outbox Pattern** to guarantee zero-data-loss audit logging to ELK (Elasticsearch, Logstash, Kibana) even during RabbitMQ broker outages.
+*   **✨ Reactive Frontend:** Built on Angular 17 utilizing the new Signals API for synchronous, boilerplate-free state management.
 
-### 1. Configure the Environment
-An example environment file is provided. You **must** duplicate it to `.env` and fill out your specific credentials before spinning up.
+---
+
+## 🏗️ Microservices Architecture
+
+OmniCharge is composed of 9 discrete Spring Boot applications, enforcing strict data isolation (Database-per-Service).
+
+```mermaid
+graph TD
+    UI[Angular 17 SPA] -->|HTTPS / JWT| GW[API Gateway :8080]
+    
+    subgraph Service Mesh
+        DS[Netflix Eureka Discovery]
+        CS[Spring Cloud Config]
+    end
+    
+    GW -->|Routing| US[User Service :8081]
+    GW -->|Routing| OS[Operator Service :8082]
+    GW -->|Routing| RS[Recharge Service :8083]
+    GW -->|Routing| PS[Payment Service :8084]
+    GW -->|Routing| NS[Notification Service :8085]
+    
+    US -.->|MySQL| UDB[(User DB)]
+    OS -.->|MySQL| ODB[(Operator DB)]
+    RS -.->|MySQL| RDB[(Recharge DB)]
+    PS -.->|MySQL| PDB[(Payment DB)]
+    NS -.->|MySQL| NDB[(Notification DB)]
+    
+    OS -.->|CQRS Read Model| REDIS[(Redis Cache)]
+    GW -.->|Token Blacklist / Rate Limit| REDIS
+    
+    US -.->|OTP Events| RMQ((RabbitMQ Broker))
+    RS -.->|SAGA Events| RMQ
+    PS -.->|SAGA Events| RMQ
+    RMQ -.->|Consume| NS
+    
+    All[All Services] -.->|Log Events| RMQ
+    RMQ -.->|Consume| LS[Logging Service :8086]
+```
+
+---
+
+## 🛠️ Technology Stack
+
+**Backend System:**
+*   Java 17 & Spring Boot 3.5.x
+*   Spring Cloud Gateway (WebFlux / Reactive)
+*   Spring Cloud Netflix Eureka (Service Registry)
+*   Spring Cloud Config (Centralized Properties)
+*   Spring Cloud OpenFeign & Resilience4j
+
+**Data & Messaging:**
+*   MySQL 8.0 (5 Isolated Schemas)
+*   Redis 7 (Caching, Rate Limiting, Read Models)
+*   RabbitMQ (Topic Exchanges, SAGA Orchestration)
+
+**Frontend:**
+*   Angular 17 (Signals, Standalone Components)
+*   Tailwind CSS (Utility-first styling)
+*   Razorpay Checkout.js
+
+**Observability:**
+*   Prometheus & Grafana
+*   Zipkin / Micrometer Tracing
+*   ELK Stack (Elasticsearch, Logstash, Kibana)
+
+---
+
+## ⚙️ Local Development Setup
+
+### 1. Prerequisites
+*   Docker & Docker Compose v2
+*   Java 17 / Maven 3.9+
+*   Node.js 20+ / Angular CLI 17+
+
+### 2. Environment Configuration
+Clone the repository and configure your secrets:
 ```bash
+git clone https://github.com/yourusername/OmniCharge.git
+cd OmniCharge
 cp .env.example .env
 ```
+*Fill in the `.env` with your Razorpay, Twilio, and Numverify API keys.*
 
-### 2. Startup via Docker
-The entire system is orchestrated inside `docker-compose.yml`. You can cleanly start everything using:
+### 3. Bootstrapping Infrastructure
+Start the backing services (Database, Broker, Cache):
 ```bash
-docker-compose up -d --build
+docker-compose up -d mysql redis rabbitmq
 ```
-*Note: The Config Server maps to `./config-repo`. All changes to properties take effect dynamically without container rebuilds.*
 
-## 🧪 Postman Automation
-The full end-to-end user flows, admin operations, and payment triggers are mapped in the `docs/Omnicharge_postman_collection.json` file.
-1. Import into Postman.
-2. Ensure your Environment has `baseUrl` set to `http://localhost:8080`.
-3. Simply execute **Register** then **Login**. The JWT tokens are natively extracted and utilized across all subsequent requests via automated scripts.
+### 4. Build & Run Microservices
+Compile all Spring Boot services:
+```bash
+mvn clean package -DskipTests
+```
+Boot the service mesh first, then the business services:
+```bash
+docker-compose up -d config-server
+# Wait 10 seconds for config-server to be healthy
+docker-compose up -d eureka-server
+# Wait for eureka, then start the rest
+docker-compose up -d
+```
 
-## 🔐 Security Information
-- All internal operational ports (DBs, ELK, Config, Eureka) are **strictly bound to 127.0.0.1** to prevent external network brute-forcing. They form an isolated internal docker network (`omnicharge-net`).
-- API Gateway strictly validates inbound headers and destroys malicious injections natively.
+### 5. Start the Frontend
+```bash
+cd omnicharge-ui
+npm install
+npm start
+```
+*The application will be available at `http://localhost:4200`.*
 
 ---
-*Built organically for highly concurrent telecom operations.*
+
+## 📚 Comprehensive Documentation
+For an exhaustive deep-dive into the SAGA implementation, CQRS flows, Security architecture, Database schemas, and Event Catalogs, please read the [OmniCharge Technical Documentation](./OmniCharge_Technical_Documentation.md).
+
+---
+
+## 📝 License
+This project is licensed under the MIT License.
