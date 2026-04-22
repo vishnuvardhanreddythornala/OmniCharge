@@ -4,6 +4,10 @@ import com.omnicharge.recharge.common.dto.ApiResponse;
 import com.omnicharge.recharge.dto.RechargeRequest;
 import com.omnicharge.recharge.dto.RechargeResponse;
 import com.omnicharge.recharge.service.IRechargeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +24,8 @@ import java.time.LocalDateTime;
 @RestController
 @RequestMapping("/api/recharges")
 @RequiredArgsConstructor
+@Tag(name = "Recharges", description = "Manage mobile recharges")
+@SecurityRequirement(name = "bearerAuth")
 public class RechargeController {
 
     private final IRechargeService rechargeService;

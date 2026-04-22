@@ -28,6 +28,7 @@ public class SecurityConfig {
                 // Public endpoints
                 .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/api/internal/**").permitAll()  // Internal service-to-service calls
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
                 // All other endpoints require authentication
                 .anyRequest().authenticated()
             )

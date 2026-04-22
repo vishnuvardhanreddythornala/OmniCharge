@@ -4,7 +4,6 @@ import com.omnicharge.recharge.dto.ExpiringRechargeResponse;
 import com.omnicharge.recharge.dto.RechargeRequest;
 import com.omnicharge.recharge.dto.RechargeResponse;
 import com.omnicharge.recharge.dto.RechargeStatsResponse;
-import com.omnicharge.recharge.entity.RechargeStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
