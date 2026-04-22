@@ -1,4 +1,6 @@
 package com.omnicharge.payment.controller;
+import static org.mockito.ArgumentMatchers.isNull;
+
 
 import com.omnicharge.payment.common.dto.ApiResponse;
 import com.omnicharge.payment.dto.PaymentStatsResponse;
@@ -20,11 +22,18 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyLong;
 
 @ExtendWith(MockitoExtension.class)
 class AdminPaymentControllerTest {
@@ -60,7 +69,7 @@ class AdminPaymentControllerTest {
                 PaymentStatus.SUCCESS, LocalDateTime.now().minusDays(1), LocalDateTime.now(),
                 "REC123", 0, 10, "createdDate", "DESC");
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertTrue(response.getBody().isSuccess());
         assertEquals(1, response.getBody().getData().getTotalElements());
@@ -78,7 +87,7 @@ class AdminPaymentControllerTest {
                 "ROLE_ADMIN", null, null, null, null, null, null, null,
                 0, 10, "amount", "ASC");
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertTrue(response.getBody().isSuccess());
     }
 
@@ -88,7 +97,7 @@ class AdminPaymentControllerTest {
                 "ROLE_USER", null, null, null, null, null, null, null,
                 0, 10, "createdDate", "DESC");
 
-        assertEquals(403, response.getStatusCodeValue());
+        assertEquals(403, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertFalse(response.getBody().isSuccess());
         assertEquals("Access denied: Admin role required", response.getBody().getMessage());
@@ -105,7 +114,7 @@ class AdminPaymentControllerTest {
         ResponseEntity<ApiResponse<PaymentStatsResponse>> response = adminPaymentController.getPaymentStats(
                 "ROLE_ADMIN", 30);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertTrue(response.getBody().isSuccess());
         assertEquals(100L, response.getBody().getData().getTotalTransactions());
@@ -116,7 +125,7 @@ class AdminPaymentControllerTest {
         ResponseEntity<ApiResponse<PaymentStatsResponse>> response = adminPaymentController.getPaymentStats(
                 "ROLE_USER", 30);
 
-        assertEquals(403, response.getStatusCodeValue());
+        assertEquals(403, response.getStatusCode().value());
         assertFalse(response.getBody().isSuccess());
         assertEquals("Access denied: Admin role required", response.getBody().getMessage());
 

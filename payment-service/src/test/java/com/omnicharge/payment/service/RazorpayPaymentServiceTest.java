@@ -19,9 +19,20 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
 class RazorpayPaymentServiceTest {
@@ -33,7 +44,7 @@ class RazorpayPaymentServiceTest {
     private RazorpayPaymentService razorpayPaymentService;
 
     @BeforeEach
-    void setUp() {
+    void setUp()  {
         ReflectionTestUtils.setField(razorpayPaymentService, "keyId", "rzp_test_123");
         ReflectionTestUtils.setField(razorpayPaymentService, "keySecret", "rzp_test_secret_123");
     }
@@ -91,7 +102,7 @@ class RazorpayPaymentServiceTest {
     }
     
     @Test
-    void processPaymentFallback_Success() {
+    void processPaymentFallback_Success()  {
         PaymentRequest request = new PaymentRequest();
         request.setRechargeId("REC123");
         request.setAmount(new BigDecimal("50.00"));

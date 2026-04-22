@@ -11,13 +11,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
 
 @ExtendWith(MockitoExtension.class)
 class FallbackLogReplayerTest {
@@ -29,21 +35,21 @@ class FallbackLogReplayerTest {
     @TempDir Path tempDir;
 
     @BeforeEach
-    void setUp() {
+    void setUp()  {
         replayer = new FallbackLogReplayer(rabbitTemplate);
         ReflectionTestUtils.setField(replayer, "serviceName", "payment-service");
         ReflectionTestUtils.setField(replayer, "fallbackDir", tempDir.toString());
     }
 
     @Test
-    void replayLogs_NoFallbackFile_DoesNothing() {
+    void replayLogs_NoFallbackFile_DoesNothing()  throws Exception {
         // No files → silent return
         invokeReplay();
         verify(rabbitTemplate, never()).convertAndSend(anyString(), anyString(), any(Object.class));
     }
 
     @Test
-    void replayLogs_WithFallbackFile_ReplaysAndDeletes() throws IOException {
+    void replayLogs_WithFallbackFile_ReplaysAndDeletes() throws Exception {
         LogEvent event = new LogEvent();
         event.setServiceName("payment-service");
         event.setLevel("INFO");
@@ -65,7 +71,7 @@ class FallbackLogReplayerTest {
     }
 
     @Test
-    void replayLogs_BrokerDown_PreservesRemainingLines() throws IOException {
+    void replayLogs_BrokerDown_PreservesRemainingLines() throws Exception {
         LogEvent event = new LogEvent();
         event.setServiceName("payment-service");
         event.setLevel("ERROR");
@@ -85,7 +91,7 @@ class FallbackLogReplayerTest {
     }
 
     @Test
-    void replayLogs_ExistingProcessingFile_ProcessesIt() throws IOException {
+    void replayLogs_ExistingProcessingFile_ProcessesIt() throws Exception {
         LogEvent event = new LogEvent();
         event.setServiceName("payment-service");
         event.setLevel("WARN");
@@ -106,7 +112,7 @@ class FallbackLogReplayerTest {
     }
 
     @Test
-    void replayLogs_MalformedJson_BrokerMarkedDown() throws IOException {
+    void replayLogs_MalformedJson_BrokerMarkedDown() throws Exception {
         Path fallbackFile = tempDir.resolve("fallback-buffer-payment-service.log");
         Files.writeString(fallbackFile, "NOT_JSON\n");
 
@@ -121,12 +127,12 @@ class FallbackLogReplayerTest {
     }
 
     @Test
-    void initAndDestroy_DoNotThrow() {
+    void initAndDestroy_DoNotThrow()  {
         assertDoesNotThrow(() -> replayer.init());
         assertDoesNotThrow(() -> replayer.destroy());
     }
 
-    private void invokeReplay() {
+    private void invokeReplay()  {
         // Use reflection to call private synchronized replayLogs
         try {
             java.lang.reflect.Method m = FallbackLogReplayer.class.getDeclaredMethod("replayLogs");
@@ -137,7 +143,5 @@ class FallbackLogReplayerTest {
         }
     }
 }
-
-
 
 
