@@ -2,10 +2,8 @@ package com.omnicharge.operator.controller;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.omnicharge.operator.common.exception.ResourceNotFoundException;
 import com.omnicharge.operator.dto.PlanResponse;
-import com.omnicharge.operator.entity.PlanCategory;
 import com.omnicharge.operator.service.PlanQueryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +16,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.math.BigDecimal;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -34,7 +32,6 @@ class PlanControllerTest {
     @MockitoBean(name="logEventPublisher")
     private com.omnicharge.operator.common.logging.LogEventPublisher logEventPublisher;
     private final MockMvc mockMvc;
-
 
 
     @Autowired
@@ -58,7 +55,7 @@ class PlanControllerTest {
     }
 
     @Test
-    void getPlanById_NotFound() throws Exception {
+    void getPlanById_NotFound()  throws Exception {
         when(planQueryService.getPlanById(99L)).thenThrow(new ResourceNotFoundException("Not found"));
 
         mockMvc.perform(get("/api/plans/99"))

@@ -1,4 +1,6 @@
 package com.omnicharge.operator.service;
+import static org.mockito.ArgumentMatchers.isNull;
+
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -24,9 +26,15 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 @org.mockito.junit.jupiter.MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
 @ExtendWith(MockitoExtension.class)
@@ -47,7 +55,7 @@ class PlanQueryServiceTest {
     private Operator operator;
 
     @BeforeEach
-    void setUp() {
+    void setUp()  {
         planResponse = PlanResponse.builder()
                 .id(1L)
                 .planName("Basic")
@@ -97,7 +105,7 @@ class PlanQueryServiceTest {
     }
 
     @Test
-    void getPlanById_CacheMiss_FallbackToDb() {
+    void getPlanById_CacheMiss_FallbackToDb()  {
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get("plan:detail:1")).thenReturn(null);
         when(planRepository.findActiveById(1L)).thenReturn(Optional.of(plan));
@@ -110,7 +118,7 @@ class PlanQueryServiceTest {
     }
 
     @Test
-    void getPlanById_RedisError_Throws() {
+    void getPlanById_RedisError_Throws()  {
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get(anyString())).thenThrow(new RuntimeException("Redis Down"));
 
@@ -129,7 +137,7 @@ class PlanQueryServiceTest {
     // ===== fallbackGetPlanById =====
 
     @Test
-    void fallbackGetPlanById_Success() {
+    void fallbackGetPlanById_Success()  {
         when(planRepository.findActiveById(1L)).thenReturn(Optional.of(plan));
 
         PlanResponse result = planQueryService.fallbackGetPlanById(1L, new RuntimeException("test fallback"));
@@ -140,7 +148,7 @@ class PlanQueryServiceTest {
     }
 
     @Test
-    void fallbackGetPlanById_NotFound() {
+    void fallbackGetPlanById_NotFound()  {
         when(planRepository.findActiveById(999L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
@@ -234,7 +242,7 @@ class PlanQueryServiceTest {
     }
 
     @Test
-    void searchPlansFromRedis_CacheMiss_FallbackToDb() throws Exception {
+    void searchPlansFromRedis_CacheMiss_FallbackToDb() {
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get("plans:operator:10")).thenReturn(null);
 

@@ -1,4 +1,6 @@
 package com.omnicharge.operator.controller;
+import static org.mockito.ArgumentMatchers.isNull;
+
 
 import com.omnicharge.operator.common.dto.ApiResponse;
 import com.omnicharge.operator.dto.OperatorRequest;
@@ -21,10 +23,13 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AdminOperatorControllerTest {
@@ -59,7 +64,7 @@ class AdminOperatorControllerTest {
         when(operatorService.getOperatorsByStatus(true)).thenReturn(List.of(validOperator));
         ResponseEntity<ApiResponse<List<OperatorResponse>>> response = controller.getAllOperators("ACTIVE");
         assertTrue(response.getBody().isSuccess());
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
     }
 
     @Test
@@ -87,77 +92,77 @@ class AdminOperatorControllerTest {
     void createOperator() {
         when(operatorService.createOperator(any())).thenReturn(validOperator);
         ResponseEntity<ApiResponse<OperatorResponse>> response = controller.createOperator(validOperatorReq);
-        assertEquals(201, response.getStatusCodeValue());
+        assertEquals(201, response.getStatusCode().value());
     }
 
     @Test
     void updateOperator() {
         when(operatorService.updateOperator(eq(1L), any())).thenReturn(validOperator);
         ResponseEntity<ApiResponse<OperatorResponse>> response = controller.updateOperator(1L, validOperatorReq);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
     }
 
     @Test
     void deleteOperator() {
         doNothing().when(operatorService).deleteOperator(1L);
         ResponseEntity<ApiResponse<Void>> response = controller.deleteOperator(1L);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
     }
 
     @Test
     void activateOperator() {
         when(operatorService.activateOperator(1L)).thenReturn(validOperator);
         ResponseEntity<ApiResponse<OperatorResponse>> response = controller.activateOperator(1L);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
     }
 
     @Test
     void deactivateOperator() {
         when(operatorService.deactivateOperator(1L)).thenReturn(validOperator);
         ResponseEntity<ApiResponse<OperatorResponse>> response = controller.deactivateOperator(1L);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
     }
 
     @Test
     void getOperatorPlans() {
         when(planService.getPlansByOperatorAndStatus(1L, true)).thenReturn(List.of(validPlan));
         ResponseEntity<ApiResponse<List<PlanResponse>>> response = controller.getOperatorPlans(1L, "ACTIVE");
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
     }
 
     @Test
     void createPlan() {
         when(planService.createPlan(eq(1L), any())).thenReturn(validPlan);
         ResponseEntity<ApiResponse<PlanResponse>> response = controller.createPlan(1L, validPlanReq);
-        assertEquals(201, response.getStatusCodeValue());
+        assertEquals(201, response.getStatusCode().value());
     }
 
     @Test
     void updatePlan() {
         when(planService.updatePlan(eq(10L), any())).thenReturn(validPlan);
         ResponseEntity<ApiResponse<PlanResponse>> response = controller.updatePlan(10L, validPlanReq);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
     }
 
     @Test
     void deletePlan() {
         doNothing().when(planService).deletePlan(10L);
         ResponseEntity<ApiResponse<Void>> response = controller.deletePlan(10L);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
     }
 
     @Test
     void activatePlan() {
         when(planService.activatePlan(10L)).thenReturn(validPlan);
         ResponseEntity<ApiResponse<PlanResponse>> response = controller.activatePlan(10L);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
     }
 
     @Test
     void deactivatePlan() {
         when(planService.deactivatePlan(10L)).thenReturn(validPlan);
         ResponseEntity<ApiResponse<PlanResponse>> response = controller.deactivatePlan(10L);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
     }
 
     @Test
@@ -169,7 +174,7 @@ class AdminOperatorControllerTest {
         ResponseEntity<ApiResponse<Page<PlanResponse>>> response = controller.searchAllPlans(
                 1L, PlanCategory.DATA, "ACTIVE", "Search", 0, 10, "price", "DESC");
         
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
     }
 
     @Test
@@ -181,6 +186,6 @@ class AdminOperatorControllerTest {
         ResponseEntity<ApiResponse<Page<PlanResponse>>> response = controller.searchAllPlans(
                 null, null, null, null, 0, 10, "price", "ASC");
         
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
     }
 }

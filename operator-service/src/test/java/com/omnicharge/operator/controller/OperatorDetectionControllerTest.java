@@ -2,7 +2,6 @@ package com.omnicharge.operator.controller;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.omnicharge.operator.dto.OperatorDetectionResponse;
 import com.omnicharge.operator.dto.OperatorResponse;
 import com.omnicharge.operator.service.IOperatorDetectionService;
@@ -17,7 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -30,7 +28,6 @@ class OperatorDetectionControllerTest {
     @MockitoBean(name="logEventPublisher")
     private com.omnicharge.operator.common.logging.LogEventPublisher logEventPublisher;
     private final MockMvc mockMvc;
-
 
 
     @Autowired
@@ -59,7 +56,7 @@ class OperatorDetectionControllerTest {
     }
 
     @Test
-    void detectOperator_NotFound() throws Exception {
+    void detectOperator_NotFound()  throws Exception {
         when(operatorDetectionService.detectOperator(anyString())).thenReturn(null);
 
         mockMvc.perform(get("/api/operators/detect")

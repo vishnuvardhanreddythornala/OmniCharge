@@ -1,4 +1,7 @@
 package com.omnicharge.operator.service;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.ArgumentMatchers.eq;
+
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,10 +27,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class OperatorDetectionServiceTest {
@@ -74,7 +82,7 @@ class OperatorDetectionServiceTest {
     }
 
     @Test
-    void detectOperator_NumverifySuccess() throws Exception {
+    void detectOperator_NumverifySuccess() {
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get("operator:detect:9876543210")).thenReturn(null);
         when(numverifyClient.detectOperator("9876543210")).thenReturn(validNumResponse);

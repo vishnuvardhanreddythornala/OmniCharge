@@ -1,5 +1,6 @@
 package com.omnicharge.operator.controller;
 
+
 import com.omnicharge.operator.common.dto.ApiResponse;
 import com.omnicharge.operator.service.SystemCacheService;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ class AdminSystemControllerTest {
         
         ResponseEntity<ApiResponse<String>> response = adminSystemController.rebuildCache();
         
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertTrue(response.getBody().isSuccess());
         verify(systemCacheService, times(1)).rebuildRedisCache();
     }

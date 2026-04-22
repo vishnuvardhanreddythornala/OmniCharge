@@ -1,4 +1,7 @@
 package com.omnicharge.operator.messaging;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,9 +25,13 @@ import java.time.Instant;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class RedisProjectorTest {
@@ -51,7 +58,7 @@ class RedisProjectorTest {
     private Plan plan;
 
     @BeforeEach
-    void setUp() {
+    void setUp()  {
         message = PlanUpdatedMessage.builder()
                 .eventId("test-uuid-123")
                 .operatorId(1L)

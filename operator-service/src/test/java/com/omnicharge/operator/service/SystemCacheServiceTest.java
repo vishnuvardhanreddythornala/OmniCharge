@@ -1,4 +1,7 @@
 package com.omnicharge.operator.service;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.contains;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.omnicharge.operator.entity.Operator;
@@ -16,8 +19,12 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 
 @org.mockito.junit.jupiter.MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
 @ExtendWith(MockitoExtension.class)
@@ -49,7 +56,7 @@ class SystemCacheServiceTest {
     }
 
     @Test
-    void handleApplicationReady_ColdStart() {
+    void handleApplicationReady_ColdStart()  {
         when(redisTemplate.hasKey(anyString())).thenReturn(false);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(planRepository.findAll()).thenReturn(List.of());
@@ -60,7 +67,7 @@ class SystemCacheServiceTest {
     }
 
     @Test
-    void handleApplicationReady_AlreadyInitialized() {
+    void handleApplicationReady_AlreadyInitialized()  {
         when(redisTemplate.hasKey(anyString())).thenReturn(true);
 
         systemCacheService.handleApplicationReady();
@@ -85,7 +92,7 @@ class SystemCacheServiceTest {
     }
 
     @Test
-    void rebuildRedisCache_NoKeysToDelete() throws Exception {
+    void rebuildRedisCache_NoKeysToDelete() {
         when(planRepository.findAll()).thenReturn(List.of());
         when(redisTemplate.keys(anyString())).thenReturn(null);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
@@ -96,7 +103,7 @@ class SystemCacheServiceTest {
     }
 
     @Test
-    void rebuildRedisCache_InactiveOperatorFiltered() throws Exception {
+    void rebuildRedisCache_InactiveOperatorFiltered() {
         Operator inactiveOp = createActiveOperator(1L);
         inactiveOp.setIsActive(false);
         Plan plan = createActivePlan(1L, inactiveOp);
