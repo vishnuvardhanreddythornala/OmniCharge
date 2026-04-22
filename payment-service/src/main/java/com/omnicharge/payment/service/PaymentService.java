@@ -88,7 +88,14 @@ public class PaymentService implements IPaymentService {
         transaction.setRechargeId(request.getRechargeId());
         transaction.setUserId(request.getUserId());
         transaction.setAmount(request.getAmount());
-        transaction.setPaymentMethod(PaymentMethod.valueOf(request.getPaymentMethod().toUpperCase()));
+        PaymentMethod paymentMethod;
+        try {
+            paymentMethod = PaymentMethod.valueOf(request.getPaymentMethod().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            log.warn("Unknown payment method '{}', defaulting to UNKNOWN", request.getPaymentMethod());
+            paymentMethod = PaymentMethod.UNKNOWN;
+        }
+        transaction.setPaymentMethod(paymentMethod);
         transaction.setStatus(PaymentStatus.PENDING);
         
         // Save metadata for notification service (used later when webhook confirms payment)

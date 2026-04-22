@@ -6,6 +6,10 @@ import com.omnicharge.payment.dto.PaymentResponse;
 import com.omnicharge.payment.dto.TransactionResponse;
 import com.omnicharge.payment.entity.PaymentStatus;
 import com.omnicharge.payment.service.IPaymentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +26,8 @@ import java.time.LocalDateTime;
 @RestController
 @RequestMapping("/api/payments")
 @RequiredArgsConstructor
+@Tag(name = "Payments", description = "Process payments and webhooks")
+@SecurityRequirement(name = "bearerAuth")
 public class PaymentController {
 
     private final IPaymentService paymentService;

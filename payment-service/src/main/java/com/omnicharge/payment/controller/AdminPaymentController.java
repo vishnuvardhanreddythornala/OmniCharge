@@ -5,6 +5,10 @@ import com.omnicharge.payment.dto.PaymentStatsResponse;
 import com.omnicharge.payment.dto.TransactionResponse;
 import com.omnicharge.payment.entity.PaymentStatus;
 import com.omnicharge.payment.service.IPaymentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +26,8 @@ import java.time.LocalDateTime;
 @RequestMapping("/api/admin/payments")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
+@Tag(name = "Admin — Payments", description = "Admin-only operations for payments")
+@SecurityRequirement(name = "bearerAuth")
 public class AdminPaymentController {
 
     private final IPaymentService paymentService;
