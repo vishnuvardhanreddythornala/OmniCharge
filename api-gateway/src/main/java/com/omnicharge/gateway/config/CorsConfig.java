@@ -56,7 +56,6 @@ public class CorsConfig {
     @Bean
     public WebFilter securityHeadersFilter() {
         return (ServerWebExchange exchange, WebFilterChain chain) -> {
-            // COOP header removed - not needed for embedded Google Sign-In button
             // exchange.getResponse().getHeaders().add("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
             exchange.getResponse().getHeaders().add("X-Content-Type-Options", "nosniff");
             exchange.getResponse().getHeaders().add("X-Frame-Options", "DENY");
