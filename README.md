@@ -139,6 +139,7 @@ npm install
 npm start
 ```
 *The application will be available at `http://localhost:4200`.*
+*Api Docs will be available at `http://localhost:8080/webjars/swagger-ui/index.html`.*
 
 ---
 
