@@ -91,4 +91,50 @@ class RechargeEventConsumerTest {
 
         verify(emailService, never()).sendRechargeConfirmation(anyString(), any());
     }
+
+    @Test
+    void handleRechargeCompleted_EmailServiceThrowsException() {
+        RechargeCompletedEvent event = buildEvent("user@test.com", "+919876543210", "SUCCESS");
+        org.mockito.Mockito.doThrow(new RuntimeException("Email failure")).when(emailService).sendRechargeConfirmation(anyString(), any());
+
+        consumer.handleRechargeCompleted(event);
+
+        // Should handle exception and continue to SMS
+        verify(notificationService, times(1)).createAndSendSms(anyLong(), anyString(), anyString(), any(), anyString());
+    }
+
+    @Test
+    void handleRechargeCompleted_NotificationServiceEmailThrowsException() {
+        RechargeCompletedEvent event = buildEvent("user@test.com", "+919876543210", "SUCCESS");
+        org.mockito.Mockito.doThrow(new RuntimeException("DB Email failure")).when(notificationService)
+                .createAndSendEmail(anyLong(), anyString(), anyString(), anyString(), any(), anyString());
+
+        consumer.handleRechargeCompleted(event);
+
+        // Should handle exception and continue to SMS
+        verify(notificationService, times(1)).createAndSendSms(anyLong(), anyString(), anyString(), any(), anyString());
+    }
+
+    @Test
+    void handleRechargeCompleted_NotificationServiceSmsThrowsException() {
+        RechargeCompletedEvent event = buildEvent("user@test.com", "+919876543210", "SUCCESS");
+        org.mockito.Mockito.doThrow(new RuntimeException("DB SMS failure")).when(notificationService)
+                .createAndSendSms(anyLong(), anyString(), anyString(), any(), anyString());
+
+        consumer.handleRechargeCompleted(event);
+
+        // Should not bubble up
+        verify(emailService, times(1)).sendRechargeConfirmation(anyString(), any());
+    }
+
+    @Test
+    void handleRechargeCompleted_PublishBusinessLogThrowsException() {
+        RechargeCompletedEvent event = buildEvent("user@test.com", "+919876543210", "SUCCESS");
+        org.mockito.Mockito.doThrow(new RuntimeException("Log failure")).when(logEventPublisher).publish(any());
+
+        consumer.handleRechargeCompleted(event);
+
+        // Execution should still continue despite log failure
+        verify(emailService, times(1)).sendRechargeConfirmation(anyString(), any());
+    }
 }

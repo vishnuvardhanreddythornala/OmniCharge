@@ -52,12 +52,15 @@ class PaymentControllerTest {
     @MockitoBean
     private LogEventPublisher logEventPublisher;
 
+    @MockitoBean
+    private org.springframework.data.jpa.mapping.JpaMetamodelMappingContext jpaMappingContext;
 
     @Autowired
     public PaymentControllerTest(MockMvc mockMvc, ObjectMapper objectMapper) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
     }
+
     @Test
     void processPayment_Success() throws Exception {
         PaymentRequest request = new PaymentRequest();

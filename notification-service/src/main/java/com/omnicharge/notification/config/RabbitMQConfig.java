@@ -17,19 +17,45 @@ import java.util.HashMap;
 @Configuration
 public class RabbitMQConfig {
 
+    private static final String DLX_EXCHANGE = "omnicharge.dlx";
+    private static final String DLQ_ROUTING_KEY = "notification.dlq";
+    private static final String X_DEAD_LETTER_EXCHANGE = "x-dead-letter-exchange";
+    private static final String X_DEAD_LETTER_ROUTING_KEY = "x-dead-letter-routing-key";
+
     @Bean
     public TopicExchange exchange() {
         return new TopicExchange("omnicharge.exchange");
     }
 
     @Bean
+    public TopicExchange dlqExchange() {
+        return new TopicExchange(DLX_EXCHANGE);
+    }
+
+    @Bean
+    public Queue notificationDlq() {
+        return QueueBuilder.durable(DLQ_ROUTING_KEY).build();
+    }
+
+    @Bean
+    public Binding notificationDlqBinding() {
+        return BindingBuilder.bind(notificationDlq()).to(dlqExchange()).with(DLQ_ROUTING_KEY);
+    }
+
+    @Bean
     public Queue rechargeQueue() {
-        return new Queue("notification.recharge.queue", true);
+        return QueueBuilder.durable("notification.recharge.queue")
+                .withArgument(X_DEAD_LETTER_EXCHANGE, DLX_EXCHANGE)
+                .withArgument(X_DEAD_LETTER_ROUTING_KEY, DLQ_ROUTING_KEY)
+                .build();
     }
 
     @Bean
     public Queue paymentQueue() {
-        return new Queue("notification.payment.queue", true);
+        return QueueBuilder.durable("notification.payment.queue")
+                .withArgument(X_DEAD_LETTER_EXCHANGE, DLX_EXCHANGE)
+                .withArgument(X_DEAD_LETTER_ROUTING_KEY, DLQ_ROUTING_KEY)
+                .build();
     }
 
     @Bean
@@ -44,7 +70,10 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue planExpiryQueue() {
-        return new Queue("notification.plan.expiry.queue", true);
+        return QueueBuilder.durable("notification.plan.expiry.queue")
+                .withArgument(X_DEAD_LETTER_EXCHANGE, DLX_EXCHANGE)
+                .withArgument(X_DEAD_LETTER_ROUTING_KEY, DLQ_ROUTING_KEY)
+                .build();
     }
 
     @Bean
@@ -54,7 +83,10 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue otpQueue() {
-        return new Queue("notification.otp.queue", true);
+        return QueueBuilder.durable("notification.otp.queue")
+                .withArgument(X_DEAD_LETTER_EXCHANGE, DLX_EXCHANGE)
+                .withArgument(X_DEAD_LETTER_ROUTING_KEY, DLQ_ROUTING_KEY)
+                .build();
     }
 
     @Bean

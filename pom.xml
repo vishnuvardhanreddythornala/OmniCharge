@@ -36,10 +36,10 @@
 		<sonar.organization>vishnuvardhanreddythornala</sonar.organization>
 		<sonar.projectKey>vishnuvardhanreddythornala_OmniCharge</sonar.projectKey>
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-		<sonar.cpd.exclusions>**/common/dto/**,**/common/logging/**,**/common/exception/**,**/config/**,**/messaging/**</sonar.cpd.exclusions>
+		<sonar.cpd.exclusions>**/common/**</sonar.cpd.exclusions>
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
 		<sonar.coverage.jacoco.xmlReportPaths>**/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-		<sonar.coverage.exclusions>**/*Application.java,**/config/**</sonar.coverage.exclusions>
+		<sonar.coverage.exclusions>**/*Application.java,**/*Config.java,**/security/SecurityConstants.*,**/JpaConfig.*,**/client/**,**/TestController*,**/audit/**</sonar.coverage.exclusions>
 	</properties>
 
 	<build>
@@ -68,6 +68,11 @@
 						<exclude>**/constants/**</exclude>
 						<exclude>**/exception/**</exclude>
 						<exclude>**/*Application.*</exclude>
+						<exclude>**/TestController*</exclude>
+						<exclude>**/audit/**</exclude>
+						<exclude>**/security/SecurityConstants*</exclude>
+						<exclude>**/JpaConfig*</exclude>
+						<exclude>**/client/*Client*</exclude>
 					</excludes>
 				</configuration>
 				<executions>

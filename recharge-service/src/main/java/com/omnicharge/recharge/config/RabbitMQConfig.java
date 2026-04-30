@@ -11,19 +11,56 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
+    private static final String DLX_EXCHANGE = "omnicharge.dlx";
+    private static final String APPROVED_DLQ_ROUTING_KEY = "saga.recharge.approved.dlq";
+    private static final String REJECTED_DLQ_ROUTING_KEY = "saga.recharge.rejected.dlq";
+    private static final String X_DEAD_LETTER_EXCHANGE = "x-dead-letter-exchange";
+    private static final String X_DEAD_LETTER_ROUTING_KEY = "x-dead-letter-routing-key";
+
     @Bean
     public TopicExchange exchange() {
         return new TopicExchange("omnicharge.exchange");
     }
 
     @Bean
+    public TopicExchange dlqExchange() {
+        return new TopicExchange(DLX_EXCHANGE);
+    }
+
+    @Bean
+    public Queue paymentApprovedDlq() {
+        return QueueBuilder.durable(APPROVED_DLQ_ROUTING_KEY).build();
+    }
+
+    @Bean
+    public Queue paymentRejectedDlq() {
+        return QueueBuilder.durable(REJECTED_DLQ_ROUTING_KEY).build();
+    }
+
+    @Bean
+    public Binding paymentApprovedDlqBinding() {
+        return BindingBuilder.bind(paymentApprovedDlq()).to(dlqExchange()).with(APPROVED_DLQ_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding paymentRejectedDlqBinding() {
+        return BindingBuilder.bind(paymentRejectedDlq()).to(dlqExchange()).with(REJECTED_DLQ_ROUTING_KEY);
+    }
+
+    @Bean
     public Queue paymentApprovedQueue() {
-        return new Queue("saga.recharge.approved");
+        return QueueBuilder.durable("saga.recharge.approved")
+                .withArgument(X_DEAD_LETTER_EXCHANGE, DLX_EXCHANGE)
+                .withArgument(X_DEAD_LETTER_ROUTING_KEY, APPROVED_DLQ_ROUTING_KEY)
+                .build();
     }
 
     @Bean
     public Queue paymentRejectedQueue() {
-        return new Queue("saga.recharge.rejected");
+        return QueueBuilder.durable("saga.recharge.rejected")
+                .withArgument(X_DEAD_LETTER_EXCHANGE, DLX_EXCHANGE)
+                .withArgument(X_DEAD_LETTER_ROUTING_KEY, REJECTED_DLQ_ROUTING_KEY)
+                .build();
     }
 
     @Bean

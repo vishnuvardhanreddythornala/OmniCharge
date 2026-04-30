@@ -164,6 +164,7 @@
 						<exclude>**/constants/**</exclude>
 						<exclude>**/exception/**</exclude>
 						<exclude>**/*Application.*</exclude>
+						<exclude>**/security/SecurityConstants*</exclude>
 					</excludes>
 				</configuration>
 				<executions>

@@ -1,0 +1,60 @@
+# OmniCharge Production Hardening Walkthrough
+
+We have successfully executed the Implementation Plan for the OmniCharge platform. The goal was to take the existing codebase and prepare it for a robust, enterprise-grade production deployment.
+
+## Phase 1: Critical Production Fixes
+
+### 1. Flyway Database Migrations
+We successfully migrated all microservices away from the dangerous `hibernate.ddl-auto=update` configuration to use Flyway for version-controlled schema management.
+* **POM Updates:** Added `flyway-core` and `flyway-mysql` to `user-service`, `operator-service`, `recharge-service`, `payment-service`, and `notification-service`.
+* **Configuration:** Changed the property files in `config-repo` to use `spring.jpa.hibernate.ddl-auto=validate` and enabled Flyway with baseline on migrate.
+* **Baseline Scripts:** Generated `V1__baseline.sql` files containing the initial DDL for all services to match the current JPA entities.
+
+> [!CAUTION]
+> Because you are transitioning to `ddl-auto=validate`, any future additions to your entities MUST be accompanied by a new Flyway migration script (e.g., `V2__add_new_column.sql`) in the `db/migration` folder.
+
+### 2. Microservice Resilience (Synchronous Fallbacks)
+The `payment-service` occasionally needs to fetch metadata from the `recharge-service` if the initial asynchronous event is missed. We refactored this call.
+* Added `spring-cloud-starter-openfeign` to `payment-service/pom.xml` and enabled it with `@EnableFeignClients`.
+* Created `RechargeServiceClient.java` with a `@CircuitBreaker` and `@Retry` fallback.
+* Refactored `PaymentService.java` to use the Feign client instead of the brittle `RestTemplate`.
+
+### 3. SAGA Dead Letter Queues (DLQ)
+To ensure no messages are lost during failures, we implemented RabbitMQ DLQs.
+* **Recharge Service:** Bound `saga.recharge.approved` and `saga.recharge.rejected` queues to a `dlx` exchange with DLQ routing keys.
+* **Notification Service:** Bound all email/SMS and event queues to `notification.dlq`.
+
+> [!TIP]
+> You can monitor these DLQs in the RabbitMQ Management console. If a message fails all retries, it will land here for manual inspection.
+
+---
+
+## Phase 2: CI/CD Foundation
+
+We established the baseline for automated testing and deployment using GitHub Actions. The workflows have been placed in `.github/workflows/`.
+
+* **[NEW] [backend-ci.yml](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/.github/workflows/backend-ci.yml):** Runs `mvn test` automatically on PRs and pushes to `main`. It's pre-configured for SonarQube if you choose to enable it later.
+* **[NEW] [backend-cd.yml](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/.github/workflows/backend-cd.yml):** Automates building Docker images and pushing them to Docker Hub on new version tags (`v*`).
+* **[NEW] [frontend-ci-cd.yml](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/.github/workflows/frontend-ci-cd.yml):** Automates the Angular build and deployment to Azure Static Web Apps.
+
+---
+
+## Phase 3: Cloud Provisioning
+
+We opted for Azure CLI scripts for the infrastructure provisioning, making it easy to run from your local terminal.
+
+* **[NEW] [azure-provision.sh](file:///c:/Users/vishnu%20vardhan%20reddy/Downloads/OmniCharge/scripts/azure-provision.sh):** An automated script that creates a Resource Group and provisions cost-optimized resources:
+  * Azure Database for MySQL Flexible Server (Burstable tier)
+  * Azure Cache for Redis (Basic tier)
+  * Azure Container Apps Environment for Serverless Microservices
+  * Azure Static Web App for the Angular UI
+
+> [!NOTE]
+> To execute the script, you'll need the Azure CLI installed. Run `az login` followed by `bash scripts/azure-provision.sh`.
+
+## Verification Steps
+To verify that everything works locally:
+1. Run `docker-compose up -d` to start MySQL, Redis, and RabbitMQ.
+2. Start the `config-server` and `eureka-server`.
+3. Start the `user-service`. Flyway should automatically execute the `V1__baseline.sql` script without errors.
+4. Verify the database tables were created by Flyway by checking the `flyway_schema_history` table in MySQL.

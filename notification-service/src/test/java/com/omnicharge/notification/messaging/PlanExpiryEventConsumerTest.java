@@ -81,4 +81,49 @@ class PlanExpiryEventConsumerTest {
         verify(emailService, never()).sendPlanExpiredNotification(anyString(), anyString(), anyString(), anyString(), anyString());
         verify(notificationService, never()).createAndSendSms(anyLong(), anyString(), anyString(), any(), anyString());
     }
+
+    @Test
+    void handlePlanExpired_EmailServiceThrowsException() {
+        RechargeCompletedEvent event = buildEvent("user@test.com", "+919876543210");
+        org.mockito.Mockito.doThrow(new RuntimeException("Email failure")).when(emailService)
+                .sendPlanExpiredNotification(anyString(), anyString(), anyString(), anyString(), anyString());
+
+        consumer.handlePlanExpired(event);
+
+        // SMS should still be sent
+        verify(notificationService, times(1)).createAndSendSms(anyLong(), anyString(), anyString(), any(), anyString());
+    }
+
+    @Test
+    void handlePlanExpired_DbEmailThrowsException() {
+        RechargeCompletedEvent event = buildEvent("user@test.com", "+919876543210");
+        org.mockito.Mockito.doThrow(new RuntimeException("DB Email failure")).when(notificationService)
+                .createAndSendEmail(anyLong(), anyString(), anyString(), anyString(), any(), anyString());
+
+        consumer.handlePlanExpired(event);
+
+        // SMS should still be sent
+        verify(notificationService, times(1)).createAndSendSms(anyLong(), anyString(), anyString(), any(), anyString());
+    }
+
+    @Test
+    void handlePlanExpired_SmsThrowsException() {
+        RechargeCompletedEvent event = buildEvent("user@test.com", "+919876543210");
+        org.mockito.Mockito.doThrow(new RuntimeException("SMS failure")).when(notificationService)
+                .createAndSendSms(anyLong(), anyString(), anyString(), any(), anyString());
+
+        consumer.handlePlanExpired(event);
+
+        verify(emailService, times(1)).sendPlanExpiredNotification(anyString(), anyString(), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void handlePlanExpired_LogPublisherThrowsException() {
+        RechargeCompletedEvent event = buildEvent("user@test.com", "+919876543210");
+        org.mockito.Mockito.doThrow(new RuntimeException("Log failure")).when(logEventPublisher).publish(any());
+
+        consumer.handlePlanExpired(event);
+
+        verify(emailService, times(1)).sendPlanExpiredNotification(anyString(), anyString(), anyString(), anyString(), anyString());
+    }
 }

@@ -44,12 +44,15 @@ class RechargeControllerTest {
     @MockitoBean
     private LogEventPublisher logEventPublisher;
 
+    @MockitoBean
+    private org.springframework.data.jpa.mapping.JpaMetamodelMappingContext jpaMappingContext;
 
     @Autowired
     public RechargeControllerTest(MockMvc mockMvc, ObjectMapper objectMapper) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
     }
+
     @Test
     void initiateRecharge_Success() throws Exception {
         RechargeRequest request = new RechargeRequest();

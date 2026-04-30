@@ -433,6 +433,8 @@ public class PaymentService implements IPaymentService {
         }
     }
 
+    private final com.omnicharge.payment.client.RechargeServiceClient rechargeServiceClient;
+
     /**
      * Fetches recharge details from the recharge-service and enriches the Transaction entity.
      * This is a fallback for when the saga event did not propagate mobileNumber/operatorName/planName.
@@ -440,12 +442,9 @@ public class PaymentService implements IPaymentService {
     @SuppressWarnings("unchecked")
     private void enrichTransactionFromRechargeService(Transaction transaction) {
         try {
-            String url = "http://recharge-service/api/internal/recharges/" + transaction.getRechargeId();
-            log.info("Calling recharge-service: {}", url);
+            log.info("Calling recharge-service via Feign for rechargeId: {}", transaction.getRechargeId());
             
-            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-                    url, HttpMethod.GET, null, 
-                    new ParameterizedTypeReference<Map<String, Object>>() {});
+            ResponseEntity<Map<String, Object>> response = rechargeServiceClient.getRechargeById(transaction.getRechargeId());
             
             Map<String, Object> body = response.getBody();
             if (body != null && Boolean.TRUE.equals(body.get("success"))) {
@@ -466,7 +465,7 @@ public class PaymentService implements IPaymentService {
                     transactionRepository.save(transaction);
                 }
             } else {
-                log.warn("Recharge-service returned no data for rechargeId: {}", transaction.getRechargeId());
+                log.warn("Recharge-service returned no data or fallback executed for rechargeId: {}", transaction.getRechargeId());
             }
         } catch (Exception e) {
             log.error("Failed to fetch recharge details from recharge-service for rechargeId: {}", 

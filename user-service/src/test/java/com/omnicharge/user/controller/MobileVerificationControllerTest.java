@@ -42,12 +42,15 @@ class MobileVerificationControllerTest {
     @MockitoBean
     private LogEventPublisher logEventPublisher;
 
+    @MockitoBean
+    private JpaMetamodelMappingContext jpaMappingContext;
 
     @Autowired
     public MobileVerificationControllerTest(MockMvc mockMvc, ObjectMapper objectMapper) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
     }
+
     @Test
     void sendOtp_Success() throws Exception {
         SendMobileOtpRequest req = new SendMobileOtpRequest();

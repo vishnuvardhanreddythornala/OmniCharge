@@ -42,6 +42,7 @@ class PlanServiceTest {
     @Mock private OperatorRepository operatorRepository;
     @Mock private OperatorEventPublisher operatorEventPublisher;
     @Mock private LogEventPublisher logEventPublisher;
+    @Mock private org.springframework.data.redis.core.RedisTemplate<String, String> redisTemplate;
 
     @InjectMocks
     private PlanService planService;
@@ -158,6 +159,42 @@ class PlanServiceTest {
         when(planRepository.findById(100L)).thenReturn(Optional.of(plan));
 
         assertThrows(com.omnicharge.operator.common.exception.BadRequestException.class, () -> planService.activatePlan(100L));
+    }
+
+    @Test
+    void getPlansByOperator_Success() {
+        when(planRepository.findByOperatorIdAndIsActive(1L, true)).thenReturn(List.of(plan));
+        List<PlanResponse> result = planService.getPlansByOperator(1L);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getPlansByOperatorAndStatus_Success() {
+        when(planRepository.findByOperatorIdAndStatus(1L, true)).thenReturn(List.of(plan));
+        List<PlanResponse> result = planService.getPlansByOperatorAndStatus(1L, true);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void searchPlansWithStatus_Success() {
+        Page<Plan> p = new PageImpl<>(List.of(plan));
+        when(planRepository.searchPlansWithStatus(1L, PlanCategory.DATA, true, "Jio", PageRequest.of(0, 10))).thenReturn(p);
+        Page<PlanResponse> result = planService.searchPlansWithStatus(1L, PlanCategory.DATA, true, "Jio", PageRequest.of(0, 10));
+        assertEquals(1, result.getContent().size());
+    }
+
+    @Test
+    void invalidatePlanCache_RedisException() {
+        PlanRequest req = new PlanRequest();
+        req.setPlanName("Jio 5G");
+        req.setPrice(new BigDecimal("199"));
+
+        when(operatorRepository.findById(1L)).thenReturn(Optional.of(operator));
+        when(planRepository.save(any(Plan.class))).thenReturn(plan);
+        org.mockito.Mockito.doThrow(new RuntimeException("Redis Down")).when(redisTemplate).delete(any(String.class));
+
+        PlanResponse result = planService.createPlan(1L, req);
+        assertNotNull(result);
     }
 
     @Test

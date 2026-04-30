@@ -119,4 +119,43 @@ class PaymentEventConsumerTest {
         verify(notificationService, times(1)).createAndSendSms(
                 eq(1L), eq("+919876543210"), anyString(), any(), eq("TXN-001"));
     }
+
+    @Test
+    @DisplayName("DB Email creation failure: Does not crash — SMS still sent")
+    void handlePaymentCompleted_DbEmailFailure_SmsStillSent() {
+        PaymentCompletedEvent event = buildEvent("SUCCESS", "user@test.com", "+919876543210");
+
+        doThrow(new RuntimeException("DB down")).when(notificationService)
+                .createAndSendEmail(anyLong(), anyString(), anyString(), anyString(), any(), anyString());
+
+        paymentEventConsumer.handlePaymentCompleted(event);
+
+        verify(notificationService, times(1)).createAndSendSms(
+                eq(1L), eq("+919876543210"), anyString(), any(), eq("TXN-001"));
+    }
+
+    @Test
+    @DisplayName("SMS creation failure: Does not crash")
+    void handlePaymentCompleted_SmsFailure_Continues() {
+        PaymentCompletedEvent event = buildEvent("SUCCESS", "user@test.com", "+919876543210");
+
+        doThrow(new RuntimeException("DB down")).when(notificationService)
+                .createAndSendSms(anyLong(), anyString(), anyString(), any(), anyString());
+
+        paymentEventConsumer.handlePaymentCompleted(event);
+
+        verify(emailService, times(1)).sendPaymentConfirmation(anyString(), any());
+    }
+
+    @Test
+    @DisplayName("Log publisher failure: Does not crash")
+    void handlePaymentCompleted_LogPublisherFailure_Continues() {
+        PaymentCompletedEvent event = buildEvent("SUCCESS", "user@test.com", "+919876543210");
+
+        doThrow(new RuntimeException("Log down")).when(logEventPublisher).publish(any());
+
+        paymentEventConsumer.handlePaymentCompleted(event);
+
+        verify(emailService, times(1)).sendPaymentConfirmation(anyString(), any());
+    }
 }

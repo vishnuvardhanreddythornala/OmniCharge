@@ -53,7 +53,7 @@ public class RechargeService implements IRechargeService {
         
         PlanResponse plan = planApiResponse.getData();
 
-        if (!plan.getIsActive()) {
+        if (!Boolean.TRUE.equals(plan.getIsActive())) {
             throw new BadRequestException("Invalid or inactive plan");
         }
 

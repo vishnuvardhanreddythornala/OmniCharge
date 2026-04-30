@@ -20,13 +20,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.ParameterizedTypeReference;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpMethod;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -45,8 +45,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.never;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.anyString;
+
 import static org.mockito.ArgumentMatchers.anyLong;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,7 +61,7 @@ class PaymentServiceTest {
     private PaymentEventProducer paymentEventProducer;
 
     @Mock
-    private RestTemplate restTemplate;
+    private com.omnicharge.payment.client.RechargeServiceClient rechargeServiceClient;
 
     @Mock
     private LogEventPublisher logEventPublisher;
@@ -162,19 +161,19 @@ class PaymentServiceTest {
         when(transactionRepository.findByTransactionId("TXN-123")).thenReturn(Optional.of(missingDataTxn));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
 
-        // Mock rest template response since mobileNumber etc is null
+        // Mock Feign client response since mobileNumber etc is null
         Map<String, Object> dataMap = Map.of("mobileNumber", "9876543210", "operatorName", "Jio", "planName", "Pro");
         Map<String, Object> bodyMap = Map.of("success", true, "data", dataMap);
         ResponseEntity<Map<String, Object>> responseEntity = ResponseEntity.ok(bodyMap);
 
-        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), eq(null), any(ParameterizedTypeReference.class)))
+        when(rechargeServiceClient.getRechargeById("OMNI-123"))
                 .thenReturn(responseEntity);
 
         TransactionResponse response = paymentService.confirmPayment("TXN-123", "pay_webhook_id", "sign_abc");
 
         assertEquals(PaymentStatus.SUCCESS, response.getStatus());
         assertEquals("9876543210", response.getMobileNumber());
-        verify(restTemplate, times(1)).exchange(anyString(), eq(HttpMethod.GET), eq(null), any(ParameterizedTypeReference.class));
+        verify(rechargeServiceClient, times(1)).getRechargeById("OMNI-123");
         verify(paymentEventProducer, times(1)).publishPaymentApproved(any());
     }
 
@@ -297,5 +296,163 @@ class PaymentServiceTest {
         assertNotNull(stats);
         assertEquals(100L, stats.getTotalTransactions());
         assertEquals(new BigDecimal("15000"), stats.getTotalRevenue());
+    }
+
+    @Test
+    void getPaymentStats_DefaultDays() {
+        when(transactionRepository.count()).thenReturn(10L);
+        when(transactionRepository.countByStatus(any())).thenReturn(5L);
+        when(transactionRepository.sumAmountByStatus(any())).thenReturn(BigDecimal.TEN);
+        when(transactionRepository.findRevenueByDate(any(), any())).thenReturn(Collections.emptyList());
+        when(transactionRepository.findTopUsersByRevenue(any(), any())).thenReturn(Collections.emptyList());
+
+        PaymentStatsResponse stats = paymentService.getPaymentStats(null);
+        assertNotNull(stats);
+    }
+
+    @Test
+    void processPayment_UnknownPaymentMethod() {
+        validRequest.setPaymentMethod("BITCOIN");
+
+        PaymentResponse mockRazorpayResponse = PaymentResponse.builder()
+                .status("SUCCESS")
+                .razorpayOrderId("order_abc123")
+                .build();
+
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
+        when(razorpayPaymentService.processRazorpayPayment(any(PaymentRequest.class))).thenReturn(mockRazorpayResponse);
+
+        PaymentResponse response = paymentService.processPayment(validRequest);
+
+        assertNotNull(response);
+        assertEquals("SUCCESS", response.getStatus());
+    }
+
+    @Test
+    void confirmPayment_WithoutMissingMetadata() {
+        // Transaction already has metadata - no enrichment needed
+        Transaction txn = new Transaction();
+        txn.setTransactionId("TXN-FULL");
+        txn.setRechargeId("REC-FULL");
+        txn.setUserId(1L);
+        txn.setStatus(PaymentStatus.PENDING);
+        txn.setAmount(BigDecimal.TEN);
+        txn.setMobileNumber("9876543210");
+        txn.setOperatorName("Jio");
+        txn.setPlanName("Gold");
+        txn.setPaymentMethod(PaymentMethod.UPI);
+
+        when(transactionRepository.findByTransactionId("TXN-FULL")).thenReturn(Optional.of(txn));
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
+
+        TransactionResponse response = paymentService.confirmPayment("TXN-FULL", "pay_123", "sig_123");
+
+        assertEquals(PaymentStatus.SUCCESS, response.getStatus());
+        verify(rechargeServiceClient, never()).getRechargeById(any());
+    }
+
+    @Test
+    void confirmPayment_EnrichmentReturnsNoData() {
+        Transaction txn = new Transaction();
+        txn.setTransactionId("TXN-NODATA");
+        txn.setRechargeId("REC-NODATA");
+        txn.setUserId(1L);
+        txn.setStatus(PaymentStatus.PENDING);
+        txn.setAmount(BigDecimal.TEN);
+        txn.setPaymentMethod(PaymentMethod.UPI);
+
+        when(transactionRepository.findByTransactionId("TXN-NODATA")).thenReturn(Optional.of(txn));
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
+
+        // Return success=false from recharge-service
+        Map<String, Object> bodyMap = Map.of("success", false);
+        when(rechargeServiceClient.getRechargeById("REC-NODATA"))
+                .thenReturn(ResponseEntity.ok(bodyMap));
+
+        TransactionResponse response = paymentService.confirmPayment("TXN-NODATA", "pay_123", "sig_123");
+
+        assertEquals(PaymentStatus.SUCCESS, response.getStatus());
+    }
+
+    @Test
+    void confirmPayment_EnrichmentThrowsException() {
+        Transaction txn = new Transaction();
+        txn.setTransactionId("TXN-ERR");
+        txn.setRechargeId("REC-ERR");
+        txn.setUserId(1L);
+        txn.setStatus(PaymentStatus.PENDING);
+        txn.setAmount(BigDecimal.TEN);
+        txn.setPaymentMethod(PaymentMethod.UPI);
+
+        when(transactionRepository.findByTransactionId("TXN-ERR")).thenReturn(Optional.of(txn));
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
+        when(rechargeServiceClient.getRechargeById("REC-ERR")).thenThrow(new RuntimeException("Connection refused"));
+
+        TransactionResponse response = paymentService.confirmPayment("TXN-ERR", "pay_123", "sig_123");
+
+        // Should not throw — enrichment failure is caught
+        assertEquals(PaymentStatus.SUCCESS, response.getStatus());
+    }
+
+    @Test
+    void confirmPayment_TransactionNotFound() {
+        when(transactionRepository.findByTransactionId("TXN-MISSING")).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> paymentService.confirmPayment("TXN-MISSING", "pay_123", "sig_123"));
+    }
+
+    @Test
+    void failPayment_TransactionNotFound() {
+        when(transactionRepository.findByTransactionId("TXN-MISSING")).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> paymentService.failPayment("TXN-MISSING", "cancelled"));
+    }
+
+    @Test
+    void processPayment_PublishPaymentEventThrowsException() {
+        PaymentResponse mockRazorpayResponse = PaymentResponse.builder()
+                .status("SUCCESS")
+                .razorpayOrderId("order_abc123")
+                .build();
+
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
+        when(razorpayPaymentService.processRazorpayPayment(any(PaymentRequest.class))).thenReturn(mockRazorpayResponse);
+        org.mockito.Mockito.doThrow(new RuntimeException("RabbitMQ down")).when(paymentEventProducer).publishPaymentCompleted(any());
+
+        PaymentResponse response = paymentService.processPayment(validRequest);
+
+        // Should not throw — event publish failure is caught
+        assertNotNull(response);
+        assertEquals("SUCCESS", response.getStatus());
+    }
+
+    @Test
+    void getPaymentStats_WithRevenueData() {
+        when(transactionRepository.count()).thenReturn(50L);
+        when(transactionRepository.countByStatus(PaymentStatus.SUCCESS)).thenReturn(40L);
+        when(transactionRepository.countByStatus(PaymentStatus.FAILED)).thenReturn(5L);
+        when(transactionRepository.countByStatus(PaymentStatus.PENDING)).thenReturn(5L);
+        when(transactionRepository.sumAmountByStatus(PaymentStatus.SUCCESS)).thenReturn(new BigDecimal("10000"));
+        when(transactionRepository.sumAmountByStatus(PaymentStatus.FAILED)).thenReturn(new BigDecimal("500"));
+        when(transactionRepository.averageAmountByStatus(PaymentStatus.SUCCESS)).thenReturn(new BigDecimal("250"));
+        when(transactionRepository.countTransactionsSince(any())).thenReturn(10L);
+        when(transactionRepository.sumAmountSinceByStatus(any(), any())).thenReturn(new BigDecimal("2500"));
+
+        Object[] row1 = new Object[]{"2026-04-29", 10L, new BigDecimal("2500")};
+        List<Object[]> revenueRows = new java.util.ArrayList<>();
+        revenueRows.add(row1);
+        when(transactionRepository.findRevenueByDate(any(), any())).thenReturn(revenueRows);
+
+        Object[] userRow = new Object[]{1L, 5L, new BigDecimal("1000")};
+        List<Object[]> userRows = new java.util.ArrayList<>();
+        userRows.add(userRow);
+        when(transactionRepository.findTopUsersByRevenue(any(), any())).thenReturn(userRows);
+
+        PaymentStatsResponse stats = paymentService.getPaymentStats(7);
+
+        assertNotNull(stats);
+        assertEquals(50L, stats.getTotalTransactions());
+        assertEquals(1, stats.getRevenueByDate().size());
+        assertEquals(1, stats.getTopUsers().size());
     }
 }

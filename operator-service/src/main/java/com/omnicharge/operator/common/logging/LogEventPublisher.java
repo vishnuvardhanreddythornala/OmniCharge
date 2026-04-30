@@ -23,7 +23,7 @@ public class LogEventPublisher {
     @Value("${spring.application.name:unknown}")
     private String serviceName;
 
-    @Autowired(required = false)
+    @Autowired
     public LogEventPublisher(RabbitTemplate rabbitTemplate, FallbackLogWriter fallbackLogWriter) {
         this.rabbitTemplate = rabbitTemplate;
         this.fallbackLogWriter = fallbackLogWriter;

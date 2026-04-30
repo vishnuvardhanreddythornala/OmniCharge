@@ -200,4 +200,108 @@ class OperatorServiceTest {
         assertTrue(plan.getDeactivatedByOperator());
         verify(operatorRepository, times(1)).save(operator);
     }
+
+    @Test
+    void getActiveOperators_Success() {
+        when(operatorRepository.findByIsActive(true)).thenReturn(List.of(operator));
+        List<OperatorResponse> list = operatorService.getActiveOperators();
+        assertEquals(1, list.size());
+    }
+
+    @Test
+    void getOperatorsByStatus_NullReturnsAll() {
+        when(operatorRepository.findAll()).thenReturn(List.of(operator));
+        List<OperatorResponse> list = operatorService.getOperatorsByStatus(null);
+        assertEquals(1, list.size());
+    }
+
+    @Test
+    void getOperatorsByStatus_ActiveFilter() {
+        when(operatorRepository.findByIsActive(false)).thenReturn(List.of());
+        List<OperatorResponse> list = operatorService.getOperatorsByStatus(false);
+        assertEquals(0, list.size());
+    }
+
+    @Test
+    void createOperator_DuplicateName() {
+        OperatorRequest req = new OperatorRequest();
+        req.setCode("NEW");
+        req.setName("Jio");
+        when(operatorRepository.existsByCode("NEW")).thenReturn(false);
+        when(operatorRepository.existsByName("Jio")).thenReturn(true);
+
+        assertThrows(DuplicateResourceException.class, () -> operatorService.createOperator(req));
+    }
+
+    @Test
+    void updateOperator_DuplicateCode() {
+        Operator other = new Operator();
+        other.setId(2L);
+        OperatorRequest req = new OperatorRequest();
+        req.setCode("EXISTING_CODE");
+        req.setName("Unique Name");
+
+        when(operatorRepository.findById(1L)).thenReturn(Optional.of(operator));
+        when(operatorRepository.findByCode("EXISTING_CODE")).thenReturn(Optional.of(other));
+
+        assertThrows(DuplicateResourceException.class, () -> operatorService.updateOperator(1L, req));
+    }
+
+    @Test
+    void updateOperator_SameOperatorCodeOk() {
+        OperatorRequest req = new OperatorRequest();
+        req.setName("Jio Updated");
+        req.setCode("JIO");
+        req.setCategory(OperatorCategory.PREPAID);
+
+        when(operatorRepository.findById(1L)).thenReturn(Optional.of(operator));
+        when(operatorRepository.findByCode("JIO")).thenReturn(Optional.of(operator)); // same operator
+        when(operatorRepository.findByName("Jio Updated")).thenReturn(Optional.empty());
+        when(operatorRepository.save(any(Operator.class))).thenReturn(operator);
+
+        OperatorResponse response = operatorService.updateOperator(1L, req);
+        assertNotNull(response);
+    }
+
+    @Test
+    void deleteOperator_SkipsInactivePlans() {
+        plan.setIsActive(false); // plan is already inactive
+        when(operatorRepository.findById(1L)).thenReturn(Optional.of(operator));
+
+        operatorService.deleteOperator(1L);
+
+        assertFalse(operator.getIsActive());
+        assertFalse(plan.getIsActive());
+        // DeactivatedByOperator should not have been set to true since plan was already inactive
+    }
+
+    @Test
+    void activateOperator_SkipsPlanNotDeactivatedByOperator() {
+        operator.setIsActive(false);
+        plan.setIsActive(false);
+        plan.setDeactivatedByOperator(false); // was manually deactivated, not by operator
+
+        when(operatorRepository.findById(1L)).thenReturn(Optional.of(operator));
+        when(operatorRepository.save(operator)).thenReturn(operator);
+
+        operatorService.activateOperator(1L);
+
+        assertTrue(operator.getIsActive());
+        assertFalse(plan.getIsActive()); // should NOT be restored
+    }
+
+    @Test
+    void mapToResponse_NullPlans() {
+        Operator op = new Operator();
+        op.setId(99L);
+        op.setName("NoPlan");
+        op.setCode("NP");
+        op.setCategory(OperatorCategory.PREPAID);
+        op.setIsActive(true);
+        op.setPlans(null);
+
+        when(operatorRepository.findById(99L)).thenReturn(Optional.of(op));
+        OperatorResponse response = operatorService.getOperatorById(99L);
+        assertEquals(0, response.getPlanCount());
+    }
 }

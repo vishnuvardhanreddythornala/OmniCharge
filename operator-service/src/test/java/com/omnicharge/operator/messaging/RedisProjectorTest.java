@@ -51,6 +51,9 @@ class RedisProjectorTest {
     private com.omnicharge.operator.common.logging.LogEventPublisher logEventPublisher;
 
 
+    @Mock
+    private com.omnicharge.operator.service.IOperatorDetectionService operatorDetectionService;
+
     @InjectMocks
     private RedisProjector redisProjector;
 
@@ -68,6 +71,7 @@ class RedisProjectorTest {
         Operator operator = new Operator();
         operator.setId(1L);
         operator.setName("Airtel");
+        operator.setIsActive(true); // FIX: Ensure operator is active
 
         plan = new Plan();
         plan.setId(10L);
@@ -91,6 +95,7 @@ class RedisProjectorTest {
         verify(planRepository, times(1)).findByOperatorIdAndIsActive(1L, true);
         verify(valueOperations, times(1)).set(eq("plans:operator:1"), anyString());
         verify(valueOperations, times(1)).set(eq("plan:detail:10"), anyString());
+        verify(operatorDetectionService, times(1)).invalidateDetectionCacheForOperator(1L);
     }
 
     @Test
@@ -102,6 +107,30 @@ class RedisProjectorTest {
         redisProjector.consumePlanUpdatedEvent(message);
 
         verify(planRepository, never()).findByOperatorIdAndIsActive(anyLong(), anyBoolean());
+        verify(valueOperations, never()).set(eq("plans:operator:1"), anyString());
+    }
+
+    @Test
+    void consumePlanUpdatedEvent_JsonProcessingException() throws JsonProcessingException {
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.setIfAbsent(anyString(), anyString(), any(Duration.class))).thenReturn(true);
+        when(planRepository.findByOperatorIdAndIsActive(1L, true)).thenReturn(List.of(plan));
+        
+        when(objectMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("JSON Error"){});
+
+        redisProjector.consumePlanUpdatedEvent(message);
+        
+        verify(valueOperations, never()).set(eq("plans:operator:1"), anyString());
+    }
+
+    @Test
+    void consumePlanUpdatedEvent_Exception() {
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.setIfAbsent(anyString(), anyString(), any(Duration.class))).thenReturn(true);
+        when(planRepository.findByOperatorIdAndIsActive(1L, true)).thenThrow(new RuntimeException("DB Error"));
+
+        redisProjector.consumePlanUpdatedEvent(message);
+        
         verify(valueOperations, never()).set(eq("plans:operator:1"), anyString());
     }
 }

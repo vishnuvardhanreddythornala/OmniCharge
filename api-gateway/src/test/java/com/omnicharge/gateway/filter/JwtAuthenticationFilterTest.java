@@ -168,4 +168,126 @@ class JwtAuthenticationFilterTest {
         assertEquals(HttpStatus.UNAUTHORIZED, exchange.getResponse().getStatusCode());
         verify(logEventPublisher, times(1)).publish(argThat(logEvent -> logEvent.getLevel().equals("WARN")));
     }
+
+    @Test
+    void filter_RedisError_FailsOpen() {
+        SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        String token = Jwts.builder()
+                .claim("userId", "1")
+                .claim("email", "test@test.com")
+                .claim("role", "ROLE_USER")
+                .claim("isProfileComplete", true)
+                .claim("jti", "jti-redis-err")
+                .expiration(new Date(System.currentTimeMillis() + 10000))
+                .signWith(key)
+                .compact();
+
+        MockServerHttpRequest request = MockServerHttpRequest.get("/api/secure/data")
+                .header("Authorization", "Bearer " + token)
+                .build();
+        ServerWebExchange exchange = MockServerWebExchange.from(request);
+
+        when(reactiveRedisTemplate.hasKey("blacklist:jti-redis-err"))
+                .thenReturn(Mono.error(new RuntimeException("Redis connection refused")));
+        when(filterChain.filter(any(ServerWebExchange.class))).thenReturn(Mono.empty());
+
+        jwtAuthenticationFilter.filter(exchange, filterChain).block();
+
+        // Should fail open - allow the request through
+        verify(filterChain, times(1)).filter(any(ServerWebExchange.class));
+    }
+
+    @Test
+    void filter_IncompleteProfile_AllowedPath_Allows() {
+        SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        String token = Jwts.builder()
+                .claim("userId", "1")
+                .claim("email", "test@test.com")
+                .claim("role", "ROLE_USER")
+                .claim("isProfileComplete", false)
+                .claim("jti", "jti-profile")
+                .expiration(new Date(System.currentTimeMillis() + 10000))
+                .signWith(key)
+                .compact();
+
+        // /api/users/profile is in PROFILE_INCOMPLETE_ALLOWED_PATHS
+        MockServerHttpRequest request = MockServerHttpRequest.get("/api/users/profile")
+                .header("Authorization", "Bearer " + token)
+                .build();
+        ServerWebExchange exchange = MockServerWebExchange.from(request);
+
+        when(reactiveRedisTemplate.hasKey("blacklist:jti-profile")).thenReturn(Mono.just(false));
+        when(filterChain.filter(any(ServerWebExchange.class))).thenReturn(Mono.empty());
+
+        jwtAuthenticationFilter.filter(exchange, filterChain).block();
+
+        verify(filterChain, times(1)).filter(any(ServerWebExchange.class));
+    }
+
+    @Test
+    void filter_NullProfileComplete_AllowsThrough() {
+        SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        String token = Jwts.builder()
+                .claim("userId", "1")
+                .claim("email", "user@example.com")
+                .claim("role", "ROLE_USER")
+                .claim("jti", "jti-null-profile")
+                // No isProfileComplete claim at all
+                .expiration(new Date(System.currentTimeMillis() + 10000))
+                .signWith(key)
+                .compact();
+
+        MockServerHttpRequest request = MockServerHttpRequest.get("/api/secure/data")
+                .header("Authorization", "Bearer " + token)
+                .build();
+        ServerWebExchange exchange = MockServerWebExchange.from(request);
+
+        when(reactiveRedisTemplate.hasKey("blacklist:jti-null-profile")).thenReturn(Mono.just(false));
+        when(filterChain.filter(any(ServerWebExchange.class))).thenReturn(Mono.empty());
+
+        jwtAuthenticationFilter.filter(exchange, filterChain).block();
+
+        verify(filterChain, times(1)).filter(any(ServerWebExchange.class));
+    }
+
+    @Test
+    void filter_BearerPrefixOnly_RejectsUnauthorized() {
+        MockServerHttpRequest request = MockServerHttpRequest.get("/api/secure/data")
+                .header("Authorization", "Basic abc123")
+                .build();
+        ServerWebExchange exchange = MockServerWebExchange.from(request);
+
+        jwtAuthenticationFilter.filter(exchange, filterChain).block();
+
+        assertEquals(HttpStatus.UNAUTHORIZED, exchange.getResponse().getStatusCode());
+    }
+
+    @Test
+    void filter_SwaggerPath_AllowsWithoutToken() {
+        MockServerHttpRequest request = MockServerHttpRequest.get("/swagger-ui.html").build();
+        ServerWebExchange exchange = MockServerWebExchange.from(request);
+
+        when(filterChain.filter(any(ServerWebExchange.class))).thenReturn(Mono.empty());
+
+        jwtAuthenticationFilter.filter(exchange, filterChain).block();
+
+        verify(filterChain, times(1)).filter(exchange);
+    }
+
+    @Test
+    void filter_ActuatorPath_AllowsWithoutToken() {
+        MockServerHttpRequest request = MockServerHttpRequest.get("/actuator/health").build();
+        ServerWebExchange exchange = MockServerWebExchange.from(request);
+
+        when(filterChain.filter(any(ServerWebExchange.class))).thenReturn(Mono.empty());
+
+        jwtAuthenticationFilter.filter(exchange, filterChain).block();
+
+        verify(filterChain, times(1)).filter(exchange);
+    }
+
+    @Test
+    void getOrder_ReturnsMinusOne() {
+        assertEquals(-1, jwtAuthenticationFilter.getOrder());
+    }
 }

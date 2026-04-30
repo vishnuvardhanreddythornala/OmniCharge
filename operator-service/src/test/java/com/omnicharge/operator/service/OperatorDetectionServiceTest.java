@@ -197,4 +197,56 @@ class OperatorDetectionServiceTest {
 
         assertNull(result); // Falls through because of bad cache + null numverify + no active prefix
     }
+
+    @Test
+    void detectOperator_RedisDownDuringCacheRead() {
+        lenient().when(redisTemplate.opsForValue()).thenThrow(new RuntimeException("Redis connection failed"));
+        lenient().when(numverifyClient.detectOperator("9876543210")).thenReturn(null);
+        lenient().when(operatorRepository.findByIsActive(true)).thenReturn(new ArrayList<>());
+
+        OperatorDetectionResponse result = operatorDetectionService.detectOperator("9876543210");
+        assertNull(result);
+    }
+
+    @Test
+    void detectOperator_RedisDownDuringCacheWrite() throws Exception {
+        lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        lenient().when(valueOperations.get("operator:detect:9876543210")).thenReturn(null);
+        
+        NumverifyResponse validResp = new NumverifyResponse();
+        validResp.setValid(true);
+        validResp.setCarrier("Airtel");
+        lenient().when(numverifyClient.detectOperator("9876543210")).thenReturn(validResp);
+        lenient().when(operatorRepository.findByIsActive(true)).thenReturn(List.of(operator));
+        lenient().when(operatorRepository.findByCode("AIRTEL")).thenReturn(Optional.of(operator));
+        lenient().when(planService.getPlansByOperator(1L)).thenReturn(new ArrayList<>());
+        
+        lenient().when(objectMapper.writeValueAsString(any())).thenReturn("json");
+        
+        // Throw exception when trying to write to cache
+        lenient().when(redisTemplate.opsForValue()).thenThrow(new RuntimeException("Redis connection failed for write"));
+
+        OperatorDetectionResponse result = operatorDetectionService.detectOperator("9876543210");
+        assertNotNull(result);
+        assertEquals("Airtel", result.getOperatorName());
+    }
+
+    @Test
+    void invalidateDetectionCacheForOperator_RedisDown() {
+        when(redisTemplate.keys(anyString())).thenThrow(new RuntimeException("Redis down"));
+        
+        // Should catch exception and not throw
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> 
+            operatorDetectionService.invalidateDetectionCacheForOperator(1L)
+        );
+    }
+
+    @Test
+    void invalidateDetectionCacheForOperator_NullKeys() {
+        when(redisTemplate.keys(anyString())).thenReturn(null);
+        
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> 
+            operatorDetectionService.invalidateDetectionCacheForOperator(1L)
+        );
+    }
 }
