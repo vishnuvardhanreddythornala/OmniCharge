@@ -13,6 +13,7 @@ on:
       - 'discovery-server/**'
       - 'config-server/**'
       - 'pom.xml'
+      - '.github/workflows/**'
   pull_request:
     branches: [ "main", "develop" ]
 
