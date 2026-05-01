@@ -34,7 +34,7 @@ jobs:
           
       - name: Install dependencies
         working-directory: ./omnicharge-ui
-        run: npm ci
+        run: npm ci --legacy-peer-deps
         
       - name: Build Angular for GitHub Pages
         working-directory: ./omnicharge-ui
