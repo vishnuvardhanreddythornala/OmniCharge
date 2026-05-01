@@ -15,4 +15,5 @@ COPY ${JAR_FILE} app.jar
 COPY config-repo /config-repo
 
 # Run the application
+WORKDIR /
 ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar /app.jar"]
