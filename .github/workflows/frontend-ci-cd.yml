@@ -5,6 +5,7 @@ on:
     branches: [ "main" ]
     paths:
       - 'omnicharge-ui/**'
+      - '.github/workflows/frontend-ci-cd.yml'
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
