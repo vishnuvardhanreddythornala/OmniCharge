@@ -51,7 +51,7 @@ jobs:
           type=ref,event=branch
           type=semver,pattern={{version}}
           type=sha
-          type=raw,value=v2
+          type=raw,value=v3
 
     - name: Copy config-repo (for config-server only)
       if: matrix.service == 'config-server'
