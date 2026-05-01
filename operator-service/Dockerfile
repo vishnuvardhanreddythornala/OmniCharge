@@ -3,6 +3,7 @@ FROM eclipse-temurin:21-jre-alpine
 
 # Set non-root user for security (optional but best practice)
 RUN addgroup -S spring && adduser -S spring -G spring
+RUN mkdir /logs && chown spring:spring /logs
 USER spring:spring
 
 # Optimize JVM settings inside container
