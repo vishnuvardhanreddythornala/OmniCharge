@@ -48,10 +48,9 @@ jobs:
     - name: Build and Test ${{ matrix.service }}
       run: mvn -B test --file ${{ matrix.service }}/pom.xml
 
-    # Uncomment and configure SONAR_TOKEN secret to enable SonarQube analysis
-    - name: SonarQube Scan
+    - name: SonarCloud Scan
       if: success() && matrix.service != 'eureka-server' && matrix.service != 'config-server'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=omnicharge-${{ matrix.service }} --file ${{ matrix.service }}/pom.xml
+      run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=vishnuvardhanreddythornala_OmniCharge-${{ matrix.service }} -Dsonar.organization=vishnuvardhanreddythornala -Dsonar.host.url=https://sonarcloud.io --file ${{ matrix.service }}/pom.xml
