@@ -19,7 +19,7 @@ jobs:
           'payment-service',
           'notification-service',
           'api-gateway',
-          'eureka-server',
+          'discovery-server',
           'config-server'
         ]
 
