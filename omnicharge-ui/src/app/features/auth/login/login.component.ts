@@ -213,7 +213,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
       this.loadingAction.set('google');
       this.authService.googleAuth(idToken).subscribe({
         next: res => {
-          if (res.success) Object.assign(window, { location: this.getReturnUrl() });
+          if (res.success) this.handleSuccessfulNavigation();
           else this.displayError(res.message || 'Google Auth failed.');
           this.loadingAction.set('');
         },
