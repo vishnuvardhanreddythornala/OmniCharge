@@ -76,11 +76,14 @@ public class AuthService implements InterfaceAuthService {
         // Log to console for dev
         log.warn("========= ADMIN 2FA OTP for {} → {} =========", user.getEmail(), otp);
 
-        // RabbitMQ dispatch
-        OtpEvent event = OtpEvent.builder().userId(user.getId()).mobileNumber(user.getEmail()).otp(otp).build();
-        rabbitTemplate.convertAndSend(EXCHANGE_NAME, "email.otp.send", event);
-
-        publishBusinessLog("ADMIN_LOGIN_PASSWORD_SUCCESS", "Admin Password Validated. 2FA Initiated", Map.of("email", user.getEmail(), "ip", ipAddress));
+        // RabbitMQ dispatch (non-fatal — OTP is already in Redis and console log)
+        try {
+            OtpEvent event = OtpEvent.builder().userId(user.getId()).mobileNumber(user.getEmail()).otp(otp).build();
+            rabbitTemplate.convertAndSend(EXCHANGE_NAME, "email.otp.send", event);
+            publishBusinessLog("ADMIN_LOGIN_PASSWORD_SUCCESS", "Admin Password Validated. 2FA Initiated", Map.of("email", user.getEmail(), "ip", ipAddress));
+        } catch (Exception e) {
+            log.warn("RabbitMQ unavailable — OTP email dispatch skipped. OTP is in Redis and console log. Error: {}", e.getMessage());
+        }
 
         return AdminLoginInitResponse.builder()
                 .requires2fa(true)
