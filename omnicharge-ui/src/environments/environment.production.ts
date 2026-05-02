@@ -1,10 +1,10 @@
 /**
- * Production environment configuration for Local Docker Desktop testing.
- * All API calls route through the Spring Cloud Gateway mapped to port 8080 on the host.
+ * Production environment configuration for Azure VM deployment.
+ * All API calls route through the Nginx reverse proxy on the VM.
  */
 export const environment = {
   production: true,
-  apiBaseUrl: '', // Uses relative path. Routed dynamically by Nginx Reverse Proxy
-  razorpayKeyId: 'rzp_test_TzY0Gv36M8v5j2', // Public Live Key
-  googleClientId: '1084384475158-8sc296epqd9fj6hkplr0725hgbs6sl8h.apps.googleusercontent.com', // Google OAuth Client ID
+  apiBaseUrl: 'https://omnicharge.centralindia.cloudapp.azure.com',
+  razorpayKeyId: 'rzp_live_SgV8VMOB5gIRcd',
+  googleClientId: '1084384475158-8sc296epqd9fj6hkplr0725hgbs6sl8h.apps.googleusercontent.com',
 };
