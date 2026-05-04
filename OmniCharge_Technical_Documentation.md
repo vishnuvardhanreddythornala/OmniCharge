@@ -5,7 +5,7 @@ OmniCharge is a highly scalable, distributed microservices-based mobile recharge
 
 The platform delivers the complete recharge lifecycle: mobile number input, Numverify API-based network operator detection, displaying operator-specific plans from a high-performance Redis read-model, checkout with authentication gates (mobile OTP or Google OAuth), secure Razorpay payment processing, and SAGA-orchestrated transaction fulfillment followed by instant SMS/email receipts. It also handles edge cases like abandoned Razorpay popups (zombie transactions) and plan expiry reminders.
 
-**Executive Summary:** OmniCharge is a modern, enterprise-grade mobile recharge platform architected on Spring Boot 3.x microservices and Angular 17. By leveraging a reactive Spring Cloud Gateway, Netflix Eureka service mesh, RabbitMQ event-driven SAGA orchestration, CQRS for high-speed plan retrieval, and Resilience4j circuit breakers, the platform guarantees high availability, zero-data-loss logging via an Outbox Pattern, and strict fault tolerance. The system ensures robust data isolation using per-service MySQL schemas while offering real-time observability via ELK, Prometheus, Grafana, and Micrometer Tracing.
+**Executive Summary:** OmniCharge is a modern, enterprise-grade mobile recharge platform architected on Spring Boot 3.x microservices and Angular 17. By leveraging a reactive Spring Cloud Gateway, Netflix Eureka service mesh, RabbitMQ event-driven SAGA orchestration, CQRS for high-speed plan retrieval, and Resilience4j circuit breakers, the platform guarantees high availability, zero-data-loss logging via an Outbox Pattern, and strict fault tolerance. The system ensures robust data isolation using per-service MySQL schemas while offering real-time observability via Loki, Prometheus, Grafana, and Zipkin/Micrometer Tracing. The production system is deployed on an Azure VM utilizing Docker Compose with an Nginx reverse proxy for SSL termination.
 
 **System Boundaries:** OmniCharge owns user identity, profile management, recharge orchestration, operator plan catalogs, and transaction history. It strictly delegates external capabilities: payment processing is delegated to Razorpay, mobile operator lookup is delegated to Numverify, SMS delivery is delegated to Twilio, email delivery is delegated to JavaMail/SMTP, and SSO is delegated to Google OAuth2.
 
@@ -13,6 +13,58 @@ The platform delivers the complete recharge lifecycle: mobile number input, Numv
 
 ## SECTION 2 — ARCHITECTURE DOCUMENT (HLD)
 The OmniCharge backend is built as a distributed microservices ecosystem consisting of 9 discrete Spring Boot applications: `config-server`, `discovery-server`, `api-gateway`, `user-service`, `operator-service`, `recharge-service`, `payment-service`, `notification-service`, and `logging-service`.
+
+**High-Level Architecture Diagram:**
+
+```mermaid
+graph TD
+    Client[Angular Frontend / User] -->|HTTPS| Nginx[Nginx Reverse Proxy]
+    Nginx -->|Route| APIGateway[API Gateway :8080]
+    
+    subgraph Service Layer
+        APIGateway -->|JWT Auth & Route| UserService[User Service]
+        APIGateway -->|Route| OperatorService[Operator Service]
+        APIGateway -->|Route| RechargeService[Recharge Service]
+        APIGateway -->|Route| PaymentService[Payment Service]
+        APIGateway -->|Route| NotificationService[Notification Service]
+    end
+    
+    subgraph Registry
+        Eureka[Eureka Discovery] -.-> APIGateway
+        Eureka -.-> UserService
+        Eureka -.-> OperatorService
+        Eureka -.-> RechargeService
+        Eureka -.-> PaymentService
+        Eureka -.-> NotificationService
+    end
+    
+    subgraph Message Broker
+        RabbitMQ[(RabbitMQ Event Broker)]
+    end
+    
+    UserService -->|Publish OTP| RabbitMQ
+    OperatorService -->|Publish Plan Update| RabbitMQ
+    RechargeService <-->|SAGA Events| RabbitMQ
+    PaymentService <-->|SAGA Events| RabbitMQ
+    RabbitMQ -->|Consume| NotificationService
+    
+    subgraph Databases & Caching
+        MySQL_User[(User DB)]
+        MySQL_Op[(Operator DB)]
+        MySQL_Rec[(Recharge DB)]
+        MySQL_Pay[(Payment DB)]
+        MySQL_Notif[(Notification DB)]
+        RedisCache[(Redis Cache/RateLimit)]
+    end
+    
+    UserService --> MySQL_User
+    OperatorService --> MySQL_Op
+    OperatorService <--> RedisCache
+    RechargeService --> MySQL_Rec
+    PaymentService --> MySQL_Pay
+    NotificationService --> MySQL_Notif
+    APIGateway <--> RedisCache
+```
 
 **Why Microservices?** A microservices architecture was chosen over a monolith to enable independent scaling and fault isolation. For instance, the `operator-service` experiences heavy read traffic during plan browsing and scales independently using its Redis cache. The `payment-service` and `recharge-service` require strict transactional integrity but can fail independently without taking down the user profile system. Development agility is maintained by separating concerns (e.g., logging and notifications are decoupled via RabbitMQ).
 
@@ -60,9 +112,9 @@ If RabbitMQ is down, `LogEventPublisher` fails. `FallbackLogWriter.writeToFallba
 | Google OAuth2 | 1.34.1 | Google Sign-in verification (`GoogleIdTokenVerifier`) | user-service |
 | Twilio SDK | 10.x | SMS delivery | notification-service |
 | JavaMail | Spring Mail | Email delivery via SMTP | notification-service |
-| Logstash | 8.x | Log aggregation pipeline | logging-service |
-| Elasticsearch | 8.x | Centralized log storage | logging-service |
-| Kibana | 8.x | Log visualization dashboard | logging-service |
+| Promtail | 2.x | Log file collection & shipping | logging-service (Docker volumes) |
+| Loki | 2.x | Lightweight log aggregation system | Observability Stack |
+| Nginx | 1.18.x | Reverse proxy and SSL termination | Production VM |
 | Prometheus | 2.x | Time-series metrics collection | All microservices via Actuator |
 | Grafana | 10.x | Metrics visualization dashboard | Infrastructure |
 | Micrometer / Zipkin | 1.12 | Distributed tracing (traceId/spanId) | All microservices |
@@ -334,14 +386,16 @@ The Angular `environment.ts` provides variables loaded into services via `enviro
 
 ## SECTION 8 — INFRASTRUCTURE & DEPLOYMENT
 
-### 8.1 Docker Compose Reference
-The `docker-compose.yml` orchestrates the entire stack:
-- `mysql`: Image `mysql:8.0.35`, Ports `3306`. Envs: `MYSQL_ROOT_PASSWORD`. Healthcheck on `mysqladmin ping`.
-- `redis`: Image `redis:7.2.4-alpine`, Ports `6379`.
-- `rabbitmq`: Image `rabbitmq:3.12-management-alpine`, Ports `5672`, `15672`. Healthcheck on `rabbitmq-diagnostics`.
-- `config-server`: Builds from `/config-server`, maps `./config-repo` to internal volume. Wait for rabbitmq.
-- `eureka-server`: Builds from `/discovery-server`. Wait for config-server.
-- `payment-service` (and all others): Wait for eureka-server, mysql, rabbitmq.
+### 8.1 Production Deployment (Azure VM)
+The production environment runs on a self-managed Azure VM (`Standard_B2s`, Ubuntu 22.04) using `docker-compose.prod.yml`.
+- **Reverse Proxy**: Nginx handles SSL termination (Let's Encrypt / Certbot) and proxies external traffic (`omnicharge.centralindia...`) to the internal API Gateway.
+- **Frontend**: Hosted on GitHub Pages (`vishnuvardhanreddythornala.github.io/OmniCharge/`), utilizing `environment.production.ts` to point strictly to the VM's HTTPS domain.
+- **Backend Orchestration**:
+  - `mysql`: Image `mysql:8.0.35`, private network.
+  - `redis`: Image `redis:7.2.4-alpine`, private network.
+  - `rabbitmq`: Exposed via `0.0.0.0:15672` for management.
+  - Microservices (Gateway, User, Payment, etc.) are built via GitHub Actions and pulled from Docker Hub.
+- **Observability**: `zipkin` (Port `9411`), `prometheus` (Port `9090`), `loki` (Port `3100`), `promtail`, and `grafana` (Port `3000`) are orchestrated alongside the services to provide a lightweight, sub-1GB memory footprint alternative to ELK.
 
 ### 8.2 Config Server Properties Reference
 In `config-repo/*.properties`:
@@ -362,7 +416,7 @@ Strict dependency chain enforced via Docker Compose `depends_on`:
 - **Prometheus:** Services expose `/actuator/prometheus`. Scraped by Prometheus server.
 - **Grafana:** Visualizes metrics like API latency, JVM heap usage, Circuit Breaker states (`resilience4j_circuitbreaker_state`).
 - **Zipkin / Micrometer Tracing:** Injects `traceId` and `spanId` into log formats. Traces requests from Gateway down to DB.
-- **ELK:** Logs generated by `logging-service` are ingested by Logstash, indexed in Elasticsearch, visualized in Kibana.
+- **Loki + Promtail:** Logs generated by `logging-service` are ingested by Promtail, shipped to Loki, and visualized natively in Grafana (Explore view). This replaces the heavier ELK stack.
 - **Health Endpoints:** `management.endpoint.health.show-details=always` is enabled globally. Exposes DB, RabbitMQ, DiskSpace, and Circuit Breaker health.
 
 ---
@@ -501,9 +555,8 @@ OmniCharge uses a root `.env` file to inject secrets into the `docker-compose.ym
 ## SECTION 16 — API DOCUMENTATION & CONTRACTS
 OmniCharge uses **Springdoc OpenAPI** (`springdoc-openapi-starter-webmvc-ui` and `webflux-ui`) to automatically generate Swagger documentation directly from the Spring `@RestController`s.
 
-- **Swagger UI Endpoints:** Each backend service exposes its own Swagger UI at `http://localhost:<PORT>/swagger-ui/index.html`.
+- **Swagger UI Endpoints:** The API Gateway aggregates Swagger docs natively. In production, access the UI at: `https://omnicharge.centralindia.cloudapp.azure.com/swagger-ui/index.html?url=/v3/api-docs/user-service` (Change the URL parameter to explore different services).
 - **OpenAPI JSON:** Available at `/v3/api-docs`.
-- **API Gateway Aggregation:** The `api-gateway` routes `/swagger-ui/**` natively, but for complete discovery, individual service definitions are available on their respective ports.
 - **Contract Enforcement:** OmniCharge relies on shared DTO standards (e.g., uniform `ApiResponse<T>` wrappers containing `success`, `message`, `data`, and `error` fields) rather than strict Protobufs, using Jackson for JSON serialization.
 
 ---
