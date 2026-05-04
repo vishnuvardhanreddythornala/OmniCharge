@@ -165,6 +165,17 @@ If RabbitMQ is down, `LogEventPublisher` fails. `FallbackLogWriter.writeToFallba
   * `User` (table `users`): `id` (PK), `email` (Unique), `mobileNumber` (Unique), `passwordHash`, `role` (Enum), `isActive`, `isMobileVerified`.
   * `RefreshToken` (table `refresh_tokens`): `id` (PK), `token` (Unique), `userId` (FK), `expiryDate`, `deviceInfo`.
 * **Events Published:** `OTPEvent` -> `omnicharge.exchange` (routing key: `notification.otp`), `LogEvent` -> `omnicharge.logging.exchange`.
+* **Internal Component Diagram:**
+```mermaid
+graph LR
+    API[API Gateway] -->|HTTP| C[Auth / User Controllers]
+    C --> S1[Auth Service]
+    C --> S2[Admin Service]
+    S1 -->|Verify Google Token| Google[Google OAuth API]
+    S1 --> DB[(MySQL: User DB)]
+    S1 --> Redis[(Redis: OTP Cache)]
+    S1 -->|Publish OTP| RMQ[RabbitMQ: omnicharge.exchange]
+```
 
 ### 4.5 Operator Service
 * **Identity Card:** Port: `8082`, DB: `omnicharge_operator_db`, `Redis` (CQRS read model), Spring App Name: `operator-service`. Purpose: Manages telecom operators, recharge plans, and executes Numverify detection. Dependencies: `config-server`, `discovery-server`, `mysql`, `redis`, `rabbitmq`.
@@ -185,6 +196,19 @@ If RabbitMQ is down, `LogEventPublisher` fails. `FallbackLogWriter.writeToFallba
 * **Events Published:** `PlanUpdatedMessage` -> `omnicharge.exchange` (routing key: `operator.plan.updated`).
 * **Events Consumed:** `PlanUpdatedMessage` queue -> updates Redis projection.
 * **Redis Keys:** `plans:operator:{id}`, `plan:detail:{id}`, `operator:detect:{mobile}`.
+* **Internal Component Diagram:**
+```mermaid
+graph LR
+    API[API Gateway] -->|HTTP| C[Operator Controller]
+    C --> S1[Detection Service]
+    C --> S2[Admin Plan Service]
+    S1 --> Redis[(Redis CQRS Cache)]
+    S1 -->|Cache Miss| Numverify[Numverify API]
+    S2 --> DB[(MySQL: Operator DB)]
+    S2 -->|Publish Update| RMQ[RabbitMQ]
+    RMQ -->|Consume Update| Proj[Redis Projector]
+    Proj -->|Write Flat JSON| Redis
+```
 
 ### 4.6 Recharge Service
 * **Identity Card:** Port: `8083`, DB: `omnicharge_recharge_db`, Spring App Name: `recharge-service`. Purpose: Core orchestrator for the recharge lifecycle, validates dependencies, acts as SAGA coordinator, and manages plan expiry schedules. Dependencies: `config-server`, `discovery-server`, `mysql`, `rabbitmq`.
@@ -202,6 +226,23 @@ If RabbitMQ is down, `LogEventPublisher` fails. `FallbackLogWriter.writeToFallba
 * **Events Published:** `RechargeInitiatedEvent`, `RechargeCompletedEvent`, `PlanExpiryEvent`.
 * **Events Consumed:** `PaymentApprovedEvent`, `PaymentRejectedEvent`.
 * **Resilience Config:** Uses annotations `@CircuitBreaker(name = "operatorService", fallbackMethod = "fallbackOperatorDetails")`. Properties defined in config-repo (e.g. failureRateThreshold=50).
+* **Internal Component Diagram:**
+```mermaid
+graph TD
+    API[API Gateway] -->|HTTP POST| C[Recharge Controller]
+    C --> S[Recharge Service]
+    S -->|Feign + Circuit Breaker| Client1[Operator Client]
+    S -->|Feign + Circuit Breaker| Client2[User Client]
+    S --> DB[(MySQL: Recharge DB)]
+    S -->|Publish RechargeInitiated| RMQ[RabbitMQ]
+    
+    RMQ -->|Consume PaymentEvent| Saga[Recharge SAGA Consumer]
+    Saga --> DB
+    Saga -->|Publish RechargeCompleted| RMQ
+    
+    Cron[Expiry Sweeper Task] -->|Daily| DB
+    Cron -->|Publish ExpiryEvent| RMQ
+```
 
 ### 4.7 Payment Service
 * **Identity Card:** Port: `8084`, DB: `omnicharge_payment_db`, Spring App Name: `payment-service`. Purpose: Handles financial transactions and Razorpay gateway integration. Dependencies: `config-server`, `discovery-server`, `mysql`, `rabbitmq`.
@@ -217,6 +258,19 @@ If RabbitMQ is down, `LogEventPublisher` fails. `FallbackLogWriter.writeToFallba
 * **Data Model:**
   * `Transaction` (table `transactions`): `id` (PK), `transactionId`, `rechargeId`, `userId`, `amount`, `paymentMethod` (Enum: CREDIT_CARD, DEBIT_CARD, CARD, UPI, NET_BANKING, WALLET, RAZORPAY, UNKNOWN), `status` (Enum), `razorpayOrderId`, `razorpayPaymentId`.
 * **Events Published:** `PaymentApprovedEvent`, `PaymentRejectedEvent`, `PaymentCompletedEvent`.
+* **Internal Component Diagram:**
+```mermaid
+graph LR
+    API[API Gateway] -->|HTTP| C[Payment Controller]
+    C --> S[Payment Service]
+    S -->|Circuit Breaker| RZ[Razorpay SDK API]
+    S --> DB[(MySQL: Payment DB)]
+    
+    S -->|Publish Approved/Rejected| RMQ[RabbitMQ]
+    
+    Cron[Payment Zombie Sweeper] -->|Every 5m| DB
+    Cron -->|Fail Zombie Tx| RMQ
+```
 
 ### 4.8 Notification Service
 * **Identity Card:** Port: `8085`, DB: `omnicharge_notification_db`, Spring App Name: `notification-service`. Purpose: Asynchronous delivery of SMS (Twilio) and Emails (JavaMail). Dependencies: `config-server`, `discovery-server`, `mysql`, `rabbitmq`.
@@ -229,6 +283,15 @@ If RabbitMQ is down, `LogEventPublisher` fails. `FallbackLogWriter.writeToFallba
   * `SmsService.java` (Service): Connects to Twilio API.
 * **Data Model:**
   * `Notification` (table `notifications`): `id` (PK), `userId`, `type` (Enum: SMS, EMAIL, IN_APP), `category` (Enum: OTP, PAYMENT, RECHARGE, EXPIRY), `title`, `message`, `isRead`.
+* **Internal Component Diagram:**
+```mermaid
+graph LR
+    RMQ[RabbitMQ: omnicharge.exchange] -->|Consume SAGA Events| C[Notification Event Consumer]
+    C --> S[Notification Service]
+    S --> DB[(MySQL: Notification DB)]
+    S --> Email[JavaMail SMTP Sender]
+    S --> SMS[Twilio SMS Sender]
+```
 
 ### 4.9 Logging Service
 * **Identity Card:** Port: `8086`, DB: None (uses ELK stack log files), Spring App Name: `logging-service`. Purpose: Centralized audit logging absorber. Listens to `omnicharge.logging.exchange`. Dependencies: `config-server`, `discovery-server`, `rabbitmq`.
