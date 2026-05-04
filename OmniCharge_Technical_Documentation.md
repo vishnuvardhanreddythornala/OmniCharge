@@ -274,6 +274,37 @@ The KeyResolver uses the remote IP address.
 ## SECTION 6 — DATA FLOW DOCUMENTATION
 
 **Flow 1 — New User Mobile OTP Registration and Login:**
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant UI as Angular UI
+    participant Gateway as API Gateway
+    participant UserSvc as User Service
+    participant Redis
+    participant RabbitMQ
+    participant NotifSvc as Notification Service
+    participant Twilio
+
+    User->>UI: Enter Mobile & Click Get OTP
+    UI->>Gateway: POST /api/auth/mobile/send-otp
+    Gateway->>UserSvc: Route Request
+    UserSvc->>Redis: Store OTP (5m TTL)
+    UserSvc->>RabbitMQ: Publish OTPEvent
+    RabbitMQ->>NotifSvc: Consume OTPEvent
+    NotifSvc->>Twilio: Send SMS via API
+    Twilio-->>User: SMS Received
+    
+    User->>UI: Enter 6-digit OTP
+    UI->>Gateway: POST /api/auth/mobile/verify-otp
+    Gateway->>UserSvc: Route Request
+    UserSvc->>Redis: Validate OTP
+    UserSvc->>UserSvc: Create User in MySQL
+    UserSvc->>UserSvc: Mint JWT & Refresh Token
+    UserSvc-->>UI: Return Tokens
+    UI-->>User: Login Success, Redirect to Dashboard
+```
+
 1. Angular `LoginComponent` calls `AuthService.sendPublicMobileOtp()`.
 2. API Gateway routes to `user-service` `AuthController.sendMobileOtp()`.
 3. `AuthService.java` generates 6-digit OTP, stores in Redis (`otp:mobile:{number}`) with 5min TTL.
@@ -284,7 +315,36 @@ The KeyResolver uses the remote IP address.
 8. `JwtUtil.generateAccessToken()` mints JWT and `RefreshTokenService` stores refresh token in MySQL.
 9. Angular intercepts response, stores tokens in `localStorage`, calls `restoreSession()` to set Signals.
 
-**Flow 2 — Complete Recharge with Razorpay:**
+**Flow 2 — Complete Recharge with Razorpay (SAGA Orchestration):**
+
+```mermaid
+sequenceDiagram
+    participant UI as Angular UI
+    participant Gateway as API Gateway
+    participant RechargeSvc as Recharge Service
+    participant PaymentSvc as Payment Service
+    participant RabbitMQ
+    participant Razorpay
+    
+    UI->>Gateway: POST /initiate (Plan ID, Mobile)
+    Gateway->>RechargeSvc: Route Request
+    RechargeSvc->>RechargeSvc: Save Recharge as PENDING
+    RechargeSvc->>RabbitMQ: Publish RechargeInitiatedEvent
+    UI->>Gateway: POST /process
+    Gateway->>PaymentSvc: Route Request
+    PaymentSvc->>Razorpay: Create Order via SDK
+    Razorpay-->>UI: Open Razorpay Checkout Modal
+    UI->>Razorpay: User Enters Payment Info
+    Razorpay-->>UI: Payment Success (Payment ID)
+    UI->>Gateway: POST /confirm (Payment ID)
+    Gateway->>PaymentSvc: Route Request
+    PaymentSvc->>PaymentSvc: Save Transaction as SUCCESS
+    PaymentSvc->>RabbitMQ: Publish PaymentApprovedEvent
+    RabbitMQ->>RechargeSvc: Consume PaymentApprovedEvent
+    RechargeSvc->>RechargeSvc: Update Recharge to SUCCESS
+    RechargeSvc->>RabbitMQ: Publish RechargeCompletedEvent
+```
+
 1. Angular `RechargeFlowComponent.onMobileInput()` triggers `OperatorService.detectOperator()`.
 2. `operator-service` checks Redis `operator:detect:{mobile}`. If miss, calls Numverify API.
 3. Plans loaded from CQRS Redis `plans:operator:{id}`. User selects plan and hits `onProceedToCheckout()`.
@@ -453,7 +513,53 @@ Strict dependency chain enforced via Docker Compose `depends_on`:
 
 ---
 
-## SECTION 11 — DATABASE SCHEMA REFERENCE
+## SECTION 11 — LOW-LEVEL DESIGN (LLD) & DATABASE SCHEMA REFERENCE
+
+**Entity Relationship Diagram (ERD):**
+
+```mermaid
+erDiagram
+    USERS ||--o{ REFRESH_TOKENS : "has"
+    USERS {
+        bigint id PK
+        string email
+        string mobile_number
+        string role
+        boolean is_active
+    }
+    REFRESH_TOKENS {
+        bigint id PK
+        string token
+        bigint user_id FK
+        datetime expiry_date
+    }
+    OPERATORS ||--o{ PLANS : "offers"
+    OPERATORS {
+        bigint id PK
+        string name
+        string code
+    }
+    PLANS {
+        bigint id PK
+        bigint operator_id FK
+        decimal price
+        int validity_days
+    }
+    RECHARGES {
+        bigint id PK
+        string recharge_id
+        bigint user_id
+        bigint plan_id
+        string status
+    }
+    TRANSACTIONS {
+        bigint id PK
+        string transaction_id
+        string recharge_id
+        decimal amount
+        string status
+    }
+```
 
 **1. omnicharge_user_db**
 - `users`: `id` (BIGINT, PK, AutoInc), `email` (VARCHAR(100), UNIQUE), `mobile_number` (VARCHAR(20), UNIQUE), `password_hash` (VARCHAR(255)), `role` (VARCHAR(20) ENUM), `is_active` (BIT), `is_mobile_verified` (BIT), `full_name` (VARCHAR(100)). Maps to `User.java`.
