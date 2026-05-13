@@ -41,7 +41,7 @@ public class OpenApiConfig {
                 .servers(List.of(
                         new Server().url("http://localhost:" + serverPort).description("Local (Direct)"),
                         new Server().url("http://localhost:8080").description("Local (via API Gateway)"),
-                        new Server().url("https://api.omnicharge.com").description("Production")
+                        new Server().url("https://omnicharge.centralindia.cloudapp.azure.com").description("Production (Azure)")
                 ))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
                 .components(new Components()
