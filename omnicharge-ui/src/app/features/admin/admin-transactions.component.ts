@@ -16,10 +16,10 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
       <!-- Header -->
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-8">
         <div>
-          <h1 class="text-3xl font-light text-white mb-2 tracking-wide font-outfit">
+          <h1 class="text-3xl font-light text-surface-900 mb-2 tracking-wide font-outfit">
             Global <span class="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-omni-400 to-accent-teal">Transactions</span>
           </h1>
-          <p class="text-surface-400 text-sm">Monitor all platform payment activity.</p>
+          <p class="text-surface-500 text-sm">Monitor all platform payment activity.</p>
         </div>
         
         <div class="flex items-center gap-3">
@@ -28,10 +28,10 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
                    [ngModel]="searchQuery" 
                    (ngModelChange)="onSearchChange($event)"
                    placeholder="Search by Transaction ID..." 
-                   class="w-full sm:w-64 pl-10 pr-4 py-2.5 rounded-xl bg-surface-900 border border-white/10 text-sm focus:border-omni-500/50 outline-none transition-colors text-white placeholder-surface-500" />
-            <svg class="w-4 h-4 absolute left-3.5 top-3 text-surface-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                   class="w-full sm:w-64 pl-10 pr-4 py-2.5 rounded-xl bg-white border border-surface-200 text-sm focus:border-omni-500/50 outline-none transition-colors text-surface-900 placeholder-surface-400" />
+            <svg class="w-4 h-4 absolute left-3.5 top-3 text-surface-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             @if (searchQuery) {
-              <button (click)="clearSearch()" class="absolute right-3.5 top-3 text-surface-400 hover:text-white transition-colors">
+              <button (click)="clearSearch()" class="absolute right-3.5 top-3 text-surface-500 hover:text-surface-900 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
             }
@@ -46,36 +46,36 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
             <div class="w-8 h-8 rounded-lg bg-omni-500/10 flex items-center justify-center border border-omni-500/20">
               <svg class="w-4 h-4 text-omni-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
             </div>
-            <p class="text-[10px] text-surface-400 font-bold uppercase tracking-wider">Total</p>
+            <p class="text-[10px] text-surface-500 font-bold uppercase tracking-wider">Total</p>
           </div>
-          <span class="text-2xl font-display font-bold text-white">{{ totalElements() }}</span>
+          <span class="text-2xl font-display font-bold text-surface-900">{{ totalElements() }}</span>
         </div>
         <div class="glass-card p-5 flex flex-col justify-between border border-white/[0.05]">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-8 h-8 rounded-lg bg-accent-emerald/10 flex items-center justify-center border border-accent-emerald/20">
               <svg class="w-4 h-4 text-accent-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
             </div>
-            <p class="text-[10px] text-surface-400 font-bold uppercase tracking-wider">Success</p>
+            <p class="text-[10px] text-surface-500 font-bold uppercase tracking-wider">Success</p>
           </div>
-          <span class="text-2xl font-display font-bold text-white">{{ successCount() }}</span>
+          <span class="text-2xl font-display font-bold text-surface-900">{{ successCount() }}</span>
         </div>
         <div class="glass-card p-5 flex flex-col justify-between border border-white/[0.05]">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-8 h-8 rounded-lg bg-accent-rose/10 flex items-center justify-center border border-accent-rose/20">
               <svg class="w-4 h-4 text-accent-rose" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
             </div>
-            <p class="text-[10px] text-surface-400 font-bold uppercase tracking-wider">Failed</p>
+            <p class="text-[10px] text-surface-500 font-bold uppercase tracking-wider">Failed</p>
           </div>
-          <span class="text-2xl font-display font-bold text-white">{{ failedCount() }}</span>
+          <span class="text-2xl font-display font-bold text-surface-900">{{ failedCount() }}</span>
         </div>
         <div class="glass-card p-5 flex flex-col justify-between border border-white/[0.05]">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-8 h-8 rounded-lg bg-accent-amber/10 flex items-center justify-center border border-accent-amber/20">
               <svg class="w-4 h-4 text-accent-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
-            <p class="text-[10px] text-surface-400 font-bold uppercase tracking-wider">Pending</p>
+            <p class="text-[10px] text-surface-500 font-bold uppercase tracking-wider">Pending</p>
           </div>
-          <span class="text-2xl font-display font-bold text-white">{{ pendingCount() }}</span>
+          <span class="text-2xl font-display font-bold text-surface-900">{{ pendingCount() }}</span>
         </div>
       </div>
 
@@ -83,11 +83,11 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
       <div class="flex flex-col md:flex-row items-stretch gap-3 mb-6 animate-slide-up">
         
         <!-- Status Filter Tabs -->
-        <div class="flex-1 flex overflow-x-auto p-1 bg-surface-900 border border-white/[0.05] rounded-xl hide-scrollbar min-w-0">
+        <div class="flex-1 flex overflow-x-auto p-1 bg-white border border-white/[0.05] rounded-xl hide-scrollbar min-w-0">
           <div class="flex items-center gap-1 w-full">
             @for (filter of statusFilters; track filter.key) {
               <button (click)="setCategory(filter.key)"
-                      [class]="transactionCategory() === filter.key ? 'bg-white/10 text-white shadow-sm' : 'text-surface-400 hover:text-white hover:bg-white/[0.02]'"
+                      [class]="transactionCategory() === filter.key ? 'bg-surface-100 text-surface-900 shadow-sm' : 'text-surface-500 hover:text-surface-900 hover:bg-white/[0.02]'"
                       class="flex-1 px-4 py-2.5 rounded-lg text-xs font-bold tracking-wider transition-all whitespace-nowrap text-center">
                 {{ filter.label }}
               </button>
@@ -97,16 +97,16 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 
         <!-- Date Range Filter -->
         <div class="flex-1 glass-card p-1 flex items-center border border-white/[0.05] rounded-xl min-w-0">
-          <div class="flex items-center gap-2 text-[10px] text-surface-400 font-semibold uppercase tracking-wider px-4 shrink-0 border-r border-white/5">
+          <div class="flex items-center gap-2 text-[10px] text-surface-500 font-semibold uppercase tracking-wider px-4 shrink-0 border-r border-white/5">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
             Date Range
           </div>
           <div class="flex items-center gap-1.5 px-3 py-1 flex-1 xl:flex-none">
             <input type="date" [(ngModel)]="filterStartDate"
-                   class="bg-transparent text-sm text-white outline-none w-32 [color-scheme:dark] placeholder-surface-500 font-mono" />
+                   class="bg-transparent text-sm text-surface-900 outline-none w-32 [color-scheme:dark] placeholder-surface-400 font-mono" />
             <span class="text-surface-600">-</span>
             <input type="date" [(ngModel)]="filterEndDate"
-                   class="bg-transparent text-sm text-white outline-none w-32 [color-scheme:dark] placeholder-surface-500 font-mono" />
+                   class="bg-transparent text-sm text-surface-900 outline-none w-32 [color-scheme:dark] placeholder-surface-400 font-mono" />
           </div>
           <div class="flex gap-1 pr-1 pl-2 border-l border-white/5 shrink-0">
             <button (click)="applyDateFilter()" 
@@ -138,8 +138,8 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
         } @else {
           <!-- Desktop Table (hidden on mobile) -->
           <div class="hidden sm:block overflow-x-auto">
-            <table class="w-full text-left text-sm text-surface-300">
-              <thead class="text-xs uppercase bg-white/[0.03] text-surface-400 border-b border-white/[0.05]">
+            <table class="w-full text-left text-sm text-surface-600">
+              <thead class="text-xs uppercase bg-white/[0.03] text-surface-500 border-b border-white/[0.05]">
                 <tr>
                   <th scope="col" class="px-6 py-4 font-semibold">Txn ID</th>
                   <th scope="col" class="px-6 py-4 font-semibold">Recharge ID</th>
@@ -151,17 +151,17 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
               <tbody class="divide-y divide-white/[0.05]">
             @for (txn of transactions(); track txn.transactionId) {
               <tr class="hover:bg-white/[0.02] transition-colors">
-                <td class="px-6 py-4 font-mono text-xs text-white">
+                <td class="px-6 py-4 font-mono text-xs text-surface-900">
                   {{ txn.transactionId }}
                 </td>
-                <td class="px-6 py-4 font-mono text-xs text-surface-400">
+                <td class="px-6 py-4 font-mono text-xs text-surface-500">
                   {{ txn.rechargeId }}
                 </td>
-                <td class="px-6 py-4 font-semibold text-white">
+                <td class="px-6 py-4 font-semibold text-surface-900">
                   ₹{{ txn.amount }}
                 </td>
                 <td class="px-6 py-4">
-                  <span class="px-2 py-1 rounded bg-white/[0.05] text-[10px] font-bold uppercase tracking-wider border border-white/10"
+                  <span class="px-2 py-1 rounded bg-white/[0.05] text-[10px] font-bold uppercase tracking-wider border border-surface-200"
                         [class]="txn.status === 'SUCCESS' ? 'text-accent-emerald border-accent-emerald/20 bg-accent-emerald/5' : 
                                  txn.status === 'FAILED' ? 'text-accent-rose border-accent-rose/20 bg-accent-rose/5' : 
                                  'text-accent-amber border-accent-amber/20 bg-accent-amber/5'">
@@ -185,7 +185,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
             @for (txn of transactions(); track txn.transactionId) {
               <div class="p-4 space-y-2.5">
                 <div class="flex items-center justify-between">
-                  <span class="font-mono text-xs text-white">{{ txn.transactionId }}</span>
+                  <span class="font-mono text-xs text-surface-900">{{ txn.transactionId }}</span>
                   <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border"
                         [class]="txn.status === 'SUCCESS' ? 'text-accent-emerald border-accent-emerald/20 bg-accent-emerald/5' : 
                                  txn.status === 'FAILED' ? 'text-accent-rose border-accent-rose/20 bg-accent-rose/5' : 
@@ -194,8 +194,8 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
                   </span>
                 </div>
                 <div class="flex items-center justify-between text-xs">
-                  <span class="text-surface-400">Recharge: <span class="font-mono text-surface-300">{{ txn.rechargeId }}</span></span>
-                  <span class="font-semibold text-white">₹{{ txn.amount }}</span>
+                  <span class="text-surface-500">Recharge: <span class="font-mono text-surface-600">{{ txn.rechargeId }}</span></span>
+                  <span class="font-semibold text-surface-900">₹{{ txn.amount }}</span>
                 </div>
                 <div class="text-[10px] text-surface-500">{{ txn.createdDate | date:'medium' }}</div>
                 @if (txn.failureReason) {
@@ -212,12 +212,12 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                   </svg>
                 </div>
-                <h3 class="text-lg font-semibold text-white mb-1.5">No transactions found</h3>
-                <p class="text-sm text-surface-400 max-w-xs mx-auto leading-relaxed">
+                <h3 class="text-lg font-semibold text-surface-900 mb-1.5">No transactions found</h3>
+                <p class="text-sm text-surface-500 max-w-xs mx-auto leading-relaxed">
                   {{ searchQuery ? 'No transactions match "' + searchQuery + '". Try a different search term.' : (filterStartDate || filterEndDate) ? 'No transactions in this date range. Try adjusting the dates.' : 'Transaction records will appear here once users start making payments.' }}
                 </p>
                 @if (searchQuery || filterStartDate || filterEndDate) {
-                  <button (click)="clearSearch(); clearDateFilter()" class="btn-ghost text-xs mt-4 border border-white/10">
+                  <button (click)="clearSearch(); clearDateFilter()" class="btn-ghost text-xs mt-4 border border-surface-200">
                     Clear all filters
                   </button>
                 }
@@ -227,7 +227,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
           <!-- Pagination -->
           @if (totalPages() > 1) {
             <div class="flex items-center justify-between px-6 py-4 border-t border-white/[0.05]">
-              <span class="text-xs text-surface-400">
+              <span class="text-xs text-surface-500">
                 Showing {{ (currentPage() * 10) + 1 }}–{{ Math.min((currentPage() + 1) * 10, totalElements()) }} of {{ totalElements() }}
               </span>
               <div class="flex items-center gap-1">
@@ -237,7 +237,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
                 </button>
                 @for (page of getPageNumbers(); track page) {
                   <button (click)="loadTransactions(page)" 
-                          [class]="page === currentPage() ? 'bg-omni-600 text-white' : 'text-surface-400 hover:bg-white/[0.06]'"
+                          [class]="page === currentPage() ? 'bg-omni-600 text-surface-900' : 'text-surface-500 hover:bg-white/[0.06]'"
                           class="w-8 h-8 rounded-lg text-xs font-medium transition-colors">
                     {{ page + 1 }}
                   </button>

@@ -12,8 +12,8 @@ import { AdminService, PaymentStatsResponse, RechargeStatsResponse, UserProfileR
       <!-- Header Row -->
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h1 class="text-2xl font-display font-bold text-white">Dashboard Overview</h1>
-          <p class="text-sm text-surface-400 mt-1">Real-time platform metrics &amp; system health</p>
+          <h1 class="text-2xl font-display font-bold text-surface-900">Dashboard Overview</h1>
+          <p class="text-sm text-surface-500 mt-1">Real-time platform metrics &amp; system health</p>
         </div>
         <button
           id="rebuild-cache-btn"
@@ -21,7 +21,7 @@ import { AdminService, PaymentStatsResponse, RechargeStatsResponse, UserProfileR
           [disabled]="rebuildingCache()"
           class="group relative flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 border overflow-hidden"
           [class]="rebuildingCache()
-            ? 'bg-white/[0.03] border-white/10 text-surface-500 cursor-not-allowed'
+            ? 'bg-white/[0.03] border-surface-200 text-surface-500 cursor-not-allowed'
             : 'bg-gradient-to-r from-accent-amber/10 to-accent-amber/5 border-accent-amber/25 text-accent-amber hover:border-accent-amber/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.1)]'"
         >
           <!-- Animated spinning gears icon -->
@@ -78,7 +78,7 @@ import { AdminService, PaymentStatsResponse, RechargeStatsResponse, UserProfileR
                 <div class="w-8 h-8 rounded-lg bg-accent-emerald/10 flex items-center justify-center">
                   <svg class="w-4 h-4 text-accent-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
-                <span class="text-surface-400 text-xs font-semibold uppercase tracking-wider">Total Revenue</span>
+                <span class="text-surface-500 text-xs font-semibold uppercase tracking-wider">Total Revenue</span>
               </div>
               <div class="text-3xl font-display font-bold text-accent-emerald">₹{{ formatNumber(paymentStats()?.totalRevenue) }}</div>
               <div class="text-[10px] text-surface-500 mt-1 font-medium">Successful payments · 30 days</div>
@@ -93,9 +93,9 @@ import { AdminService, PaymentStatsResponse, RechargeStatsResponse, UserProfileR
                 <div class="w-8 h-8 rounded-lg bg-omni-500/10 flex items-center justify-center">
                   <svg class="w-4 h-4 text-omni-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                 </div>
-                <span class="text-surface-400 text-xs font-semibold uppercase tracking-wider">Transactions</span>
+                <span class="text-surface-500 text-xs font-semibold uppercase tracking-wider">Transactions</span>
               </div>
-              <div class="text-3xl font-display font-bold text-white">{{ paymentStats()?.totalTransactions || 0 }}</div>
+              <div class="text-3xl font-display font-bold text-surface-900">{{ paymentStats()?.totalTransactions || 0 }}</div>
               <div class="text-[10px] text-surface-500 mt-1 font-medium">
                 <span class="text-accent-emerald">{{ paymentStats()?.successfulTransactions || 0 }} passed</span> ·
                 <span class="text-accent-rose">{{ paymentStats()?.failedTransactions || 0 }} failed</span>
@@ -111,7 +111,7 @@ import { AdminService, PaymentStatsResponse, RechargeStatsResponse, UserProfileR
                 <div class="w-8 h-8 rounded-lg bg-accent-teal/10 flex items-center justify-center">
                   <svg class="w-4 h-4 text-accent-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                 </div>
-                <span class="text-surface-400 text-xs font-semibold uppercase tracking-wider">Success Rate</span>
+                <span class="text-surface-500 text-xs font-semibold uppercase tracking-wider">Success Rate</span>
               </div>
               <div class="text-3xl font-display font-bold text-accent-teal">{{ getSuccessRate() }}%</div>
               <div class="mt-2 w-full h-1.5 bg-white/[0.05] rounded-full overflow-hidden">
@@ -129,7 +129,7 @@ import { AdminService, PaymentStatsResponse, RechargeStatsResponse, UserProfileR
                 <div class="w-8 h-8 rounded-lg bg-accent-amber/10 flex items-center justify-center">
                   <svg class="w-4 h-4 text-accent-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                 </div>
-                <span class="text-surface-400 text-xs font-semibold uppercase tracking-wider">Today</span>
+                <span class="text-surface-500 text-xs font-semibold uppercase tracking-wider">Today</span>
               </div>
               <div class="text-3xl font-display font-bold text-accent-amber">₹{{ formatNumber(paymentStats()?.todayRevenue) }}</div>
               <div class="text-[10px] text-surface-500 mt-1 font-medium">{{ paymentStats()?.todayTransactions || 0 }} transactions today</div>
@@ -153,9 +153,9 @@ import { AdminService, PaymentStatsResponse, RechargeStatsResponse, UserProfileR
                 <div class="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center">
                   <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 </div>
-                <span class="text-surface-400 text-xs font-semibold uppercase tracking-wider">Total Recharges</span>
+                <span class="text-surface-500 text-xs font-semibold uppercase tracking-wider">Total Recharges</span>
               </div>
-              <div class="text-3xl font-display font-bold text-white">{{ rechargeStats()?.totalRecharges || 0 }}</div>
+              <div class="text-3xl font-display font-bold text-surface-900">{{ rechargeStats()?.totalRecharges || 0 }}</div>
               <div class="text-[10px] text-surface-500 mt-1 font-medium">All-time recharge requests</div>
             </div>
           </div>
@@ -168,7 +168,7 @@ import { AdminService, PaymentStatsResponse, RechargeStatsResponse, UserProfileR
                 <div class="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
                   <svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 </div>
-                <span class="text-surface-400 text-xs font-semibold uppercase tracking-wider">Recharge Volume</span>
+                <span class="text-surface-500 text-xs font-semibold uppercase tracking-wider">Recharge Volume</span>
               </div>
               <div class="text-3xl font-display font-bold text-violet-400">₹{{ formatNumber(rechargeStats()?.totalAmount) }}</div>
               <div class="text-[10px] text-surface-500 mt-1 font-medium">Total recharge value processed</div>
@@ -182,7 +182,7 @@ import { AdminService, PaymentStatsResponse, RechargeStatsResponse, UserProfileR
                 <div class="w-8 h-8 rounded-lg bg-accent-emerald/10 flex items-center justify-center">
                   <svg class="w-4 h-4 text-accent-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                 </div>
-                <span class="text-surface-400 text-xs font-semibold uppercase tracking-wider">Successful</span>
+                <span class="text-surface-500 text-xs font-semibold uppercase tracking-wider">Successful</span>
               </div>
               <div class="text-3xl font-display font-bold text-accent-emerald">{{ rechargeStats()?.successCount || 0 }}</div>
               <div class="text-[10px] text-surface-500 mt-1 font-medium">Completed recharges</div>
@@ -196,7 +196,7 @@ import { AdminService, PaymentStatsResponse, RechargeStatsResponse, UserProfileR
                 <div class="w-8 h-8 rounded-lg bg-accent-rose/10 flex items-center justify-center">
                   <svg class="w-4 h-4 text-accent-rose" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </div>
-                <span class="text-surface-400 text-xs font-semibold uppercase tracking-wider">Failed</span>
+                <span class="text-surface-500 text-xs font-semibold uppercase tracking-wider">Failed</span>
               </div>
               <div class="text-3xl font-display font-bold text-accent-rose">{{ rechargeStats()?.failedCount || 0 }}</div>
               <div class="text-[10px] text-surface-500 mt-1 font-medium">Failed recharge attempts</div>
@@ -209,28 +209,28 @@ import { AdminService, PaymentStatsResponse, RechargeStatsResponse, UserProfileR
 
           <!-- Avg Transaction & Pending -->
           <div class="glass-card p-6 border border-white/[0.05]">
-            <h3 class="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+            <h3 class="text-sm font-semibold text-surface-900 mb-4 flex items-center gap-2">
               <svg class="w-4 h-4 text-omni-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
               Transaction Breakdown
             </h3>
             <div class="space-y-4">
               <div class="flex items-center justify-between">
-                <span class="text-sm text-surface-400">Avg. Transaction</span>
-                <span class="text-sm font-semibold text-white">₹{{ formatNumber(paymentStats()?.averageTransactionAmount) }}</span>
+                <span class="text-sm text-surface-500">Avg. Transaction</span>
+                <span class="text-sm font-semibold text-surface-900">₹{{ formatNumber(paymentStats()?.averageTransactionAmount) }}</span>
               </div>
               <div class="w-full h-px bg-white/[0.05]"></div>
               <div class="flex items-center justify-between">
-                <span class="text-sm text-surface-400">Pending Transactions</span>
+                <span class="text-sm text-surface-500">Pending Transactions</span>
                 <span class="text-sm font-semibold text-accent-amber">{{ paymentStats()?.pendingTransactions || 0 }}</span>
               </div>
               <div class="w-full h-px bg-white/[0.05]"></div>
               <div class="flex items-center justify-between">
-                <span class="text-sm text-surface-400">Success Amount</span>
+                <span class="text-sm text-surface-500">Success Amount</span>
                 <span class="text-sm font-semibold text-accent-emerald">₹{{ formatNumber(paymentStats()?.successAmount) }}</span>
               </div>
               <div class="w-full h-px bg-white/[0.05]"></div>
               <div class="flex items-center justify-between">
-                <span class="text-sm text-surface-400">Failed Amount</span>
+                <span class="text-sm text-surface-500">Failed Amount</span>
                 <span class="text-sm font-semibold text-accent-rose">₹{{ formatNumber(paymentStats()?.failedAmount) }}</span>
               </div>
             </div>
@@ -238,7 +238,7 @@ import { AdminService, PaymentStatsResponse, RechargeStatsResponse, UserProfileR
 
           <!-- Top Users -->
           <div class="glass-card p-6 border border-white/[0.05]">
-            <h3 class="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+            <h3 class="text-sm font-semibold text-surface-900 mb-4 flex items-center gap-2">
               <svg class="w-4 h-4 text-accent-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
               Top Users by Spend
             </h3>
@@ -247,14 +247,14 @@ import { AdminService, PaymentStatsResponse, RechargeStatsResponse, UserProfileR
                 @for (user of paymentStats()!.topUsers.slice(0, 5); track user.userId; let i = $index) {
                   <div class="flex items-center gap-3">
                     <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
-                         [class]="i === 0 ? 'bg-accent-amber/20 text-accent-amber' : i === 1 ? 'bg-surface-400/20 text-surface-300' : 'bg-amber-900/20 text-amber-700'">
+                         [class]="i === 0 ? 'bg-accent-amber/20 text-accent-amber' : i === 1 ? 'bg-surface-400/20 text-surface-600' : 'bg-amber-900/20 text-amber-700'">
                       {{ i + 1 }}
                     </div>
                     <div class="flex-1 min-w-0">
-                      <div class="text-sm text-surface-300 font-medium">{{ getUserName(user.userId) }}</div>
+                      <div class="text-sm text-surface-600 font-medium">{{ getUserName(user.userId) }}</div>
                       <div class="text-[10px] text-surface-500">{{ user.transactionCount }} transactions</div>
                     </div>
-                    <div class="text-sm font-semibold text-white">₹{{ formatNumber(user.totalSpent) }}</div>
+                    <div class="text-sm font-semibold text-surface-900">₹{{ formatNumber(user.totalSpent) }}</div>
                   </div>
                 }
               </div>

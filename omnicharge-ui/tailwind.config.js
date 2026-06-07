@@ -7,39 +7,39 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // OmniCharge Brand Palette — deep navy/violet fintech aesthetic
+        // OmniCharge Brand Palette — premium terracotta fintech aesthetic
         omni: {
-          50:  '#f0f0ff',
-          100: '#e0e1ff',
-          200: '#c7c8fe',
-          300: '#a4a5fc',
-          400: '#8183f8',
-          500: '#6366f1', // primary
-          600: '#4f46e5',
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
-          950: '#1e1b4b',
+          50:  '#FDE8E6', // Light Accent Background
+          100: '#f9d2cc',
+          200: '#f3b4ab',
+          300: '#eb8f81',
+          400: '#e06f5c',
+          500: '#C65D3B', // Primary Accent (Terracotta Red)
+          600: '#A94E32', // Primary Hover
+          700: '#8b4028',
+          800: '#733725',
+          900: '#603123',
+          950: '#34170f',
         },
         surface: {
-          DEFAULT: '#0b0f1a',  // deepest background
-          50:  '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#1e293b',
-          800: '#141b2d',
-          900: '#0f1629',
-          950: '#080c16',
+          DEFAULT: '#FCFCFB',  // Page Background
+          50:  '#FCFCFB',
+          100: '#F9FAFB',
+          200: '#F3F4F6',
+          300: '#E5E7EB', // Borders
+          400: '#D1D5DB',
+          500: '#9CA3AF',
+          600: '#6B7280', // Secondary Text
+          700: '#4B5563',
+          800: '#374151',
+          900: '#1F2937', // Primary Text
+          950: '#111827',
         },
         accent: {
           teal:    '#2dd4bf',
-          emerald: '#34d399',
-          amber:   '#fbbf24',
-          rose:    '#fb7185',
+          emerald: '#16A34A', // Success
+          amber:   '#D97706', // Warning
+          rose:    '#DC2626', // Error
           sky:     '#38bdf8',
         }
       },
@@ -50,15 +50,15 @@ module.exports = {
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'hero-glow': 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.3), transparent)',
-        'card-shine': 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%, rgba(255,255,255,0.02) 100%)',
+        'hero-glow': 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(198, 93, 59, 0.15), transparent)',
+        'card-shine': 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, transparent 50%, rgba(255,255,255,0.5) 100%)',
       },
       boxShadow: {
-        'glow':      '0 0 20px rgba(99, 102, 241, 0.3)',
-        'glow-lg':   '0 0 40px rgba(99, 102, 241, 0.25)',
+        'glow':      '0 0 20px rgba(198, 93, 59, 0.25)',
+        'glow-lg':   '0 0 40px rgba(198, 93, 59, 0.2)',
         'glow-teal': '0 0 20px rgba(45, 212, 191, 0.3)',
-        'elevated':  '0 8px 32px rgba(0, 0, 0, 0.4)',
-        'card':      '0 4px 24px rgba(0, 0, 0, 0.25)',
+        'elevated':  '0 8px 32px rgba(0, 0, 0, 0.08)',
+        'card':      '0 4px 12px rgba(0, 0, 0, 0.06)',
       },
       animation: {
         'fade-in':       'fadeIn 0.5s ease-out',
@@ -96,8 +96,8 @@ module.exports = {
           '50%':      { transform: 'translateY(-10px)' },
         },
         glowPulse: {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(99, 102, 241, 0.3)' },
-          '50%':      { boxShadow: '0 0 40px rgba(99, 102, 241, 0.6)' },
+          '0%, 100%': { boxShadow: '0 0 20px rgba(198, 93, 59, 0.25)' },
+          '50%':      { boxShadow: '0 0 40px rgba(198, 93, 59, 0.5)' },
         },
       },
       backdropBlur: {

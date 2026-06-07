@@ -14,24 +14,24 @@ import { NotificationService } from '../../../core/services/notification.service
   imports: [CommonModule, RouterLink, RouterLinkActive],
   template: `
     <nav class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
-         [class]="scrolled() ? 'bg-surface-900/80 backdrop-blur-xl border-b border-white/[0.06] shadow-lg' : 'bg-transparent'">
+         [class]="scrolled() ? 'bg-white/80 backdrop-blur-xl border-b border-white/[0.06] shadow-lg' : 'bg-transparent'">
       <div class="w-full max-w-full px-4 sm:px-8">
         <div class="flex items-center justify-between h-16">
 
           <!-- Brand Logo -->
           <a routerLink="/" class="flex items-center gap-2.5 group">
-            <img src="assets/omnicharge%20logo.png" alt="OmniCharge Logo" class="w-10 h-10 rounded-full object-cover border-[1.5px] border-white/10 shadow-[0_0_15px_rgba(20,184,166,0.3)] transform group-hover:scale-105 transition-transform duration-300 group-hover:shadow-[0_0_20px_rgba(20,184,166,0.5)]" />
+            <img src="assets/omnicharge%20logo.png" alt="OmniCharge Logo" class="w-10 h-10 rounded-full object-cover border-[1.5px] border-surface-200 shadow-[0_0_15px_rgba(20,184,166,0.3)] transform group-hover:scale-105 transition-transform duration-300 group-hover:shadow-[0_0_20px_rgba(20,184,166,0.5)]" />
           </a>
 
           <!-- Desktop Nav Links -->
           <div class="hidden md:flex items-center gap-1">
             @if (!authService.isAdmin()) {
-              <a routerLink="/" routerLinkActive="text-white bg-white/[0.06]" [routerLinkActiveOptions]="{exact: true}"
+              <a routerLink="/" routerLinkActive="text-surface-900 bg-white/[0.06]" [routerLinkActiveOptions]="{exact: true}"
                  class="btn-ghost text-sm">Home</a>
-              <a routerLink="/recharge" routerLinkActive="text-white bg-white/[0.06]"
+              <a routerLink="/recharge" routerLinkActive="text-surface-900 bg-white/[0.06]"
                  class="btn-ghost text-sm">Recharge</a>
               @if (authService.isAuthenticated()) {
-                <a routerLink="/dashboard" routerLinkActive="text-white bg-white/[0.06]"
+                <a routerLink="/dashboard" routerLinkActive="text-surface-900 bg-white/[0.06]"
                    class="btn-ghost text-sm">Dashboard</a>
               }
             }
@@ -42,11 +42,11 @@ import { NotificationService } from '../../../core/services/notification.service
             @if (authService.isAuthenticated()) {
               <!-- Notification Bell -->
               <button (click)="toggleNotifications()" class="relative p-2 rounded-lg hover:bg-white/[0.06] transition-colors">
-                <svg class="w-5 h-5 text-surface-400 hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-surface-500 hover:text-surface-900 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/>
                 </svg>
                 @if (notificationService.unreadCount() > 0) {
-                  <span class="absolute -top-0.5 -right-0.5 w-5 h-5 bg-accent-rose text-white text-[10px] font-bold
+                  <span class="absolute -top-0.5 -right-0.5 w-5 h-5 bg-accent-rose text-surface-900 text-[10px] font-bold
                                rounded-full flex items-center justify-center animate-scale-in">
                     {{ notificationService.unreadCount() > 9 ? '9+' : notificationService.unreadCount() }}
                   </span>
@@ -57,10 +57,10 @@ import { NotificationService } from '../../../core/services/notification.service
               <div class="relative">
                 <button (click)="toggleMenu()" class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-white/[0.06] transition-colors">
                   <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-omni-500 to-accent-teal
-                              flex items-center justify-center text-white text-xs font-bold">
+                              flex items-center justify-center text-surface-900 text-xs font-bold">
                     {{ authService.userInitials() }}
                   </div>
-                  <svg class="w-4 h-4 text-surface-400 hidden sm:block transition-transform duration-200"
+                  <svg class="w-4 h-4 text-surface-500 hidden sm:block transition-transform duration-200"
                        [class.rotate-180]="menuOpen()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                   </svg>
@@ -70,26 +70,26 @@ import { NotificationService } from '../../../core/services/notification.service
                 @if (menuOpen()) {
                   <div class="absolute right-0 mt-2 w-56 glass-card p-2 animate-slide-down origin-top-right">
                     <div class="px-3 py-2 mb-1">
-                      <p class="text-sm font-medium text-white truncate">{{ authService.currentUser()?.fullName }}</p>
+                      <p class="text-sm font-medium text-surface-900 truncate">{{ authService.currentUser()?.fullName }}</p>
                       @if (authService.currentUser()?.email) {
-                        <p class="text-xs text-surface-400 truncate">{{ authService.currentUser()?.email }}</p>
+                        <p class="text-xs text-surface-500 truncate">{{ authService.currentUser()?.email }}</p>
                       } @else {
-                        <p class="text-xs text-surface-400 truncate">{{ authService.currentUser()?.mobileNumber }}</p>
+                        <p class="text-xs text-surface-500 truncate">{{ authService.currentUser()?.mobileNumber }}</p>
                       }
                     </div>
                     <div class="border-t border-white/[0.06] my-1"></div>
                       <a *ngIf="authService.isAdmin()" routerLink="/admin/profile" 
                          (click)="menuOpen.set(false)"
-                         class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-surface-300
-                                hover:bg-white/[0.06] hover:text-white transition-colors cursor-pointer">
+                         class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-surface-600
+                                hover:bg-white/[0.06] hover:text-surface-900 transition-colors cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
                         </svg>
                         Settings
                       </a>
                       <button *ngIf="!authService.isAdmin()" (click)="menuOpen.set(false); navigateToProfile()"
-                         class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-surface-300
-                                hover:bg-white/[0.06] hover:text-white transition-colors cursor-pointer text-left">
+                         class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-surface-600
+                                hover:bg-white/[0.06] hover:text-surface-900 transition-colors cursor-pointer text-left">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
                         </svg>
@@ -114,7 +114,7 @@ import { NotificationService } from '../../../core/services/notification.service
             <!-- Mobile Hamburger -->
             <button (click)="mobileMenuOpen.set(!mobileMenuOpen())"
                     class="md:hidden p-2 rounded-lg hover:bg-white/[0.06] transition-colors">
-              <svg class="w-5 h-5 text-surface-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 text-surface-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 @if (mobileMenuOpen()) {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 } @else {
@@ -131,23 +131,23 @@ import { NotificationService } from '../../../core/services/notification.service
             <div class="glass-card p-3 mt-2 space-y-1">
               @if (!authService.isAdmin()) {
                 <a routerLink="/" (click)="mobileMenuOpen.set(false)"
-                   class="block px-3 py-2.5 rounded-lg text-sm text-surface-300 hover:bg-white/[0.06] hover:text-white transition">Home</a>
+                   class="block px-3 py-2.5 rounded-lg text-sm text-surface-600 hover:bg-white/[0.06] hover:text-surface-900 transition">Home</a>
                 <a routerLink="/recharge" (click)="mobileMenuOpen.set(false)"
-                   class="block px-3 py-2.5 rounded-lg text-sm text-surface-300 hover:bg-white/[0.06] hover:text-white transition">Recharge</a>
+                   class="block px-3 py-2.5 rounded-lg text-sm text-surface-600 hover:bg-white/[0.06] hover:text-surface-900 transition">Recharge</a>
               }
               @if (authService.isAuthenticated()) {
                 @if (authService.isAdmin()) {
                   <a routerLink="/admin" (click)="mobileMenuOpen.set(false)"
-                     class="block px-3 py-2.5 rounded-lg text-sm text-surface-300 hover:bg-white/[0.06] hover:text-white transition">Admin Panel</a>
+                     class="block px-3 py-2.5 rounded-lg text-sm text-surface-600 hover:bg-white/[0.06] hover:text-surface-900 transition">Admin Panel</a>
                   <a routerLink="/admin/profile" (click)="mobileMenuOpen.set(false)"
-                     class="block px-3 py-2.5 rounded-lg text-sm text-surface-300 hover:bg-white/[0.06] hover:text-white transition">Settings</a>
+                     class="block px-3 py-2.5 rounded-lg text-sm text-surface-600 hover:bg-white/[0.06] hover:text-surface-900 transition">Settings</a>
                 } @else {
                   <a routerLink="/dashboard" (click)="mobileMenuOpen.set(false)"
-                     class="block px-3 py-2.5 rounded-lg text-sm text-surface-300 hover:bg-white/[0.06] hover:text-white transition">Dashboard</a>
+                     class="block px-3 py-2.5 rounded-lg text-sm text-surface-600 hover:bg-white/[0.06] hover:text-surface-900 transition">Dashboard</a>
                 }
               } @else {
                 <a routerLink="/login" (click)="mobileMenuOpen.set(false)"
-                   class="block px-3 py-2.5 rounded-lg text-sm text-surface-300 hover:bg-white/[0.06] hover:text-white transition">Sign In</a>
+                   class="block px-3 py-2.5 rounded-lg text-sm text-surface-600 hover:bg-white/[0.06] hover:text-surface-900 transition">Sign In</a>
               }
             </div>
           </div>
@@ -159,7 +159,7 @@ import { NotificationService } from '../../../core/services/notification.service
     @if (authService.isAuthenticated() && !authService.isProfileComplete() && !authService.isAdmin()) {
       <div class="bg-omni-500/20 border-b border-omni-400/30 backdrop-blur-md fixed top-16 left-0 right-0 z-40 animate-slide-down">
         <div class="section-container py-2.5 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p class="text-sm text-white/90">
+          <p class="text-sm text-surface-900/90">
             <span class="font-semibold text-omni-300">Action Required:</span> Please link your mobile number to enable recharges and payments.
           </p>
           <button (click)="navigateToProfile()"
@@ -179,22 +179,22 @@ import { NotificationService } from '../../../core/services/notification.service
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity animate-fade-in" (click)="cancelLogout()"></div>
         
         <!-- Modal -->
-        <div class="relative w-full max-w-sm glass-card border flex flex-col items-center border-white/10 shadow-2xl rounded-3xl p-6 sm:p-8 animate-scale-in text-center">
+        <div class="relative w-full max-w-sm glass-card border flex flex-col items-center border-surface-200 shadow-2xl rounded-3xl p-6 sm:p-8 animate-scale-in text-center">
           <div class="w-16 h-16 rounded-full bg-gradient-to-br from-surface-800 to-surface-700 mb-4 flex items-center justify-center shadow-inner border border-white/5 text-accent-rose">
             <svg class="w-8 h-8 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"></path>
             </svg>
           </div>
-          <h2 class="text-xl font-bold font-display text-white mb-2">Sign Out</h2>
-          <p class="text-sm font-medium text-surface-400 mb-8">
+          <h2 class="text-xl font-bold font-display text-surface-900 mb-2">Sign Out</h2>
+          <p class="text-sm font-medium text-surface-500 mb-8">
             Are you sure you want to sign out safely from OmniCharge?
           </p>
           
           <div class="w-full flex gap-3">
-            <button (click)="cancelLogout()" class="flex-1 py-3 text-sm font-semibold text-surface-300 hover:text-white bg-surface-800 hover:bg-surface-700 border border-white/5 rounded-xl transition-colors">
+            <button (click)="cancelLogout()" class="flex-1 py-3 text-sm font-semibold text-surface-600 hover:text-surface-900 bg-white hover:bg-surface-100 border border-white/5 rounded-xl transition-colors">
               Cancel
             </button>
-            <button (click)="confirmLogout()" class="flex-1 py-3 text-sm font-semibold text-white bg-accent-rose hover:bg-rose-600 rounded-xl transition-colors shadow-lg shadow-accent-rose/20">
+            <button (click)="confirmLogout()" class="flex-1 py-3 text-sm font-semibold text-surface-900 bg-accent-rose hover:bg-rose-600 rounded-xl transition-colors shadow-lg shadow-accent-rose/20">
               Yes, Sign Out
             </button>
           </div>

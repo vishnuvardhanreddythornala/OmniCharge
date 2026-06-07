@@ -20,7 +20,7 @@ import { ToastComponent } from './shared/components/toast/toast.component';
           <!-- Logo -->
           <div class="welcome-logo">
             <div class="welcome-icon">
-              <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg class="w-8 h-8 text-surface-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
@@ -73,34 +73,34 @@ import { ToastComponent } from './shared/components/toast/toast.component';
                 <div class="md:col-span-2">
                   <a routerLink="/" class="flex items-center gap-2.5 group mb-3 w-fit">
                     <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-omni-500 via-omni-400 to-accent-teal
-                                flex items-center justify-center shadow-[0_0_10px_rgba(20,184,166,0.3)] border border-white/10 relative overflow-hidden">
-                      <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                flex items-center justify-center shadow-[0_0_10px_rgba(20,184,166,0.3)] border border-surface-200 relative overflow-hidden">
+                      <svg class="w-4 h-4 text-surface-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
                     </div>
-                    <span class="text-xl font-display font-bold text-white tracking-tight">
+                    <span class="text-xl font-display font-bold text-surface-900 tracking-tight">
                       Omni<span class="text-transparent bg-clip-text bg-gradient-to-r from-omni-400 to-accent-teal">Charge</span>
                     </span>
                   </a>
-                  <p class="text-surface-400 text-sm leading-relaxed max-w-md">
+                  <p class="text-surface-500 text-sm leading-relaxed max-w-md">
                     India's smartest recharge platform. Instant mobile recharges, automatic operator detection,
                     and secure payments — all in one place.
                   </p>
                 </div>
                 <!-- Quick Links -->
                 <div>
-                  <h4 class="text-sm font-semibold text-surface-300 uppercase tracking-wider mb-4">Quick Links</h4>
+                  <h4 class="text-sm font-semibold text-surface-600 uppercase tracking-wider mb-4">Quick Links</h4>
                   <ul class="space-y-2.5">
-                    <li><a routerLink="/recharge" class="text-sm text-surface-400 hover:text-white transition-colors">Recharge Now</a></li>
-                    <li><a routerLink="/dashboard" class="text-sm text-surface-400 hover:text-white transition-colors">My Dashboard</a></li>
+                    <li><a routerLink="/recharge" class="text-sm text-surface-500 hover:text-surface-900 transition-colors">Recharge Now</a></li>
+                    <li><a routerLink="/dashboard" class="text-sm text-surface-500 hover:text-surface-900 transition-colors">My Dashboard</a></li>
                   </ul>
                 </div>
                 <!-- Support -->
                 <div>
-                  <h4 class="text-sm font-semibold text-surface-300 uppercase tracking-wider mb-4">Support</h4>
+                  <h4 class="text-sm font-semibold text-surface-600 uppercase tracking-wider mb-4">Support</h4>
                   <ul class="space-y-2.5">
-                    <li><a href="mailto:omnicharge.app@gmail.com" class="text-sm text-surface-400 hover:text-white transition-colors">omnicharge.app&#64;gmail.com</a></li>
-                    <li><span class="text-sm text-surface-400">24×7 Customer Support</span></li>
+                    <li><a href="mailto:omnicharge.app@gmail.com" class="text-sm text-surface-500 hover:text-surface-900 transition-colors">omnicharge.app&#64;gmail.com</a></li>
+                    <li><span class="text-sm text-surface-500">24×7 Customer Support</span></li>
                   </ul>
                 </div>
               </div>

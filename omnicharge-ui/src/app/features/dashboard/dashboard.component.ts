@@ -28,7 +28,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
       <div class="dash-splash">
         <div class="ds-content">
           <div class="ds-icon">
-            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-10 h-10 text-surface-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/>
             </svg>
           </div>
@@ -52,22 +52,22 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
         <!-- Modal -->
         <div class="relative w-full max-w-sm glass-card border flex flex-col items-center border-accent-rose/30 shadow-[0_0_30px_rgba(244,63,94,0.15)] rounded-3xl p-6 sm:p-8 animate-scale-in">
           
-          <div class="w-16 h-16 rounded-full bg-gradient-to-br from-accent-rose to-orange-500 mb-4 flex items-center justify-center shadow-glow shadow-accent-rose/20 text-white">
+          <div class="w-16 h-16 rounded-full bg-gradient-to-br from-accent-rose to-orange-500 mb-4 flex items-center justify-center shadow-glow shadow-accent-rose/20 text-surface-900">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
           </div>
           
-          <h2 class="text-2xl font-bold font-display text-white mb-1">Recharge Reminder</h2>
+          <h2 class="text-2xl font-bold font-display text-surface-900 mb-1">Recharge Reminder</h2>
           <p class="text-sm font-medium text-accent-rose mb-1">
             {{ reminderTimeLeft() }}
           </p>
-          <p class="text-xs font-semibold text-surface-400 mb-6">
+          <p class="text-xs font-semibold text-surface-500 mb-6">
             Due On: {{ formatDate(expiringRecharge()?.planExpiryDate) }}
           </p>
           
-          <div class="w-full bg-surface-900/50 rounded-2xl p-4 border border-white/5 mb-6">
-            <div class="text-center font-bold text-white mb-1">{{ getDisplayName() }}</div>
-            <div class="text-center text-sm text-surface-400 mb-3">{{ expiringRecharge()?.mobileNumber }} • {{ expiringRecharge()?.operatorName || 'Last Recharge' }}</div>
-            <div class="text-center text-3xl font-bold font-mono tracking-tight text-white">₹{{ expiringRecharge()?.amount }}</div>
+          <div class="w-full bg-white/50 rounded-2xl p-4 border border-white/5 mb-6">
+            <div class="text-center font-bold text-surface-900 mb-1">{{ getDisplayName() }}</div>
+            <div class="text-center text-sm text-surface-500 mb-3">{{ expiringRecharge()?.mobileNumber }} • {{ expiringRecharge()?.operatorName || 'Last Recharge' }}</div>
+            <div class="text-center text-3xl font-bold font-mono tracking-tight text-surface-900">₹{{ expiringRecharge()?.amount }}</div>
           </div>
           
           <div class="w-full space-y-3">
@@ -75,7 +75,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                class="btn-primary w-full !py-3.5 flex justify-center text-sm">
               Select Plan &amp; Recharge
             </a>
-            <button (click)="showReminderModal.set(false)" class="w-full py-3 text-sm font-semibold text-surface-400 hover:text-white transition-colors">
+            <button (click)="showReminderModal.set(false)" class="w-full py-3 text-sm font-semibold text-surface-500 hover:text-surface-900 transition-colors">
               Skip Reminder
             </button>
           </div>
@@ -91,7 +91,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
         <div class="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div class="flex items-center gap-4">
             <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-omni-500 to-accent-teal
-                        flex items-center justify-center text-white shadow-glow">
+                        flex items-center justify-center text-surface-900 shadow-glow">
               @if (hasRealName()) {
                 <span class="text-xl font-bold">{{ authService.userInitials() }}</span>
               } @else {
@@ -104,13 +104,13 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
               </h1>
             <div class="flex items-center gap-2 mt-0.5">
                 @if (authService.currentUser()?.mobileNumber) {
-                  <p class="text-sm text-surface-400">{{ authService.currentUser()?.mobileNumber }}</p>
+                  <p class="text-sm text-surface-500">{{ authService.currentUser()?.mobileNumber }}</p>
                   @if (authService.currentUser()?.email) {
                     <span class="text-surface-600">•</span>
                   }
                 }
                 @if (authService.currentUser()?.email) {
-                  <p class="text-sm text-surface-400">{{ authService.currentUser()?.email }}</p>
+                  <p class="text-sm text-surface-500">{{ authService.currentUser()?.email }}</p>
                 }
               </div>
             </div>
@@ -135,7 +135,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
             <span [innerHTML]="tab.icon"></span>
             {{ tab.label }}
             @if (tab.key === 'notifications' && notificationService.unreadCount() > 0) {
-              <span class="w-5 h-5 rounded-full bg-accent-rose text-white text-[10px] font-bold
+              <span class="w-5 h-5 rounded-full bg-accent-rose text-surface-900 text-[10px] font-bold
                            flex items-center justify-center">
                 {{ notificationService.unreadCount() }}
               </span>
@@ -177,7 +177,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                 <div class="space-y-4 animate-fade-in">
                   <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                     <div class="relative flex-1">
-                      <div class="absolute left-4 top-1/2 -translate-y-1/2 text-surface-400 text-sm">+91</div>
+                      <div class="absolute left-4 top-1/2 -translate-y-1/2 text-surface-500 text-sm">+91</div>
                       <input type="tel" [(ngModel)]="newMobile" placeholder="Enter mobile number" class="input-field !pl-14" 
                              [disabled]="mobileOtpSent()" />
                     </div>
@@ -190,7 +190,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                         <span>{{ mobileVerifying() ? 'Sending...' : 'Verify Mobile' }}</span>
                       </button>
                     } @else {
-                      <button type="button" (click)="mobileOtpSent.set(false)" class="btn-ghost !py-2.5 !px-4 text-xs whitespace-nowrap border border-white/10 hover:border-white/30">
+                      <button type="button" (click)="mobileOtpSent.set(false)" class="btn-ghost !py-2.5 !px-4 text-xs whitespace-nowrap border border-surface-200 hover:border-white/30">
                         Change Number
                       </button>
                     }
@@ -203,15 +203,15 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                       <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity animate-fade-in" (click)="mobileOtpSent.set(false)"></div>
                       
                       <!-- Modal Content -->
-                      <div class="relative w-full max-w-sm glass-card border border-white/10 shadow-2xl rounded-3xl p-6 sm:p-8 animate-scale-in overflow-hidden backdrop-blur-2xl">
+                      <div class="relative w-full max-w-sm glass-card border border-surface-200 shadow-2xl rounded-3xl p-6 sm:p-8 animate-scale-in overflow-hidden backdrop-blur-2xl">
                         <div class="absolute inset-0 bg-gradient-to-br from-omni-500/10 to-accent-teal/5 pointer-events-none"></div>
                         
                         <div class="w-12 h-12 mx-auto rounded-full bg-accent-emerald/10 text-accent-emerald flex items-center justify-center mb-4 border border-accent-emerald/20 shadow-inner">
                           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                         </div>
                         
-                        <h3 class="text-xl font-display font-bold text-center text-white mb-2 relative z-10">Verify Mobile</h3>
-                        <p class="text-xs text-surface-400 mb-6 text-center relative z-10">Enter 6-digit OTP sent to <span class="text-white font-semibold">+91 {{ newMobile }}</span></p>
+                        <h3 class="text-xl font-display font-bold text-center text-surface-900 mb-2 relative z-10">Verify Mobile</h3>
+                        <p class="text-xs text-surface-500 mb-6 text-center relative z-10">Enter 6-digit OTP sent to <span class="text-surface-900 font-semibold">+91 {{ newMobile }}</span></p>
                         
                         <div class="flex justify-center gap-2 sm:gap-3 mb-6 relative z-10">
                           @for (i of [0,1,2,3,4,5]; track i) {
@@ -221,7 +221,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                                    (keydown)="onMobileOtpKeydown($event, i)"
                                    (paste)="onMobileOtpPaste($event)"
                                    maxlength="1"
-                                   class="w-10 h-12 sm:w-11 sm:h-14 rounded-xl bg-surface-900/60 border border-white/[0.08] text-center text-lg sm:text-xl font-bold font-mono text-white transition-all outline-none focus:border-omni-500/60 focus:shadow-[0_0_15px_rgba(99,102,241,0.2)]"
+                                   class="w-10 h-12 sm:w-11 sm:h-14 rounded-xl bg-white/60 border border-white/[0.08] text-center text-lg sm:text-xl font-bold font-mono text-surface-900 transition-all outline-none focus:border-omni-500/60 focus:shadow-[0_0_15px_rgba(99,102,241,0.2)]"
                                    [class.border-omni-500]="mobileOtpDigits()[i]"
                                    placeholder="·" />
                           }
@@ -269,10 +269,10 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                         <span>{{ emailVerifying() ? 'Sending...' : (authService.currentUser()?.email ? 'Verify New Email' : 'Verify Email') }}</span>
                       </button>
                       @if (authService.currentUser()?.email) {
-                        <button type="button" (click)="isEditingEmail.set(false)" class="btn-ghost !py-2.5 !px-4 text-xs whitespace-nowrap border border-white/10 hover:border-white/30 text-surface-400">Cancel</button>
+                        <button type="button" (click)="isEditingEmail.set(false)" class="btn-ghost !py-2.5 !px-4 text-xs whitespace-nowrap border border-surface-200 hover:border-white/30 text-surface-500">Cancel</button>
                       }
                     } @else {
-                      <button type="button" (click)="emailOtpSent.set(false)" class="btn-ghost !py-2.5 !px-4 text-xs whitespace-nowrap border border-white/10 hover:border-white/30">
+                      <button type="button" (click)="emailOtpSent.set(false)" class="btn-ghost !py-2.5 !px-4 text-xs whitespace-nowrap border border-surface-200 hover:border-white/30">
                         Change Email
                       </button>
                     }
@@ -285,15 +285,15 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                       <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity animate-fade-in" (click)="emailOtpSent.set(false)"></div>
                       
                       <!-- Modal Content -->
-                      <div class="relative w-full max-w-sm glass-card border border-white/10 shadow-2xl rounded-3xl p-6 sm:p-8 animate-scale-in overflow-hidden backdrop-blur-2xl">
+                      <div class="relative w-full max-w-sm glass-card border border-surface-200 shadow-2xl rounded-3xl p-6 sm:p-8 animate-scale-in overflow-hidden backdrop-blur-2xl">
                         <div class="absolute inset-0 bg-gradient-to-br from-omni-500/10 to-accent-teal/5 pointer-events-none"></div>
                         
                         <div class="w-12 h-12 mx-auto rounded-full bg-omni-500/10 text-omni-400 flex items-center justify-center mb-4 border border-omni-500/20 shadow-inner">
                           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                         </div>
                         
-                        <h3 class="text-xl font-display font-bold text-center text-white mb-2 relative z-10">Verify Email</h3>
-                        <p class="text-xs text-surface-400 mb-6 text-center relative z-10">Enter 6-digit OTP sent to <span class="text-white font-semibold">{{ newEmail }}</span></p>
+                        <h3 class="text-xl font-display font-bold text-center text-surface-900 mb-2 relative z-10">Verify Email</h3>
+                        <p class="text-xs text-surface-500 mb-6 text-center relative z-10">Enter 6-digit OTP sent to <span class="text-surface-900 font-semibold">{{ newEmail }}</span></p>
                         
                         <div class="flex justify-center gap-2 sm:gap-3 mb-6 relative z-10">
                           @for (i of [0,1,2,3,4,5]; track i) {
@@ -303,7 +303,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                                    (keydown)="onEmailOtpKeydown($event, i)"
                                    (paste)="onEmailOtpPaste($event)"
                                    maxlength="1"
-                                   class="w-10 h-12 sm:w-11 sm:h-14 rounded-xl bg-surface-900/60 border border-white/[0.08] text-center text-lg sm:text-xl font-bold font-mono text-white transition-all outline-none focus:border-omni-500/60 focus:shadow-[0_0_15px_rgba(99,102,241,0.2)]"
+                                   class="w-10 h-12 sm:w-11 sm:h-14 rounded-xl bg-white/60 border border-white/[0.08] text-center text-lg sm:text-xl font-bold font-mono text-surface-900 transition-all outline-none focus:border-omni-500/60 focus:shadow-[0_0_15px_rgba(99,102,241,0.2)]"
                                    [class.border-omni-500]="emailOtpDigits()[i]"
                                    placeholder="·" />
                           }
@@ -344,8 +344,8 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                       <svg class="w-5 h-5 text-accent-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                     </div>
                     <div>
-                      <p class="text-sm font-medium text-white">Mobile Status</p>
-                      <p class="text-xs text-surface-400">Used for Quick Logins</p>
+                      <p class="text-sm font-medium text-surface-900">Mobile Status</p>
+                      <p class="text-xs text-surface-500">Used for Quick Logins</p>
                     </div>
                   </div>
                   @if (authService.currentUser()?.mobileNumber) {
@@ -361,8 +361,8 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                       <svg class="w-5 h-5 text-omni-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                     </div>
                     <div>
-                      <p class="text-sm font-medium text-white">Email Status</p>
-                      <p class="text-xs text-surface-400">Used for Receipts</p>
+                      <p class="text-sm font-medium text-surface-900">Email Status</p>
+                      <p class="text-xs text-surface-500">Used for Receipts</p>
                     </div>
                   </div>
                   @if (authService.currentUser()?.email) {
@@ -377,7 +377,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
             <!-- Quick Actions -->
             <div class="glass-card p-6 border border-white/5 relative overflow-hidden group">
               <div class="absolute inset-0 bg-gradient-to-br from-white/[0.01] to-white/[0.03] opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <h3 class="text-base font-semibold text-white mb-4 flex items-center gap-2 relative z-10">
+              <h3 class="text-base font-semibold text-surface-900 mb-4 flex items-center gap-2 relative z-10">
                 <svg class="w-4 h-4 text-accent-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 Quick Actions
               </h3>
@@ -386,15 +386,15 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                   <div class="w-8 h-8 rounded-full bg-accent-emerald/10 text-accent-emerald flex items-center justify-center mb-2 group-hover/btn:scale-110 transition-transform">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                   </div>
-                  <p class="text-sm font-medium text-white">New Recharge</p>
-                  <p class="text-[10px] text-surface-400">Recharge now</p>
+                  <p class="text-sm font-medium text-surface-900">New Recharge</p>
+                  <p class="text-[10px] text-surface-500">Recharge now</p>
                 </button>
                 <button (click)="activeTab.set('notifications')" class="p-3 text-left rounded-xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.06] hover:border-white/[0.1] transition-all group/btn cursor-pointer">
                   <div class="w-8 h-8 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center mb-2 group-hover/btn:scale-110 transition-transform">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                   </div>
-                  <p class="text-sm font-medium text-white">Notifications</p>
-                  <p class="text-[10px] text-surface-400">View alerts</p>
+                  <p class="text-sm font-medium text-surface-900">Notifications</p>
+                  <p class="text-[10px] text-surface-500">View alerts</p>
                 </button>
               </div>
             </div>
@@ -410,8 +410,8 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
           
           <!-- Header -->
           <div class="mb-6 animate-slide-up">
-            <h2 class="text-xl font-display font-bold text-white mb-2">My Packs</h2>
-            <p class="text-sm text-surface-400">Your active, processing, expired & failed recharge packs</p>
+            <h2 class="text-xl font-display font-bold text-surface-900 mb-2">My Packs</h2>
+            <p class="text-sm text-surface-500">Your active, processing, expired & failed recharge packs</p>
           </div>
 
           <!-- Filters -->
@@ -437,7 +437,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
 
           <!-- Date Range Filter -->
           <div class="glass-card p-4 mb-6 animate-slide-up flex flex-col sm:flex-row items-stretch sm:items-center gap-3 border border-white/[0.05]" style="animation-delay: 0.15s">
-            <div class="flex items-center gap-2 text-xs text-surface-400 font-semibold uppercase tracking-wider shrink-0">
+            <div class="flex items-center gap-2 text-xs text-surface-500 font-semibold uppercase tracking-wider shrink-0">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
               Filter by Date
             </div>
@@ -445,12 +445,12 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
               <div class="flex items-center gap-2 flex-1">
                 <label class="text-[10px] text-surface-500 uppercase tracking-wide font-bold shrink-0">From</label>
                 <input type="date" [(ngModel)]="rechStartDate"
-                       class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-surface-900/60 border border-white/[0.08] text-sm text-white outline-none transition-all focus:border-omni-500/50 [color-scheme:dark]" />
+                       class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-white/60 border border-white/[0.08] text-sm text-surface-900 outline-none transition-all focus:border-omni-500/50 [color-scheme:dark]" />
               </div>
               <div class="flex items-center gap-2 flex-1">
                 <label class="text-[10px] text-surface-500 uppercase tracking-wide font-bold shrink-0">To</label>
                 <input type="date" [(ngModel)]="rechEndDate"
-                       class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-surface-900/60 border border-white/[0.08] text-sm text-white outline-none transition-all focus:border-omni-500/50 [color-scheme:dark]" />
+                       class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-white/60 border border-white/[0.08] text-sm text-surface-900 outline-none transition-all focus:border-omni-500/50 [color-scheme:dark]" />
               </div>
               <div class="flex gap-2 shrink-0">
                 <button (click)="applyRechDateFilter()" 
@@ -468,7 +468,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                 </button>
                 @if (rechStartDate || rechEndDate) {
                   <button (click)="clearRechDateFilter()" 
-                          class="btn-ghost !py-2 !px-3 text-xs border border-white/10 hover:border-accent-rose/30 hover:text-accent-rose transition-all">
+                          class="btn-ghost !py-2 !px-3 text-xs border border-surface-200 hover:border-accent-rose/30 hover:text-accent-rose transition-all">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                   </button>
                 }
@@ -483,7 +483,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                 <div class="w-8 h-8 rounded-lg bg-accent-emerald/10 flex items-center justify-center border border-accent-emerald/20">
                   <svg class="w-4 h-4 text-accent-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                 </div>
-                <p class="text-xs text-surface-400 font-bold uppercase tracking-wider">Active Packs</p>
+                <p class="text-xs text-surface-500 font-bold uppercase tracking-wider">Active Packs</p>
               </div>
               <span class="text-3xl font-display font-bold px-1">{{ stats().active }}</span>
             </div>
@@ -493,7 +493,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                 <div class="w-8 h-8 rounded-lg bg-accent-amber/10 flex items-center justify-center border border-accent-amber/20">
                   <svg class="w-4 h-4 text-accent-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
                 </div>
-                <p class="text-xs text-surface-400 font-bold uppercase tracking-wider">Processing</p>
+                <p class="text-xs text-surface-500 font-bold uppercase tracking-wider">Processing</p>
               </div>
               <span class="text-3xl font-display font-bold px-1">{{ stats().processing }}</span>
             </div>
@@ -501,9 +501,9 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
             <div class="glass-card p-6 flex flex-col justify-between border border-white/[0.05]">
               <div class="flex items-center gap-2 mb-2">
                 <div class="w-8 h-8 rounded-lg bg-surface-500/10 flex items-center justify-center border border-surface-500/20">
-                  <svg class="w-4 h-4 text-surface-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <svg class="w-4 h-4 text-surface-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
-                <p class="text-xs text-surface-400 font-bold uppercase tracking-wider">Expired</p>
+                <p class="text-xs text-surface-500 font-bold uppercase tracking-wider">Expired</p>
               </div>
               <span class="text-3xl font-display font-bold px-1">{{ stats().expired }}</span>
             </div>
@@ -513,7 +513,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                 <div class="w-8 h-8 rounded-lg bg-accent-rose/10 flex items-center justify-center border border-accent-rose/20">
                   <svg class="w-4 h-4 text-accent-rose" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                 </div>
-                <p class="text-xs text-surface-400 font-bold uppercase tracking-wider">Failed</p>
+                <p class="text-xs text-surface-500 font-bold uppercase tracking-wider">Failed</p>
               </div>
               <span class="text-3xl font-display font-bold px-1">{{ stats().failed }}</span>
             </div>
@@ -532,7 +532,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
             <div class="glass-card overflow-hidden bg-white/[0.01] animate-slide-up" style="animation-delay: 0.3s">
               
               <!-- Grid Header -->
-              <div class="hidden lg:grid grid-cols-12 gap-2 px-6 py-4 border-b border-white/[0.05] bg-white/[0.03] text-[10px] font-bold text-surface-400 uppercase tracking-wider">
+              <div class="hidden lg:grid grid-cols-12 gap-2 px-6 py-4 border-b border-white/[0.05] bg-white/[0.03] text-[10px] font-bold text-surface-500 uppercase tracking-wider">
                 <div class="col-span-1">Date</div>
                 <div class="col-span-2">Mobile</div>
                 <div class="col-span-1">Operator</div>
@@ -548,33 +548,33 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                 @for (r of filteredRecharges(); track r.rechargeId) {
                   <div class="px-6 py-4 hover:bg-white/[0.02] transition-colors group">
                     <div class="flex flex-col lg:grid lg:grid-cols-12 gap-3 lg:gap-2 lg:items-center">
-                      <div class="col-span-1 text-xs font-semibold text-surface-300">
+                      <div class="col-span-1 text-xs font-semibold text-surface-600">
                         {{ r.createdDate | date:'dd MMM yyyy, h:mm a' }}
                       </div>
                       
-                      <div class="col-span-2 text-sm font-bold tracking-wider font-mono text-white">
+                      <div class="col-span-2 text-sm font-bold tracking-wider font-mono text-surface-900">
                         {{ r.mobileNumber }}
                       </div>
                       
-                      <div class="col-span-1 text-xs text-surface-300">
+                      <div class="col-span-1 text-xs text-surface-600">
                         {{ r.operatorName }}
                       </div>
                       
-                      <div class="col-span-2 text-xs text-surface-300 truncate" [title]="r.planName">
+                      <div class="col-span-2 text-xs text-surface-600 truncate" [title]="r.planName">
                         {{ r.planName }}
                       </div>
                       
-                      <div class="col-span-1 text-sm font-bold text-white">
+                      <div class="col-span-1 text-sm font-bold text-surface-900">
                         ₹{{ r.amount }}
                       </div>
                       
-                      <div class="col-span-1 text-[11px] font-semibold" [class]="getPackStatus(r).type === 'expired' || getPackStatus(r).type === 'failed' ? 'text-surface-500' : 'text-surface-300'">
+                      <div class="col-span-1 text-[11px] font-semibold" [class]="getPackStatus(r).type === 'expired' || getPackStatus(r).type === 'failed' ? 'text-surface-500' : 'text-surface-600'">
                         {{ getExactExpiryDate(r) && getPackStatus(r).type !== 'failed' ? (getExactExpiryDate(r) | date:'dd MMM yyyy') : (getPackStatus(r).type === 'expired' ? 'Expired' : 'N/A') }}
                       </div>
                       
                       <div class="col-span-1 text-xs font-semibold">
                         @if (getExactExpiryDate(r) && getPackStatus(r).type === 'active') {
-                          <span [class]="getDaysLeft(r) <= 5 ? 'text-accent-rose' : 'text-surface-300'">
+                          <span [class]="getDaysLeft(r) <= 5 ? 'text-accent-rose' : 'text-surface-600'">
                             {{ getTimeLeft(r) }}
                           </span>
                         } @else {
@@ -585,7 +585,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                       <div class="col-span-1">
                         <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border bg-white/[0.02]"
                              [class]="getPackStatus(r).type === 'active' ? 'border-accent-emerald/20 text-accent-emerald' : 
-                                      getPackStatus(r).type === 'expired' ? 'border-surface-600/30 text-surface-400' : 
+                                      getPackStatus(r).type === 'expired' ? 'border-surface-600/30 text-surface-500' : 
                                       getPackStatus(r).type === 'failed' ? 'border-accent-rose/20 text-accent-rose' :
                                       'border-accent-amber/20 text-accent-amber'">
                           @if (getPackStatus(r).type === 'active') {
@@ -604,7 +604,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                       <div class="col-span-2 flex justify-end">
                         @if (getPackStatus(r).type !== 'active') {
                           <a [routerLink]="['/recharge']" [queryParams]="{mobile: r.mobileNumber}" 
-                             class="btn-secondary !py-1.5 !px-4 text-xs !bg-transparent border border-white/20 text-white hover:bg-white/10 hover:border-white/40 transition-all font-semibold">
+                             class="btn-secondary !py-1.5 !px-4 text-xs !bg-transparent border border-surface-300 text-surface-900 hover:bg-surface-100 hover:border-white/40 transition-all font-semibold">
                             Recharge Now
                           </a>
                         }
@@ -617,7 +617,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
               <!-- Pagination -->
               @if (rechTotalPages() > 1 && packCategory() === 'ALL') {
                 <div class="flex justify-between items-center px-6 py-4 border-t border-white/[0.05] bg-white/[0.01]">
-                  <span class="text-xs text-surface-400 font-medium">Page {{ rechPage() + 1 }} of {{ rechTotalPages() }}</span>
+                  <span class="text-xs text-surface-500 font-medium">Page {{ rechPage() + 1 }} of {{ rechTotalPages() }}</span>
                   <div class="flex gap-2">
                     <button (click)="loadRecharges(rechPage() - 1)" [disabled]="rechPage() === 0" class="btn-ghost text-xs group">
                       <svg class="w-4 h-4 inline mr-1 group-disabled:opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
@@ -630,18 +630,18 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
               }
             </div>
           } @else {
-            <div class="glass-card p-16 text-center border-dashed border-2 border-white/10">
+            <div class="glass-card p-16 text-center border-dashed border-2 border-surface-200">
               <div class="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-surface-800 to-surface-900 flex items-center justify-center border border-white/[0.06]">
                 <svg class="w-10 h-10 text-surface-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
                 </svg>
               </div>
-              <h3 class="text-lg font-semibold text-white mb-2">No {{ packCategory() !== 'ALL' ? packCategory().toLowerCase() : '' }} recharges found</h3>
-              <p class="text-sm text-surface-400 max-w-sm mx-auto leading-relaxed mb-6">
+              <h3 class="text-lg font-semibold text-surface-900 mb-2">No {{ packCategory() !== 'ALL' ? packCategory().toLowerCase() : '' }} recharges found</h3>
+              <p class="text-sm text-surface-500 max-w-sm mx-auto leading-relaxed mb-6">
                 {{ (rechStartDate || rechEndDate) ? 'We could not find any recharges in this date range. Try clearing your filters to see all history.' : 'You have not made any recharges yet. Recharge your mobile now to enjoy uninterrupted services.' }}
               </p>
               @if (rechStartDate || rechEndDate) {
-                <button (click)="clearRechDateFilter()" class="btn-ghost text-xs border border-white/10">
+                <button (click)="clearRechDateFilter()" class="btn-ghost text-xs border border-surface-200">
                   Clear date filters
                 </button>
               } @else {
@@ -684,7 +684,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
 
             <!-- Date Range Filter -->
             <div class="glass-card p-4 mb-6 animate-slide-up flex flex-col sm:flex-row items-stretch sm:items-center gap-3 border border-white/[0.05]">
-              <div class="flex items-center gap-2 text-xs text-surface-400 font-semibold uppercase tracking-wider shrink-0">
+              <div class="flex items-center gap-2 text-xs text-surface-500 font-semibold uppercase tracking-wider shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 Filter by Date
               </div>
@@ -692,12 +692,12 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                 <div class="flex items-center gap-2 flex-1">
                   <label class="text-[10px] text-surface-500 uppercase tracking-wide font-bold shrink-0">From</label>
                   <input type="date" [(ngModel)]="payStartDate"
-                         class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-surface-900/60 border border-white/[0.08] text-sm text-white outline-none transition-all focus:border-omni-500/50 [color-scheme:dark]" />
+                         class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-white/60 border border-white/[0.08] text-sm text-surface-900 outline-none transition-all focus:border-omni-500/50 [color-scheme:dark]" />
                 </div>
                 <div class="flex items-center gap-2 flex-1">
                   <label class="text-[10px] text-surface-500 uppercase tracking-wide font-bold shrink-0">To</label>
                   <input type="date" [(ngModel)]="payEndDate"
-                         class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-surface-900/60 border border-white/[0.08] text-sm text-white outline-none transition-all focus:border-omni-500/50 [color-scheme:dark]" />
+                         class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-white/60 border border-white/[0.08] text-sm text-surface-900 outline-none transition-all focus:border-omni-500/50 [color-scheme:dark]" />
                 </div>
                 <div class="flex gap-2 shrink-0">
                   <button (click)="applyPayDateFilter()" 
@@ -715,7 +715,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                   </button>
                   @if (payStartDate || payEndDate) {
                     <button (click)="clearPayDateFilter()" 
-                            class="btn-ghost !py-2 !px-3 text-xs border border-white/10 hover:border-accent-rose/30 hover:text-accent-rose transition-all">
+                            class="btn-ghost !py-2 !px-3 text-xs border border-surface-200 hover:border-accent-rose/30 hover:text-accent-rose transition-all">
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                   }
@@ -725,7 +725,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
 
             <div class="glass-card overflow-hidden">
               <!-- Table Header -->
-              <div class="hidden sm:grid grid-cols-12 gap-4 px-6 py-4 border-b border-white/[0.05] bg-white/[0.02] text-xs font-semibold text-surface-400 uppercase tracking-wider">
+              <div class="hidden sm:grid grid-cols-12 gap-4 px-6 py-4 border-b border-white/[0.05] bg-white/[0.02] text-xs font-semibold text-surface-500 uppercase tracking-wider">
                 <div class="col-span-3">Transaction ID</div>
                 <div class="col-span-3">Date / Time</div>
                 <div class="col-span-2 text-right">Amount</div>
@@ -739,7 +739,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                       
                       <!-- Transaction ID -->
                       <div class="col-span-3 w-full flex justify-between sm:block">
-                        <span class="sm:hidden font-medium text-surface-400">ID</span>
+                        <span class="sm:hidden font-medium text-surface-500">ID</span>
                         <div>
                           <div class="text-xs font-mono text-omni-300 font-medium tracking-wide">{{ p.transactionId }}</div>
                           <div class="text-[10px] text-surface-500 uppercase mt-0.5">{{ p.paymentMethod }}</div>
@@ -747,20 +747,20 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                       </div>
                       
                       <!-- Date / Time -->
-                      <div class="col-span-3 text-xs text-surface-300 w-full flex justify-between sm:block">
-                        <span class="sm:hidden font-medium text-surface-400">Date</span>
+                      <div class="col-span-3 text-xs text-surface-600 w-full flex justify-between sm:block">
+                        <span class="sm:hidden font-medium text-surface-500">Date</span>
                         {{ p.createdDate | date:'mediumDate' }} • <span class="text-surface-500">{{ p.createdDate | date:'shortTime' }}</span>
                       </div>
                       
                       <!-- Amount -->
                       <div class="col-span-2 sm:text-right w-full flex justify-between sm:block">
-                        <span class="sm:hidden font-medium text-surface-400">Amount</span>
-                        <span class="text-sm font-bold text-white">₹{{ p.amount }}</span>
+                        <span class="sm:hidden font-medium text-surface-500">Amount</span>
+                        <span class="text-sm font-bold text-surface-900">₹{{ p.amount }}</span>
                       </div>
                       
                       <!-- Status -->
                       <div class="col-span-4 sm:text-right w-full flex justify-between sm:block">
-                        <span class="sm:hidden font-medium text-surface-400">Status</span>
+                        <span class="sm:hidden font-medium text-surface-500">Status</span>
                         <div class="flex flex-col sm:items-end gap-1">
                           <span class="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase inline-block"
                                 [class]="p.status === 'SUCCESS' ? 'bg-accent-emerald/10 text-accent-emerald border border-accent-emerald/15' : 
@@ -784,7 +784,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
               <!-- Pagination -->
               @if (payTotalPages() > 1) {
                 <div class="flex items-center justify-between px-6 py-4 border-t border-white/[0.05]">
-                  <span class="text-xs text-surface-400">
+                  <span class="text-xs text-surface-500">
                     Showing {{ (payPage() * 10) + 1 }}–{{ mathMin((payPage() + 1) * 10, payTotalElements()) }} of {{ payTotalElements() }}
                   </span>
                   <div class="flex items-center gap-1">
@@ -794,7 +794,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                     </button>
                     @for (pg of getPayPageNumbers(); track pg) {
                       <button (click)="loadPayments(pg)" 
-                              [class]="pg === payPage() ? 'bg-omni-600 text-white' : 'text-surface-400 hover:bg-white/[0.06]'"
+                              [class]="pg === payPage() ? 'bg-omni-600 text-surface-900' : 'text-surface-500 hover:bg-white/[0.06]'"
                               class="w-8 h-8 rounded-lg text-xs font-medium transition-colors">
                         {{ pg + 1 }}
                       </button>
@@ -814,12 +814,12 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0119.5 16.5h-2.25m-9 0h9l-3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"/>
                 </svg>
               </div>
-              <h3 class="text-lg font-semibold text-white mb-2">No payment transactions found</h3>
-              <p class="text-sm text-surface-400 max-w-sm mx-auto leading-relaxed">
+              <h3 class="text-lg font-semibold text-surface-900 mb-2">No payment transactions found</h3>
+              <p class="text-sm text-surface-500 max-w-sm mx-auto leading-relaxed">
                 {{ (payStartDate || payEndDate) ? 'We could not find any payments in this date range. Try clearing your filters to see all history.' : 'Your payment history is currently empty.' }}
               </p>
               @if (payStartDate || payEndDate) {
-                <button (click)="clearPayDateFilter()" class="btn-ghost text-xs mt-6 border border-white/10">
+                <button (click)="clearPayDateFilter()" class="btn-ghost text-xs mt-6 border border-surface-200">
                   Clear date filters
                 </button>
               }
@@ -870,7 +870,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center justify-between gap-3 mb-1.5">
                         <div class="flex items-center gap-2 min-w-0">
-                          <p class="text-sm font-bold tracking-wide truncate" [class]="n.isRead ? 'text-surface-300' : 'text-white'">{{ n.subject || 'OmniCharge Alert' }}</p>
+                          <p class="text-sm font-bold tracking-wide truncate" [class]="n.isRead ? 'text-surface-600' : 'text-surface-900'">{{ n.subject || 'OmniCharge Alert' }}</p>
                           <span class="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider shrink-0"
                                 [class]="getNotifStyle(n).type === 'success' ? 'bg-accent-emerald/10 text-accent-emerald border border-accent-emerald/20' :
                                          getNotifStyle(n).type === 'error' ? 'bg-accent-rose/10 text-accent-rose border border-accent-rose/20' :
@@ -880,7 +880,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                         </div>
                         <span class="text-[11px] text-surface-500 font-medium shrink-0 whitespace-nowrap">{{ n.createdDate | date:'M/d/yy, h:mm a' }}</span>
                       </div>
-                      <p class="text-xs text-surface-400 leading-relaxed mb-2">{{ n.message }}</p>
+                      <p class="text-xs text-surface-500 leading-relaxed mb-2">{{ n.message }}</p>
                       <div class="flex items-center gap-3">
                         <span class="flex items-center gap-1.5">
                           <span class="w-1.5 h-1.5 rounded-full" [class]="n.isRead ? 'bg-surface-600' : 'bg-accent-emerald'"></span>
@@ -896,7 +896,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
             <!-- Pagination -->
             @if (notifTotalPages() > 1) {
               <div class="flex items-center justify-between mt-6 px-2">
-                <span class="text-xs text-surface-400">
+                <span class="text-xs text-surface-500">
                   Page {{ notifPage() + 1 }} of {{ notifTotalPages() }}
                 </span>
                 <div class="flex items-center gap-1">
@@ -906,7 +906,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                   </button>
                   @for (pg of getNotifPageNumbers(); track pg) {
                     <button (click)="loadNotifications(pg)" 
-                            [class]="pg === notifPage() ? 'bg-omni-600 text-white' : 'text-surface-400 hover:bg-white/[0.06]'"
+                            [class]="pg === notifPage() ? 'bg-omni-600 text-surface-900' : 'text-surface-500 hover:bg-white/[0.06]'"
                             class="w-8 h-8 rounded-lg text-xs font-medium transition-colors">
                       {{ pg + 1 }}
                     </button>
@@ -920,7 +920,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
             }
           } @else {
             <div class="glass-card p-12 text-center">
-              <p class="text-surface-400">No notifications yet.</p>
+              <p class="text-surface-500">No notifications yet.</p>
             </div>
           }
         </div>
@@ -938,13 +938,13 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                  [style.background]="faqOpen() === i ? 'rgba(255,255,255,0.04)' : ''"
                  [style.box-shadow]="faqOpen() === i ? '0 0 20px rgba(99,102,241,0.1)' : ''">
               <button (click)="toggleFaq(i)" class="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-white/[0.02] transition-colors focus:outline-none rounded-2xl">
-                <span class="font-medium text-[15px] transition-colors duration-300" [class.text-white]="faqOpen() === i" [class.text-surface-300]="faqOpen() !== i">{{ faq.q }}</span>
-                <span class="transform transition-transform duration-300 flex items-center justify-center w-8 h-8 rounded-full border border-white/10" 
-                      [class.rotate-180]="faqOpen() === i" [class.bg-omni-500]="faqOpen() === i" [class.text-white]="faqOpen() === i" [class.text-surface-400]="faqOpen() !== i">
+                <span class="font-medium text-[15px] transition-colors duration-300" [class.text-surface-900]="faqOpen() === i" [class.text-surface-600]="faqOpen() !== i">{{ faq.q }}</span>
+                <span class="transform transition-transform duration-300 flex items-center justify-center w-8 h-8 rounded-full border border-surface-200" 
+                      [class.rotate-180]="faqOpen() === i" [class.bg-omni-500]="faqOpen() === i" [class.text-surface-900]="faqOpen() === i" [class.text-surface-500]="faqOpen() !== i">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                 </span>
               </button>
-              <div class="px-6 text-sm text-surface-400 transition-all duration-300 ease-in-out leading-relaxed" 
+              <div class="px-6 text-sm text-surface-500 transition-all duration-300 ease-in-out leading-relaxed" 
                    [class.max-h-0]="faqOpen() !== i" [class.max-h-40]="faqOpen() === i" [class.opacity-0]="faqOpen() !== i" [class.py-0]="faqOpen() !== i" [class.pb-5]="faqOpen() === i" [class.-mt-2]="faqOpen() === i"
                    style="overflow: hidden;">
                 {{ faq.a }}

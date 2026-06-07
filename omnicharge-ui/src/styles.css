@@ -1,5 +1,5 @@
 /* ============================================================
-   OmniCharge Global Styles -- Premium Fintech Dark Theme
+   OmniCharge Global Styles -- Premium Fintech Light Theme
    ============================================================ */
 @tailwind base;
 @tailwind components;
@@ -10,8 +10,8 @@
 /* -- Base Layer: Global Resets & Theme -- */
 @layer base {
   :root {
-    --color-primary: 99 102 241;
-    --color-surface: 11 15 26;
+    --color-primary: 198 93 59; /* Terracotta #C65D3B */
+    --color-surface: 252 252 251; /* Page Background #FCFCFB */
     --color-accent-teal: 45 212 191;
     --radius: 12px;
   }
@@ -29,7 +29,7 @@
   }
 
   body {
-    @apply bg-surface text-white font-sans;
+    @apply bg-surface text-surface-900 font-sans;
     min-height: 100vh;
     overflow-x: hidden;
   }
@@ -39,19 +39,19 @@
     width: 6px;
   }
   ::-webkit-scrollbar-track {
-    @apply bg-surface-900;
+    @apply bg-surface-100;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-omni-700 rounded-full;
+    @apply bg-omni-400 rounded-full;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-omni-600;
+    @apply bg-omni-500;
   }
 
   /* Selection */
   ::selection {
-    background: rgba(99, 102, 241, 0.3);
-    color: white;
+    background: rgba(198, 93, 59, 0.2);
+    color: #1F2937;
   }
 
   /* Focus visible outline */
@@ -65,14 +65,14 @@
 
   /* Glassmorphic Card */
   .glass-card {
-    @apply bg-white/[0.04] backdrop-blur-xl border border-white/[0.08]
+    @apply bg-white/[0.9] backdrop-blur-xl border border-surface-300
            rounded-2xl shadow-card;
   }
   .glass-card-hover {
     @apply glass-card transition-all duration-300;
   }
   .glass-card-hover:hover {
-    @apply bg-white/[0.07] border-white/[0.15] shadow-glow;
+    @apply bg-white border-omni-200 shadow-glow;
     transform: translateY(-2px);
   }
 
@@ -88,25 +88,25 @@
 
   .btn-secondary {
     @apply px-6 py-3 rounded-xl font-semibold
-           bg-white/[0.06] border border-white/[0.12] text-white
-           transition-all duration-300
-           hover:bg-white/[0.1] hover:border-white/[0.2]
+           bg-white border border-surface-300 text-surface-700
+           transition-all duration-300 shadow-sm
+           hover:bg-surface-50 hover:border-surface-400 hover:text-surface-900
            active:scale-[0.98];
   }
 
   .btn-ghost {
-    @apply px-4 py-2 rounded-lg font-medium text-surface-400
+    @apply px-4 py-2 rounded-lg font-medium text-surface-600
            transition-all duration-200
-           hover:text-white hover:bg-white/[0.06];
+           hover:text-surface-900 hover:bg-surface-100;
   }
 
   /* Input Fields */
   .input-field {
     @apply w-full px-4 py-3.5 rounded-xl
-           bg-white/[0.05] border border-white/[0.1]
-           text-white placeholder-surface-500
-           transition-all duration-300
-           focus:border-omni-500 focus:bg-white/[0.08]
+           bg-white border border-surface-300
+           text-surface-900 placeholder-surface-400
+           transition-all duration-300 shadow-sm
+           focus:border-omni-500 focus:bg-white
            focus:ring-2 focus:ring-omni-500/20 focus:outline-none;
   }
 
@@ -134,7 +134,7 @@
 
   /* Skeleton Loader */
   .skeleton {
-    @apply bg-gradient-to-r from-white/[0.04] via-white/[0.08] to-white/[0.04]
+    @apply bg-gradient-to-r from-surface-100 via-surface-200 to-surface-100
            bg-[length:200%_100%] animate-shimmer rounded-lg;
   }
 
@@ -151,13 +151,13 @@
   /* Tab Styles */
   .tab-item {
     @apply px-4 py-2.5 rounded-xl text-sm font-medium
-           text-surface-400 transition-all duration-200 cursor-pointer
-           hover:text-white hover:bg-white/[0.06];
+           text-surface-500 transition-all duration-200 cursor-pointer
+           hover:text-surface-900 hover:bg-surface-100;
   }
   .tab-item-active {
     @apply px-4 py-2.5 rounded-xl text-sm font-medium
-           text-white bg-omni-600/20 border border-omni-500/30
-           shadow-glow;
+           text-omni-600 bg-omni-50 border border-omni-200
+           shadow-sm;
   }
 
   /* Floating Label Group */
@@ -165,7 +165,7 @@
     @apply relative;
   }
   .form-group label {
-    @apply block text-sm font-medium text-surface-400 mb-2;
+    @apply block text-sm font-medium text-surface-600 mb-2;
   }
 }
 
@@ -173,37 +173,38 @@
 @layer utilities {
   .text-gradient {
     @apply bg-clip-text text-transparent
-           bg-gradient-to-r from-omni-400 to-accent-teal;
+           bg-gradient-to-r from-omni-600 to-omni-400;
   }
 
   .text-gradient-warm {
     @apply bg-clip-text text-transparent
-           bg-gradient-to-r from-omni-400 via-purple-400 to-pink-400;
+           bg-gradient-to-r from-omni-600 via-rose-500 to-amber-500;
   }
 
   .border-gradient {
-    border-image: linear-gradient(135deg, rgba(99,102,241,0.5), rgba(45,212,191,0.3)) 1;
+    border-image: linear-gradient(135deg, rgba(198, 93, 59, 0.5), rgba(253, 232, 230, 1)) 1;
   }
 
   .bg-mesh {
     background-image:
-      radial-gradient(at 40% 20%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-      radial-gradient(at 80% 0%, rgba(45, 212, 191, 0.08) 0px, transparent 50%),
-      radial-gradient(at 0% 50%, rgba(99, 102, 241, 0.08) 0px, transparent 50%);
+      radial-gradient(at 40% 20%, rgba(198, 93, 59, 0.08) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, rgba(253, 232, 230, 0.5) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, rgba(198, 93, 59, 0.05) 0px, transparent 50%);
   }
 }
 
 /* -- Overrides -- */
-/* Fix Browser Autofill breaking dark theme */
+/* Fix Browser Autofill */
 input:-webkit-autofill,
 input:-webkit-autofill:hover, 
 input:-webkit-autofill:focus, 
 input:-webkit-autofill:active {
-  -webkit-text-fill-color: white !important;
-  caret-color: white !important;
+  -webkit-text-fill-color: #1F2937 !important;
+  caret-color: #1F2937 !important;
   transition: background-color 5000s ease-in-out 0s, color 5000s ease-in-out 0s !important;
   background-color: transparent !important;
 }
 
 /* Deployed 2026-05-13 19:54 */
 /* Redeploy trigger 2026-06-04 15:55:42 */
+

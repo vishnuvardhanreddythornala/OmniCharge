@@ -12,8 +12,8 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
     <div class="animate-fade-in">
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 class="text-2xl font-display font-bold text-white">User Management</h1>
-          <p class="text-sm text-surface-400 mt-1">Manage platform users and security</p>
+          <h1 class="text-2xl font-display font-bold text-surface-900">User Management</h1>
+          <p class="text-sm text-surface-500 mt-1">Manage platform users and security</p>
         </div>
 
         <!-- Search Bar -->
@@ -25,9 +25,9 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
                  [(ngModel)]="searchQuery"
                  (ngModelChange)="onSearchChange($event)"
                  placeholder="Search by name, email, or mobile..."
-                 class="w-full pl-10 pr-10 py-2.5 rounded-xl bg-surface-900/60 border border-white/[0.08] text-sm text-white placeholder-surface-500 outline-none transition-all focus:border-omni-500/50 focus:shadow-[0_0_12px_rgba(99,102,241,0.1)]" />
+                 class="w-full pl-10 pr-10 py-2.5 rounded-xl bg-white/60 border border-white/[0.08] text-sm text-surface-900 placeholder-surface-400 outline-none transition-all focus:border-omni-500/50 focus:shadow-[0_0_12px_rgba(99,102,241,0.1)]" />
           @if (searchQuery) {
-            <button (click)="clearSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 text-surface-500 hover:text-white transition-colors">
+            <button (click)="clearSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 text-surface-500 hover:text-surface-900 transition-colors">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
               </svg>
@@ -44,9 +44,9 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
             <div class="w-8 h-8 rounded-lg bg-omni-500/10 flex items-center justify-center border border-omni-500/20">
               <svg class="w-4 h-4 text-omni-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
             </div>
-            <p class="text-xs text-surface-400 font-bold uppercase tracking-wider">Total Users</p>
+            <p class="text-xs text-surface-500 font-bold uppercase tracking-wider">Total Users</p>
           </div>
-          <span class="text-3xl font-display font-bold px-1 text-white">{{ totalUsersCount() }}</span>
+          <span class="text-3xl font-display font-bold px-1 text-surface-900">{{ totalUsersCount() }}</span>
         </div>
 
         <div class="glass-card p-6 flex flex-col justify-between border border-white/[0.05]">
@@ -54,9 +54,9 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
             <div class="w-8 h-8 rounded-lg bg-accent-emerald/10 flex items-center justify-center border border-accent-emerald/20">
               <svg class="w-4 h-4 text-accent-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
             </div>
-            <p class="text-xs text-surface-400 font-bold uppercase tracking-wider">Active Users</p>
+            <p class="text-xs text-surface-500 font-bold uppercase tracking-wider">Active Users</p>
           </div>
-          <span class="text-3xl font-display font-bold px-1 text-white">{{ activeUsersCount() }}</span>
+          <span class="text-3xl font-display font-bold px-1 text-surface-900">{{ activeUsersCount() }}</span>
         </div>
 
         <div class="glass-card p-6 flex flex-col justify-between border border-white/[0.05]">
@@ -64,9 +64,9 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
             <div class="w-8 h-8 rounded-lg bg-accent-rose/10 flex items-center justify-center border border-accent-rose/20">
               <svg class="w-4 h-4 text-accent-rose" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
             </div>
-            <p class="text-xs text-surface-400 font-bold uppercase tracking-wider">Suspended Users</p>
+            <p class="text-xs text-surface-500 font-bold uppercase tracking-wider">Suspended Users</p>
           </div>
-          <span class="text-3xl font-display font-bold px-1 text-white">{{ suspendedUsersCount() }}</span>
+          <span class="text-3xl font-display font-bold px-1 text-surface-900">{{ suspendedUsersCount() }}</span>
         </div>
 
       </div>
@@ -91,8 +91,8 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
         } @else {
           <!-- Desktop Table (hidden on mobile) -->
           <div class="hidden sm:block overflow-x-auto">
-            <table class="w-full text-left text-sm text-surface-300">
-              <thead class="text-xs uppercase bg-white/[0.03] text-surface-400 border-b border-white/[0.05]">
+            <table class="w-full text-left text-sm text-surface-600">
+              <thead class="text-xs uppercase bg-white/[0.03] text-surface-500 border-b border-white/[0.05]">
                 <tr>
                   <th scope="col" class="px-6 py-4 font-semibold">User ID</th>
                   <th scope="col" class="px-6 py-4 font-semibold">User</th>
@@ -106,23 +106,23 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
               <tbody class="divide-y divide-white/[0.05]">
                 @for (user of users(); track user.id) {
                   <tr class="hover:bg-white/[0.02] transition-colors">
-                    <td class="px-6 py-4 font-mono text-xs text-white">
+                    <td class="px-6 py-4 font-mono text-xs text-surface-900">
                       USR-{{ ('00000' + user.id).slice(-5) }}
                     </td>
                     <td class="px-6 py-4">
                       <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-omni-600 to-accent-teal flex items-center justify-center text-white text-xs font-bold">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-omni-600 to-accent-teal flex items-center justify-center text-surface-900 text-xs font-bold">
                           {{ user.fullName.charAt(0).toUpperCase() }}
                         </div>
-                        <div class="font-medium text-white">{{ user.fullName }}</div>
+                        <div class="font-medium text-surface-900">{{ user.fullName }}</div>
                       </div>
                     </td>
                     <td class="px-6 py-4">
-                      <div class="text-surface-200">{{ user.mobileNumber || '—' }}</div>
+                      <div class="text-surface-800">{{ user.mobileNumber || '—' }}</div>
                       <div class="text-xs text-surface-500">{{ user.email }}</div>
                     </td>
                     <td class="px-6 py-4">
-                      <span class="px-2 py-1 rounded bg-white/[0.05] text-xs font-mono border border-white/10"
+                      <span class="px-2 py-1 rounded bg-white/[0.05] text-xs font-mono border border-surface-200"
                             [class.text-omni-400]="user.role === 'ROLE_ADMIN'">
                         {{ user.role.replace('ROLE_', '') }}
                       </span>
@@ -134,7 +134,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
                         {{ user.isActive ? 'Active' : 'Suspended' }}
                       </span>
                     </td>
-                    <td class="px-6 py-4 text-xs text-surface-400">
+                    <td class="px-6 py-4 text-xs text-surface-500">
                       {{ user.createdDate | date:'mediumDate' }}
                     </td>
                     <td class="px-6 py-4 text-right">
@@ -165,15 +165,15 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
               <div class="p-4 space-y-3">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-omni-600 to-accent-teal flex items-center justify-center text-white text-xs font-bold">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-omni-600 to-accent-teal flex items-center justify-center text-surface-900 text-xs font-bold">
                       {{ user.fullName.charAt(0).toUpperCase() }}
                     </div>
                     <div>
-                      <div class="font-medium text-white text-sm">{{ user.fullName }}</div>
-                      <div class="font-mono text-[10px] text-surface-400">USR-{{ ('00000' + user.id).slice(-5) }}</div>
+                      <div class="font-medium text-surface-900 text-sm">{{ user.fullName }}</div>
+                      <div class="font-mono text-[10px] text-surface-500">USR-{{ ('00000' + user.id).slice(-5) }}</div>
                     </div>
                   </div>
-                  <span class="px-2 py-0.5 rounded bg-white/[0.05] text-[10px] font-mono border border-white/10"
+                  <span class="px-2 py-0.5 rounded bg-white/[0.05] text-[10px] font-mono border border-surface-200"
                         [class.text-omni-400]="user.role === 'ROLE_ADMIN'">
                     {{ user.role.replace('ROLE_', '') }}
                   </span>
@@ -182,8 +182,8 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
                 <div class="grid grid-cols-2 gap-2 text-xs">
                   <div>
                     <div class="text-surface-500 text-[10px] uppercase">Contact</div>
-                    <div class="text-surface-200">{{ user.mobileNumber || '—' }}</div>
-                    <div class="text-surface-400 truncate">{{ user.email }}</div>
+                    <div class="text-surface-800">{{ user.mobileNumber || '—' }}</div>
+                    <div class="text-surface-500 truncate">{{ user.email }}</div>
                   </div>
                   <div class="text-right">
                     <div class="text-surface-500 text-[10px] uppercase">Status</div>
@@ -223,12 +223,12 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                   </svg>
                 </div>
-                <h3 class="text-lg font-semibold text-white mb-1.5">No users found</h3>
-                <p class="text-sm text-surface-400 max-w-xs mx-auto leading-relaxed">
+                <h3 class="text-lg font-semibold text-surface-900 mb-1.5">No users found</h3>
+                <p class="text-sm text-surface-500 max-w-xs mx-auto leading-relaxed">
                   {{ searchQuery ? 'No users match "' + searchQuery + '". Try a different search term.' : 'User records will appear here once registrations begin.' }}
                 </p>
                 @if (searchQuery) {
-                  <button (click)="clearSearch()" class="btn-ghost text-xs mt-4 border border-white/10">
+                  <button (click)="clearSearch()" class="btn-ghost text-xs mt-4 border border-surface-200">
                     Clear search
                   </button>
                 }
@@ -239,7 +239,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
           <!-- Pagination -->
           @if (totalPages() > 1) {
             <div class="flex items-center justify-between px-6 py-4 border-t border-white/[0.05]">
-              <span class="text-xs text-surface-400">
+              <span class="text-xs text-surface-500">
                 Showing {{ (currentPage() * 10) + 1 }}–{{ Math.min((currentPage() + 1) * 10, totalElements()) }} of {{ totalElements() }}
               </span>
               <div class="flex items-center gap-1">
@@ -249,7 +249,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
                 </button>
                 @for (page of getPageNumbers(); track page) {
                   <button (click)="loadUsers(page)" 
-                          [class]="page === currentPage() ? 'bg-omni-600 text-white' : 'text-surface-400 hover:bg-white/[0.06]'"
+                          [class]="page === currentPage() ? 'bg-omni-600 text-surface-900' : 'text-surface-500 hover:bg-white/[0.06]'"
                           class="w-8 h-8 rounded-lg text-xs font-medium transition-colors">
                     {{ page + 1 }}
                   </button>

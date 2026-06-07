@@ -39,7 +39,7 @@ import { OperatorService } from '../../core/services/operator.service';
                 not minutes.
               </h1>
 
-              <p class="text-lg text-surface-400 leading-relaxed max-w-lg mb-8">
+              <p class="text-lg text-surface-500 leading-relaxed max-w-lg mb-8">
                 Auto-detect your operator, browse the best plans, and pay securely with Razorpay.
                 No account needed to explore — sign in only when you're ready to pay.
               </p>
@@ -64,7 +64,7 @@ import { OperatorService } from '../../core/services/operator.service';
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                     </svg>
                   </div>
-                  <span class="text-xs text-surface-400">Razorpay Secured</span>
+                  <span class="text-xs text-surface-500">Razorpay Secured</span>
                 </div>
                 <div class="flex items-center gap-2">
                   <div class="w-8 h-8 rounded-lg bg-omni-500/10 flex items-center justify-center">
@@ -72,7 +72,7 @@ import { OperatorService } from '../../core/services/operator.service';
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                   </div>
-                  <span class="text-xs text-surface-400">Instant Activation</span>
+                  <span class="text-xs text-surface-500">Instant Activation</span>
                 </div>
                 <div class="flex items-center gap-2">
                   <div class="w-8 h-8 rounded-lg bg-accent-teal/10 flex items-center justify-center">
@@ -80,7 +80,7 @@ import { OperatorService } from '../../core/services/operator.service';
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                     </svg>
                   </div>
-                  <span class="text-xs text-surface-400">All Operators</span>
+                  <span class="text-xs text-surface-500">All Operators</span>
                 </div>
               </div>
             </div>
@@ -93,13 +93,13 @@ import { OperatorService } from '../../core/services/operator.service';
 
                 <div class="relative">
                   <h2 class="text-lg font-display font-semibold mb-1">Quick Recharge</h2>
-                  <p class="text-sm text-surface-400 mb-6">Enter a mobile number to get started</p>
+                  <p class="text-sm text-surface-500 mb-6">Enter a mobile number to get started</p>
 
                   <!-- Mobile Number Input -->
                   <div class="relative mb-4">
                     <div class="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
-                      <span class="text-surface-400 text-sm font-medium">+91</span>
-                      <div class="w-px h-5 bg-white/10"></div>
+                      <span class="text-surface-500 text-sm font-medium">+91</span>
+                      <div class="w-px h-5 bg-surface-100"></div>
                     </div>
                     <input type="tel"
                            [(ngModel)]="mobileNumber"
@@ -117,7 +117,7 @@ import { OperatorService } from '../../core/services/operator.service';
                       <div class="w-8 h-8 rounded-lg bg-omni-500/20 flex items-center justify-center">
                         <div class="w-4 h-4 border-2 border-omni-400 border-t-transparent rounded-full animate-spin"></div>
                       </div>
-                      <span class="text-sm text-surface-300">Detecting operator...</span>
+                      <span class="text-sm text-surface-600">Detecting operator...</span>
                     </div>
                   }
 
@@ -130,8 +130,8 @@ import { OperatorService } from '../../core/services/operator.service';
                           </svg>
                         </div>
                         <div>
-                          <p class="text-sm font-medium text-white">{{ op.operatorName }}</p>
-                          <p class="text-xs text-surface-400">{{ op.type }} • {{ operatorService.isManualOverride() ? 'Selected' : 'Auto-detected' }}</p>
+                          <p class="text-sm font-medium text-surface-900">{{ op.operatorName }}</p>
+                          <p class="text-xs text-surface-500">{{ op.type }} • {{ operatorService.isManualOverride() ? 'Selected' : 'Auto-detected' }}</p>
                         </div>
                       </div>
                       <button (click)="toggleOperatorDropdown()" class="text-xs font-semibold text-omni-400 hover:text-omni-300 transition-colors px-2 py-1">
@@ -147,8 +147,8 @@ import { OperatorService } from '../../core/services/operator.service';
                           </svg>
                         </div>
                         <div>
-                          <p class="text-sm font-medium text-white">Detection Failed</p>
-                          <p class="text-[10px] text-surface-400">Please select your operator</p>
+                          <p class="text-sm font-medium text-surface-900">Detection Failed</p>
+                          <p class="text-[10px] text-surface-500">Please select your operator</p>
                         </div>
                       </div>
                       <button (click)="toggleOperatorDropdown()" class="text-xs font-semibold text-omni-400 hover:text-omni-300 transition-colors px-2 py-1">
@@ -160,13 +160,13 @@ import { OperatorService } from '../../core/services/operator.service';
                   <!-- Manual Operator Selection Dropdown -->
                   @if (showOperatorDropdown()) {
                     <div class="mb-5 animate-slide-down">
-                      <p class="text-xs font-medium text-surface-400 mb-2 px-1">Select your operator</p>
+                      <p class="text-xs font-medium text-surface-500 mb-2 px-1">Select your operator</p>
                       <div class="grid grid-cols-2 gap-2">
                         @for (op of operatorService.operators(); track op.id) {
                           <button (click)="selectManualOperator(op)"
                                   class="flex items-center gap-2.5 p-2.5 rounded-xl border transition-all duration-300"
                                   [class]="operatorService.selectedOperator()?.operatorId === op.id ? 'bg-omni-500/10 border-omni-500 shadow-glow' : 'glass-card border-white/[0.05] hover:bg-white/[0.08]'">
-                            <span class="text-xs font-bold font-display tracking-wide text-white">{{ op.name }}</span>
+                            <span class="text-xs font-bold font-display tracking-wide text-surface-900">{{ op.name }}</span>
                           </button>
                         }
                       </div>
@@ -200,7 +200,7 @@ import { OperatorService } from '../../core/services/operator.service';
             <h2 class="text-3xl sm:text-4xl font-display font-bold mb-4">
               How it <span class="text-gradient">works</span>
             </h2>
-            <p class="text-surface-400 max-w-lg mx-auto">Three simple steps to recharge any mobile number instantly.</p>
+            <p class="text-surface-500 max-w-lg mx-auto">Three simple steps to recharge any mobile number instantly.</p>
           </div>
 
           <div class="grid md:grid-cols-3 gap-6">
@@ -213,7 +213,7 @@ import { OperatorService } from '../../core/services/operator.service';
                 </div>
                 <div class="text-xs font-semibold text-omni-400 uppercase tracking-widest mb-2">Step {{ step.num }}</div>
                 <h3 class="text-lg font-semibold mb-2">{{ step.title }}</h3>
-                <p class="text-sm text-surface-400 leading-relaxed">{{ step.desc }}</p>
+                <p class="text-sm text-surface-500 leading-relaxed">{{ step.desc }}</p>
               </div>
             }
           </div>
@@ -227,7 +227,7 @@ import { OperatorService } from '../../core/services/operator.service';
             <h2 class="text-3xl sm:text-4xl font-display font-bold mb-4">
               Built for <span class="text-gradient-warm">modern recharges</span>
             </h2>
-            <p class="text-surface-400 max-w-lg mx-auto">Every feature you need in a recharge platform, nothing you don't.</p>
+            <p class="text-surface-500 max-w-lg mx-auto">Every feature you need in a recharge platform, nothing you don't.</p>
           </div>
 
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -240,7 +240,7 @@ import { OperatorService } from '../../core/services/operator.service';
                   </div>
                   <div>
                     <h3 class="text-sm font-semibold mb-1">{{ feature.title }}</h3>
-                    <p class="text-xs text-surface-400 leading-relaxed">{{ feature.desc }}</p>
+                    <p class="text-xs text-surface-500 leading-relaxed">{{ feature.desc }}</p>
                   </div>
                 </div>
               </div>
@@ -258,7 +258,7 @@ import { OperatorService } from '../../core/services/operator.service';
               <h2 class="text-3xl sm:text-4xl font-display font-bold mb-4">
                 Ready to recharge?
               </h2>
-              <p class="text-surface-300 mb-8 max-w-md mx-auto">
+              <p class="text-surface-600 mb-8 max-w-md mx-auto">
                 Join thousands of users who trust OmniCharge for instant, secure mobile recharges.
               </p>
               <a routerLink="/recharge" class="btn-primary text-base !py-3.5 !px-10 inline-flex items-center gap-2">

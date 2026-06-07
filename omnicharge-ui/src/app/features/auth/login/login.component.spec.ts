@@ -88,7 +88,7 @@ describe('LoginComponent', () => {
     });
 
     it('should call login and transition to adminOtp state on success', () => {
-      component.adminForm.patchValue({ adminEmail: 'admin@omni.com', password: 'Login@630' });
+      component.adminForm.patchValue({ adminEmail: 'admin@omni.com', password: 'dummy_password' });
       spyOn(component, 'displaySuccess');
       spyOn(component, 'switchViewMode');
 
@@ -96,7 +96,7 @@ describe('LoginComponent', () => {
 
       component.onAdminLogin();
 
-      expect(authSpy.login).toHaveBeenCalledWith({ email: 'admin@omni.com', password: 'Login@630' });
+      expect(authSpy.login).toHaveBeenCalledWith({ email: 'admin@omni.com', password: 'dummy_password' });
       expect(component.switchViewMode).toHaveBeenCalledWith('adminOtp');
       expect(component.displaySuccess).toHaveBeenCalledWith('Credentials verified. OTP sent to email.');
     });
@@ -113,7 +113,7 @@ describe('LoginComponent', () => {
     });
 
     it('should handle admin network/500 failures gracefully', () => {
-      component.adminForm.patchValue({ adminEmail: 'admin@omni.com', password: 'Login@630' });
+      component.adminForm.patchValue({ adminEmail: 'admin@omni.com', password: 'dummy_password' });
       authSpy.login.and.returnValue(throwError(() => ({ error: { message: 'Server down' } })));
 
       component.onAdminLogin();

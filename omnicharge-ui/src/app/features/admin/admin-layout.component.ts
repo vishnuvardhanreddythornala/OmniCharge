@@ -13,7 +13,7 @@ import { AuthService } from '../../core/services/auth.service';
       <div class="admin-splash">
         <div class="splash-content">
           <div class="splash-icon">
-            <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-12 h-12 text-surface-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
             </svg>
@@ -31,7 +31,7 @@ import { AuthService } from '../../core/services/auth.service';
           <div class="particle p6"></div>
         </div>
       </div>
-    }    <div class="min-h-screen bg-surface flex font-sans text-surface-200">
+    }    <div class="min-h-screen bg-surface flex font-sans text-surface-800">
       
       <!-- Sidebar -->
       <aside class="admin-sidebar hidden md:flex flex-col">
@@ -40,12 +40,12 @@ import { AuthService } from '../../core/services/auth.service';
         <a routerLink="/admin/dashboard" class="sidebar-brand block cursor-pointer group no-underline">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-omni-500 to-omni-700
-                        flex items-center justify-center shadow-glow border border-white/10 relative overflow-hidden transition-all duration-300 group-hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]">
-              <span class="text-white font-bold text-base">⚡</span>
+                        flex items-center justify-center shadow-glow border border-surface-200 relative overflow-hidden transition-all duration-300 group-hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]">
+              <span class="text-surface-900 font-bold text-base">⚡</span>
             </div>
             <div class="flex flex-col">
-              <span class="text-xl font-display font-black text-white tracking-tight leading-none">Omni<span class="text-gradient">Admin</span></span>
-              <span class="text-[10px] uppercase tracking-widest text-surface-400 font-semibold mt-1">Workspace</span>
+              <span class="text-xl font-display font-black text-surface-900 tracking-tight leading-none">Omni<span class="text-gradient">Admin</span></span>
+              <span class="text-[10px] uppercase tracking-widest text-surface-500 font-semibold mt-1">Workspace</span>
             </div>
           </div>
         </a>
@@ -118,30 +118,30 @@ import { AuthService } from '../../core/services/auth.service';
         <header class="h-16 border-b border-white/[0.05] flex items-center justify-between px-4 sm:px-8 bg-surface/80 backdrop-blur-md sticky top-0 z-40">
           <!-- Mobile Brand -->
           <div class="flex items-center gap-2 md:hidden">
-            <span class="text-white font-bold text-sm bg-gradient-to-br from-omni-500 to-omni-700 w-7 h-7 rounded-lg flex items-center justify-center">⚡</span>
-            <span class="font-display font-bold text-white tracking-tight text-lg">Omni<span class="text-gradient">Admin</span></span>
+            <span class="text-surface-900 font-bold text-sm bg-gradient-to-br from-omni-500 to-omni-700 w-7 h-7 rounded-lg flex items-center justify-center">⚡</span>
+            <span class="font-display font-bold text-surface-900 tracking-tight text-lg">Omni<span class="text-gradient">Admin</span></span>
           </div>
 
           <!-- Desktop Title Space -->
           <div class="hidden md:block">
-            <h2 class="text-white font-semibold font-display tracking-wide text-sm text-surface-400">Administrator Console</h2>
+            <h2 class="text-surface-900 font-semibold font-display tracking-wide text-sm text-surface-500">Administrator Console</h2>
           </div>
 
           <!-- Right Actions -->
           <div class="flex items-center gap-3">
-            <a routerLink="/admin/notifications" class="p-2 text-surface-400 hover:text-white hover:bg-white/[0.06] rounded-xl transition-all relative">
+            <a routerLink="/admin/notifications" class="p-2 text-surface-500 hover:text-surface-900 hover:bg-white/[0.06] rounded-xl transition-all relative">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
             </a>
             <a routerLink="/admin/profile" class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-white/[0.06] transition-all cursor-pointer">
-              <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-omni-500 to-accent-teal flex items-center justify-center text-white text-xs font-bold shadow-md">
+              <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-omni-500 to-accent-teal flex items-center justify-center text-surface-900 text-xs font-bold shadow-md">
                 {{ authService.userInitials() }}
               </div>
             </a>
-            <button (click)="showLogoutModal.set(true)" title="Sign Out" class="p-2 text-rose-400 hover:text-white hover:bg-rose-500/10 rounded-xl transition-all relative">
+            <button (click)="showLogoutModal.set(true)" title="Sign Out" class="p-2 text-rose-400 hover:text-surface-900 hover:bg-rose-500/10 rounded-xl transition-all relative">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/></svg>
             </button>
             <!-- Mobile Menu Toggle Placeholder -->
-            <button class="md:hidden p-2 text-surface-400 hover:text-white transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+            <button class="md:hidden p-2 text-surface-500 hover:text-surface-900 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
           </div>
         </header>
 
@@ -159,22 +159,22 @@ import { AuthService } from '../../core/services/auth.service';
           <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity animate-fade-in" (click)="cancelLogout()"></div>
           
           <!-- Modal -->
-          <div class="relative w-full max-w-sm glass-card border flex flex-col items-center border-white/10 shadow-2xl rounded-3xl p-6 sm:p-8 animate-scale-in text-center">
+          <div class="relative w-full max-w-sm glass-card border flex flex-col items-center border-surface-200 shadow-2xl rounded-3xl p-6 sm:p-8 animate-scale-in text-center">
             <div class="w-16 h-16 rounded-full bg-gradient-to-br from-surface-800 to-surface-700 mb-4 flex items-center justify-center shadow-inner border border-white/5 text-accent-rose">
               <svg class="w-8 h-8 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"></path>
               </svg>
             </div>
-            <h2 class="text-xl font-bold font-display text-white mb-2">Sign Out</h2>
-            <p class="text-sm font-medium text-surface-400 mb-8">
+            <h2 class="text-xl font-bold font-display text-surface-900 mb-2">Sign Out</h2>
+            <p class="text-sm font-medium text-surface-500 mb-8">
               Are you sure you want to sign out safely from OmniAdmin?
             </p>
             
             <div class="w-full flex gap-3">
-              <button (click)="cancelLogout()" class="flex-1 py-3 text-sm font-semibold text-surface-300 hover:text-white bg-surface-800 hover:bg-surface-700 border border-white/5 rounded-xl transition-colors">
+              <button (click)="cancelLogout()" class="flex-1 py-3 text-sm font-semibold text-surface-600 hover:text-surface-900 bg-white hover:bg-surface-100 border border-white/5 rounded-xl transition-colors">
                 Cancel
               </button>
-              <button (click)="confirmLogout()" class="flex-1 py-3 text-sm font-semibold text-white bg-accent-rose hover:bg-rose-600 rounded-xl transition-colors shadow-lg shadow-accent-rose/20">
+              <button (click)="confirmLogout()" class="flex-1 py-3 text-sm font-semibold text-surface-900 bg-accent-rose hover:bg-rose-600 rounded-xl transition-colors shadow-lg shadow-accent-rose/20">
                 Yes, Sign Out
               </button>
             </div>

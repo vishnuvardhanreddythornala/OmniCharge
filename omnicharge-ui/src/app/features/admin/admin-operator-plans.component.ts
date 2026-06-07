@@ -20,11 +20,11 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
           Operators
         </a>
         <svg class="w-3.5 h-3.5 text-surface-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-        <span class="text-white font-semibold flex items-center gap-2">
+        <span class="text-surface-900 font-semibold flex items-center gap-2">
           {{ operator()?.name || 'Loading...' }}
           @if (operator()) {
             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider"
-                  [class]="operator()?.isActive ? 'bg-accent-emerald/15 text-accent-emerald' : 'bg-surface-500/15 text-surface-400'">
+                  [class]="operator()?.isActive ? 'bg-accent-emerald/15 text-accent-emerald' : 'bg-surface-500/15 text-surface-500'">
               <span class="w-1.5 h-1.5 rounded-full" [class]="operator()?.isActive ? 'bg-accent-emerald animate-pulse' : 'bg-surface-500'"></span>
               {{ operator()?.isActive ? 'Active' : 'Inactive' }}
             </span>
@@ -35,8 +35,8 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
       <!-- ═══════ PAGE HEADER ═══════ -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-display font-bold text-white tracking-tight">Plan Operations</h1>
-          <p class="text-sm text-surface-400 mt-1">Manage recharge plans, pricing, and availability</p>
+          <h1 class="text-2xl sm:text-3xl font-display font-bold text-surface-900 tracking-tight">Plan Operations</h1>
+          <p class="text-sm text-surface-500 mt-1">Manage recharge plans, pricing, and availability</p>
         </div>
         @if (operator()?.isActive) {
           <button (click)="showAddModal.set(true)"
@@ -55,7 +55,7 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
           </div>
           <div>
             <h3 class="text-sm font-semibold text-accent-amber">Operator Inactive — Plan modifications locked</h3>
-            <p class="text-xs text-surface-400 mt-0.5">Reactivate the operator before managing plans. Auto-deactivated plans will auto-restore on reactivation.</p>
+            <p class="text-xs text-surface-500 mt-0.5">Reactivate the operator before managing plans. Auto-deactivated plans will auto-restore on reactivation.</p>
           </div>
         </div>
       }
@@ -70,7 +70,7 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
             </div>
             <span class="text-[10px] font-bold text-surface-500 uppercase tracking-widest">Total</span>
           </div>
-          <div class="text-2xl font-display font-bold text-white">{{ plans().length }}</div>
+          <div class="text-2xl font-display font-bold text-surface-900">{{ plans().length }}</div>
           <div class="text-[11px] text-surface-500 mt-0.5">plans configured</div>
         </div>
         <!-- Active Plans -->
@@ -124,8 +124,8 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
             <button (click)="categoryFilter.set('ALL')"
                     class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200"
                     [class]="categoryFilter() === 'ALL'
-                      ? 'bg-white/[0.1] text-white border border-white/20'
-                      : 'bg-white/[0.03] text-surface-400 border border-transparent hover:border-white/10'">
+                      ? 'bg-white/[0.1] text-surface-900 border border-surface-300'
+                      : 'bg-white/[0.03] text-surface-500 border border-transparent hover:border-surface-200'">
               All
             </button>
             @for (cat of allCategories(); track cat) {
@@ -133,7 +133,7 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
                       class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200"
                       [class]="categoryFilter() === cat
                         ? getCategoryActiveClass(cat)
-                        : 'bg-white/[0.03] text-surface-400 border border-transparent hover:border-white/10'">
+                        : 'bg-white/[0.03] text-surface-500 border border-transparent hover:border-surface-200'">
                 {{ cat }}
               </button>
             }
@@ -142,10 +142,10 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
           <select [(ngModel)]="statusFilterValue"
                   (ngModelChange)="statusFilter.set($event)"
                   class="input-field !py-2.5 text-sm !w-auto min-w-[140px]">
-            <option value="ALL" class="bg-surface-900 text-white">All Status</option>
-            <option value="ACTIVE" class="bg-surface-900 text-white">Active</option>
-            <option value="MANUAL" class="bg-surface-900 text-white">Manually Off</option>
-            <option value="AUTO" class="bg-surface-900 text-white">Auto Off</option>
+            <option value="ALL" class="bg-white text-surface-900">All Status</option>
+            <option value="ACTIVE" class="bg-white text-surface-900">Active</option>
+            <option value="MANUAL" class="bg-white text-surface-900">Manually Off</option>
+            <option value="AUTO" class="bg-white text-surface-900">Auto Off</option>
           </select>
         </div>
       </div>
@@ -154,8 +154,8 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
       @if (selectedIds().size > 0 && operator()?.isActive) {
         <div class="glass-card p-3 border-omni-500/20 bg-omni-500/[0.03] flex items-center justify-between gap-4 animate-slide-up">
           <div class="flex items-center gap-3">
-            <span class="text-sm text-white font-semibold">{{ selectedIds().size }} selected</span>
-            <button (click)="clearSelection()" class="text-xs text-surface-400 hover:text-white transition underline">Clear</button>
+            <span class="text-sm text-surface-900 font-semibold">{{ selectedIds().size }} selected</span>
+            <button (click)="clearSelection()" class="text-xs text-surface-500 hover:text-surface-900 transition underline">Clear</button>
           </div>
           <div class="flex items-center gap-2">
             <button (click)="bulkActivate()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-accent-emerald/10 text-accent-emerald border border-accent-emerald/20 hover:bg-accent-emerald/20 transition flex items-center gap-1.5">
@@ -187,7 +187,7 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
                     <input type="checkbox"
                            [checked]="allSelected()"
                            (change)="toggleSelectAll()"
-                           class="w-4 h-4 rounded border-white/20 bg-white/5 text-omni-500 focus:ring-omni-500/30 cursor-pointer" />
+                           class="w-4 h-4 rounded border-surface-300 bg-surface-50 text-omni-500 focus:ring-omni-500/30 cursor-pointer" />
                   </th>
                   <th class="px-4 py-3.5 font-semibold">Plan Name</th>
                   <th class="px-4 py-3.5 font-semibold">Price</th>
@@ -206,10 +206,10 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
                       <input type="checkbox"
                              [checked]="selectedIds().has(plan.id)"
                              (change)="toggleSelect(plan.id)"
-                             class="w-4 h-4 rounded border-white/20 bg-white/5 text-omni-500 focus:ring-omni-500/30 cursor-pointer" />
+                             class="w-4 h-4 rounded border-surface-300 bg-surface-50 text-omni-500 focus:ring-omni-500/30 cursor-pointer" />
                     </td>
                     <td class="px-4 py-3.5">
-                      <div class="font-medium text-white text-[13px]">{{ plan.planName }}</div>
+                      <div class="font-medium text-surface-900 text-[13px]">{{ plan.planName }}</div>
                       <div class="text-[11px] text-surface-500 mt-0.5 flex items-center gap-2">
                         @if (plan.dataLimit) {
                           <span class="flex items-center gap-1">
@@ -223,10 +223,10 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
                       </div>
                     </td>
                     <td class="px-4 py-3.5">
-                      <span class="text-white font-bold text-base">₹{{ plan.price }}</span>
+                      <span class="text-surface-900 font-bold text-base">₹{{ plan.price }}</span>
                     </td>
                     <td class="px-4 py-3.5">
-                      <span class="text-surface-300 font-medium">{{ plan.validityDays }}d</span>
+                      <span class="text-surface-600 font-medium">{{ plan.validityDays }}d</span>
                     </td>
                     <td class="px-4 py-3.5">
                       <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider" [class]="getCategoryBadge(plan.category)">
@@ -252,7 +252,7 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
                       }
                     </td>
                     <td class="px-4 py-3.5">
-                      <div class="text-[11px] text-surface-400">{{ plan.lastModifiedDate ? formatDate(plan.lastModifiedDate) : '—' }}</div>
+                      <div class="text-[11px] text-surface-500">{{ plan.lastModifiedDate ? formatDate(plan.lastModifiedDate) : '—' }}</div>
                       <div class="text-[10px] text-surface-600">{{ plan.lastModifiedBy || 'system' }}</div>
                     </td>
                     <td class="px-4 py-3.5 text-right">
@@ -279,12 +279,12 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
                         <!-- Three-dot menu -->
                         <div class="relative">
                           <button (click)="toggleMenu(plan.id)"
-                                  class="w-8 h-8 rounded-lg flex items-center justify-center text-surface-500 hover:text-white hover:bg-white/[0.06] transition opacity-0 group-hover:opacity-100">
+                                  class="w-8 h-8 rounded-lg flex items-center justify-center text-surface-500 hover:text-surface-900 hover:bg-white/[0.06] transition opacity-0 group-hover:opacity-100">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="4" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="16" r="1.5"/></svg>
                           </button>
                           @if (openMenuId() === plan.id) {
-                            <div class="absolute right-0 top-10 z-30 w-40 rounded-xl border border-white/10 bg-surface-900/95 backdrop-blur-xl shadow-2xl py-1.5 animate-scale-in">
-                              <button (click)="openEditModal(plan)" class="w-full px-4 py-2 text-left text-xs text-surface-300 hover:text-white hover:bg-white/[0.05] transition flex items-center gap-2">
+                            <div class="absolute right-0 top-10 z-30 w-40 rounded-xl border border-surface-200 bg-white/95 backdrop-blur-xl shadow-2xl py-1.5 animate-scale-in">
+                              <button (click)="openEditModal(plan)" class="w-full px-4 py-2 text-left text-xs text-surface-600 hover:text-surface-900 hover:bg-white/[0.05] transition flex items-center gap-2">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 Edit Plan
                               </button>
@@ -307,7 +307,7 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
                 <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white/[0.03] flex items-center justify-center">
                   <svg class="w-8 h-8 text-surface-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 </div>
-                <p class="text-surface-400 font-medium">No plans match your filters</p>
+                <p class="text-surface-500 font-medium">No plans match your filters</p>
                 <p class="text-xs text-surface-600 mt-1">Try adjusting search or category filters</p>
               </div>
             }
@@ -319,7 +319,7 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
       <div class="glass-card p-4">
         <div class="flex items-center gap-2 mb-3">
           <svg class="w-4 h-4 text-omni-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          <span class="text-xs font-semibold text-surface-300 uppercase tracking-wider">Status Legend</span>
+          <span class="text-xs font-semibold text-surface-600 uppercase tracking-wider">Status Legend</span>
           <span class="text-[10px] text-surface-600 ml-1">— click to filter</span>
         </div>
         <div class="flex flex-wrap gap-3">
@@ -327,7 +327,7 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
                   class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-200"
                   [class]="statusFilter() === 'ACTIVE'
                     ? 'bg-accent-emerald/10 border-accent-emerald/30 text-accent-emerald'
-                    : 'bg-white/[0.02] border-white/[0.06] text-surface-400 hover:border-accent-emerald/20'">
+                    : 'bg-white/[0.02] border-white/[0.06] text-surface-500 hover:border-accent-emerald/20'">
             <span class="w-2 h-2 rounded-full bg-accent-emerald"></span>
             Active — visible to users
           </button>
@@ -335,7 +335,7 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
                   class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-200"
                   [class]="statusFilter() === 'MANUAL'
                     ? 'bg-accent-rose/10 border-accent-rose/30 text-accent-rose'
-                    : 'bg-white/[0.02] border-white/[0.06] text-surface-400 hover:border-accent-rose/20'">
+                    : 'bg-white/[0.02] border-white/[0.06] text-surface-500 hover:border-accent-rose/20'">
             <span class="w-2 h-2 rounded-full bg-accent-rose"></span>
             Manual — admin deactivated
           </button>
@@ -343,7 +343,7 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
                   class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-200"
                   [class]="statusFilter() === 'AUTO'
                     ? 'bg-accent-amber/10 border-accent-amber/30 text-accent-amber'
-                    : 'bg-white/[0.02] border-white/[0.06] text-surface-400 hover:border-accent-amber/20'">
+                    : 'bg-white/[0.02] border-white/[0.06] text-surface-500 hover:border-accent-amber/20'">
             <span class="w-2 h-2 rounded-full bg-accent-amber"></span>
             Auto — operator toggle
           </button>
@@ -356,52 +356,52 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
           <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
           <div class="relative glass-card p-6 sm:p-8 w-full max-w-lg border-omni-500/10 animate-scale-in" (click)="$event.stopPropagation()">
             <div class="flex items-center justify-between mb-6">
-              <h2 class="text-lg font-display font-bold text-white">Edit Plan</h2>
-              <button (click)="showEditModal.set(false)" class="w-8 h-8 rounded-lg flex items-center justify-center text-surface-400 hover:text-white hover:bg-white/[0.05] transition">
+              <h2 class="text-lg font-display font-bold text-surface-900">Edit Plan</h2>
+              <button (click)="showEditModal.set(false)" class="w-8 h-8 rounded-lg flex items-center justify-center text-surface-500 hover:text-surface-900 hover:bg-white/[0.05] transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
             </div>
             <div class="space-y-4">
               <div>
-                <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Plan Name</label>
+                <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Plan Name</label>
                 <input type="text" [(ngModel)]="editForm.planName" class="input-field" />
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Price (₹)</label>
+                  <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Price (₹)</label>
                   <input type="number" [(ngModel)]="editForm.price" class="input-field" />
                 </div>
                 <div>
-                  <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Validity (Days)</label>
+                  <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Validity (Days)</label>
                   <input type="number" [(ngModel)]="editForm.validityDays" class="input-field" />
                 </div>
               </div>
               <div>
-                <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Category</label>
+                <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Category</label>
                 <select [(ngModel)]="editForm.category" class="input-field">
-                  <option value="RECOMMENDED" class="bg-surface-900 text-white">Recommended</option>
-                  <option value="DATA" class="bg-surface-900 text-white">Data</option>
-                  <option value="UNLIMITED" class="bg-surface-900 text-white">Unlimited</option>
-                  <option value="TALKTIME" class="bg-surface-900 text-white">Talktime</option>
+                  <option value="RECOMMENDED" class="bg-white text-surface-900">Recommended</option>
+                  <option value="DATA" class="bg-white text-surface-900">Data</option>
+                  <option value="UNLIMITED" class="bg-white text-surface-900">Unlimited</option>
+                  <option value="TALKTIME" class="bg-white text-surface-900">Talktime</option>
                 </select>
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Data Limit</label>
+                  <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Data Limit</label>
                   <input type="text" [(ngModel)]="editForm.dataLimit" class="input-field" placeholder="e.g. 2GB/day" />
                 </div>
                 <div>
-                  <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Call Benefit</label>
+                  <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Call Benefit</label>
                   <input type="text" [(ngModel)]="editForm.callBenefit" class="input-field" placeholder="e.g. Unlimited" />
                 </div>
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">SMS Benefit</label>
+                  <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">SMS Benefit</label>
                   <input type="text" [(ngModel)]="editForm.smsBenefit" class="input-field" placeholder="e.g. 100 SMS/day" />
                 </div>
                 <div>
-                  <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Extra Benefits</label>
+                  <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Extra Benefits</label>
                   <input type="text" [(ngModel)]="editForm.additionalBenefits" class="input-field" placeholder="Optional" />
                 </div>
               </div>
@@ -422,53 +422,53 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
           <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
           <div class="relative glass-card p-6 sm:p-8 w-full max-w-lg border-omni-500/10 animate-scale-in" (click)="$event.stopPropagation()">
             <div class="flex items-center justify-between mb-6">
-              <h2 class="text-lg font-display font-bold text-white">Add New Plan</h2>
-              <button (click)="showAddModal.set(false)" class="w-8 h-8 rounded-lg flex items-center justify-center text-surface-400 hover:text-white hover:bg-white/[0.05] transition">
+              <h2 class="text-lg font-display font-bold text-surface-900">Add New Plan</h2>
+              <button (click)="showAddModal.set(false)" class="w-8 h-8 rounded-lg flex items-center justify-center text-surface-500 hover:text-surface-900 hover:bg-white/[0.05] transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
             </div>
             <div class="space-y-4">
               <div>
-                <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Plan Name *</label>
+                <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Plan Name *</label>
                 <input type="text" [(ngModel)]="addForm.planName" class="input-field" placeholder="e.g. Ultra Data Pack" />
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Price (₹) *</label>
+                  <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Price (₹) *</label>
                   <input type="number" [(ngModel)]="addForm.price" class="input-field" />
                 </div>
                 <div>
-                  <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Validity (Days) *</label>
+                  <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Validity (Days) *</label>
                   <input type="number" [(ngModel)]="addForm.validityDays" class="input-field" />
                 </div>
               </div>
               <div>
-                <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Category *</label>
+                <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Category *</label>
                 <select [(ngModel)]="addForm.category" class="input-field">
-                  <option value="" class="bg-surface-900 text-white">Select category</option>
-                  <option value="RECOMMENDED" class="bg-surface-900 text-white">Recommended</option>
-                  <option value="DATA" class="bg-surface-900 text-white">Data</option>
-                  <option value="UNLIMITED" class="bg-surface-900 text-white">Unlimited</option>
-                  <option value="TALKTIME" class="bg-surface-900 text-white">Talktime</option>
+                  <option value="" class="bg-white text-surface-900">Select category</option>
+                  <option value="RECOMMENDED" class="bg-white text-surface-900">Recommended</option>
+                  <option value="DATA" class="bg-white text-surface-900">Data</option>
+                  <option value="UNLIMITED" class="bg-white text-surface-900">Unlimited</option>
+                  <option value="TALKTIME" class="bg-white text-surface-900">Talktime</option>
                 </select>
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Data Limit</label>
+                  <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Data Limit</label>
                   <input type="text" [(ngModel)]="addForm.dataLimit" class="input-field" placeholder="e.g. 2GB/day" />
                 </div>
                 <div>
-                  <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Call Benefit</label>
+                  <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Call Benefit</label>
                   <input type="text" [(ngModel)]="addForm.callBenefit" class="input-field" placeholder="e.g. Unlimited" />
                 </div>
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">SMS Benefit</label>
+                  <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">SMS Benefit</label>
                   <input type="text" [(ngModel)]="addForm.smsBenefit" class="input-field" placeholder="e.g. 100 SMS/day" />
                 </div>
                 <div>
-                  <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Extra Benefits</label>
+                  <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Extra Benefits</label>
                   <input type="text" [(ngModel)]="addForm.additionalBenefits" class="input-field" placeholder="Optional" />
                 </div>
               </div>
@@ -862,7 +862,7 @@ export class AdminOperatorPlansComponent implements OnInit {
       case 'DATA': return 'bg-sky-500/15 text-sky-400 border border-sky-500/20';
       case 'UNLIMITED': return 'bg-accent-emerald/15 text-accent-emerald border border-accent-emerald/20';
       case 'TALKTIME': return 'bg-violet-500/15 text-violet-400 border border-violet-500/20';
-      default: return 'bg-white/[0.05] text-surface-300 border border-white/10';
+      default: return 'bg-white/[0.05] text-surface-600 border border-surface-200';
     }
   }
 
@@ -872,7 +872,7 @@ export class AdminOperatorPlansComponent implements OnInit {
       case 'DATA': return 'bg-sky-500/15 text-sky-400 border border-sky-500/30';
       case 'UNLIMITED': return 'bg-accent-emerald/15 text-accent-emerald border border-accent-emerald/30';
       case 'TALKTIME': return 'bg-violet-500/15 text-violet-400 border border-violet-500/30';
-      default: return 'bg-white/[0.1] text-white border border-white/20';
+      default: return 'bg-white/[0.1] text-surface-900 border border-surface-300';
     }
   }
 

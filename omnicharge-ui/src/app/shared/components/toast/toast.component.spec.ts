@@ -42,7 +42,7 @@ describe('ToastComponent', () => {
     });
 
     it('should return default classes for unknown type', () => {
-      expect(component.getToastClasses(makeToast('unknown'))).toContain('text-white');
+      expect(component.getToastClasses(makeToast('unknown'))).toContain('text-surface-900');
     });
   });
 });

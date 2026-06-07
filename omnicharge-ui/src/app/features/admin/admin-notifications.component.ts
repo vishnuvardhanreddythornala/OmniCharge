@@ -10,9 +10,9 @@ import { AdminService, NotificationResponse } from '../../core/services/admin.se
   template: `
     <div class="animate-fade-in">
       <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-display font-bold text-white">System Notifications</h1>
-        <div class="text-sm text-surface-400">
-          Total: <span class="text-white font-semibold">{{ totalElements() }}</span>
+        <h1 class="text-2xl font-display font-bold text-surface-900">System Notifications</h1>
+        <div class="text-sm text-surface-500">
+          Total: <span class="text-surface-900 font-semibold">{{ totalElements() }}</span>
         </div>
       </div>
 
@@ -50,16 +50,16 @@ import { AdminService, NotificationResponse } from '../../core/services/admin.se
                     <div class="flex items-start justify-between gap-4 mb-2">
                       <div class="flex-1">
                         <div class="flex items-center gap-2 mb-1">
-                          <h3 class="text-sm font-semibold text-white">{{ notification.subject }}</h3>
+                          <h3 class="text-sm font-semibold text-surface-900">{{ notification.subject }}</h3>
                           <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
                                 [class]="getCategoryBadgeClass(notification.category)">
                             {{ notification.category }}
                           </span>
                         </div>
-                        <p class="text-sm text-surface-300 line-clamp-2">{{ notification.message }}</p>
+                        <p class="text-sm text-surface-600 line-clamp-2">{{ notification.message }}</p>
                       </div>
                       <div class="flex-shrink-0 text-right">
-                        <div class="text-xs text-surface-400 mb-1">{{ notification.createdDate | date:'short' }}</div>
+                        <div class="text-xs text-surface-500 mb-1">{{ notification.createdDate | date:'short' }}</div>
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold"
                               [class]="getStatusBadgeClass(notification.status)">
                           <span class="w-1.5 h-1.5 rounded-full" [class]="getStatusDotClass(notification.status)"></span>
@@ -102,14 +102,14 @@ import { AdminService, NotificationResponse } from '../../core/services/admin.se
               <svg class="w-16 h-16 mx-auto mb-4 text-surface-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
               </svg>
-              <p class="text-surface-400">No notifications found.</p>
+              <p class="text-surface-500">No notifications found.</p>
             </div>
           }
           
           <!-- Pagination -->
           @if (totalPages() > 1) {
             <div class="flex items-center justify-between px-6 py-4 border-t border-white/[0.05]">
-              <span class="text-xs text-surface-400">
+              <span class="text-xs text-surface-500">
                 Showing {{ (currentPage() * pageSize()) + 1 }} - {{ Math.min((currentPage() + 1) * pageSize(), totalElements()) }} of {{ totalElements() }}
               </span>
               <div class="flex gap-2">
@@ -121,7 +121,7 @@ import { AdminService, NotificationResponse } from '../../core/services/admin.se
                 <div class="flex items-center gap-1">
                   @for (page of getPageNumbers(); track page) {
                     <button (click)="loadNotifications(page)" 
-                            [class]="page === currentPage() ? 'bg-omni-600 text-white' : 'text-surface-400 hover:bg-white/[0.06]'"
+                            [class]="page === currentPage() ? 'bg-omni-600 text-surface-900' : 'text-surface-500 hover:bg-white/[0.06]'"
                             class="w-8 h-8 rounded-lg text-xs font-medium transition-colors">
                       {{ page + 1 }}
                     </button>
@@ -203,7 +203,7 @@ export class AdminNotificationsComponent implements OnInit {
     if (category.includes('SUCCESS')) return 'bg-accent-emerald/15 text-accent-emerald border border-accent-emerald/20';
     if (category.includes('FAILED')) return 'bg-accent-rose/15 text-accent-rose border border-accent-rose/20';
     if (category.includes('PLAN')) return 'bg-accent-amber/15 text-accent-amber border border-accent-amber/20';
-    return 'bg-white/[0.05] text-surface-400 border border-white/10';
+    return 'bg-white/[0.05] text-surface-500 border border-surface-200';
   }
 
   getCategoryIcon(category: string): string {
@@ -221,7 +221,7 @@ export class AdminNotificationsComponent implements OnInit {
       case 'SENT': return 'bg-accent-emerald/15 text-accent-emerald';
       case 'FAILED': return 'bg-accent-rose/15 text-accent-rose';
       case 'PENDING': return 'bg-accent-amber/15 text-accent-amber';
-      default: return 'bg-white/[0.05] text-surface-400';
+      default: return 'bg-white/[0.05] text-surface-500';
     }
   }
 

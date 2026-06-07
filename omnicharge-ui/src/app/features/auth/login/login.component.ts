@@ -20,7 +20,7 @@ export const COUNTRY_CODES = [
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './login.component.html',
   styles: []
 })
@@ -189,6 +189,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     const checkGoogleLoaded = setInterval(() => {
       if (typeof google !== 'undefined' && google.accounts && this.googleBtnContainer?.nativeElement) {
         clearInterval(checkGoogleLoaded);
+        //google identity
         google.accounts.id.initialize({
           client_id: environment.googleClientId,
           callback: (response: any) => this.handleGoogleCredentialResponse(response),
@@ -207,6 +208,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   private handleGoogleCredentialResponse(response: any): void {
     const idToken = response.credential;
     if (!idToken) return;
+
 
     this.ngZone.run(() => {
       this.displayError();
@@ -246,7 +248,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadingAction.set('mobile');
 
     const fullNumber = this.selectedCountryCode() + this.mobileForm.value.mobileNumber?.trim();
-    this.authService.sendPublicMobileOtp(fullNumber).subscribe({
+    this.authService.sendPublicMobileOtp(fullNumber).subscribe({  //API Communication
       next: res => {
         if (res.success) {
           this.switchViewMode('otp');

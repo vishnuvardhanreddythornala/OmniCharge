@@ -21,8 +21,8 @@ import { AdminService, PlanResponse, AdminOperatorResponse, CreatePlanRequest } 
       <!-- ═══════ PAGE HEADER ═══════ -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-display font-bold text-white tracking-tight">All Plans</h1>
-          <p class="text-sm text-surface-400 mt-1">Manage recharge plans across all operators</p>
+          <h1 class="text-2xl sm:text-3xl font-display font-bold text-surface-900 tracking-tight">All Plans</h1>
+          <p class="text-sm text-surface-500 mt-1">Manage recharge plans across all operators</p>
         </div>
         <button (click)="openAddModal()" 
                 class="btn-primary flex items-center justify-center gap-2 !py-2.5 !px-5 whitespace-nowrap">
@@ -40,7 +40,7 @@ import { AdminService, PlanResponse, AdminOperatorResponse, CreatePlanRequest } 
             </div>
             <span class="text-[10px] font-bold text-surface-500 uppercase tracking-widest">Total</span>
           </div>
-          <div class="text-2xl font-display font-bold text-white">{{ totalElements() }}</div>
+          <div class="text-2xl font-display font-bold text-surface-900">{{ totalElements() }}</div>
           <div class="text-[11px] text-surface-500 mt-0.5">Total plan records matching filters</div>
         </div>
         <div class="glass-card p-4 group hover:border-accent-emerald/20 transition-all duration-300">
@@ -91,26 +91,26 @@ import { AdminService, PlanResponse, AdminOperatorResponse, CreatePlanRequest } 
           <select [(ngModel)]="operatorFilterValue"
                   (ngModelChange)="operatorFilter.set($event); onFilterChange()"
                   class="input-field !py-2.5 text-sm !w-auto min-w-[160px]">
-            <option value="ALL" class="bg-surface-900 text-white">All Operators</option>
+            <option value="ALL" class="bg-white text-surface-900">All Operators</option>
             @for (op of operators(); track op.id) {
-              <option [value]="op.id" class="bg-surface-900 text-white">{{ op.name }}</option>
+              <option [value]="op.id" class="bg-white text-surface-900">{{ op.name }}</option>
             }
           </select>
           <!-- Status Filter -->
           <select [(ngModel)]="statusFilterValue"
                   (ngModelChange)="statusFilter.set($event); onFilterChange()"
                   class="input-field !py-2.5 text-sm !w-auto min-w-[130px]">
-            <option value="ALL" class="bg-surface-900 text-white">All Status</option>
-            <option value="ACTIVE" class="bg-surface-900 text-white">Active</option>
-            <option value="INACTIVE" class="bg-surface-900 text-white">Inactive</option>
+            <option value="ALL" class="bg-white text-surface-900">All Status</option>
+            <option value="ACTIVE" class="bg-white text-surface-900">Active</option>
+            <option value="INACTIVE" class="bg-white text-surface-900">Inactive</option>
           </select>
           <!-- Category Filter -->
           <select [(ngModel)]="categoryFilterValue"
                   (ngModelChange)="categoryFilter.set($event); onFilterChange()"
                   class="input-field !py-2.5 text-sm !w-auto min-w-[140px]">
-            <option value="ALL" class="bg-surface-900 text-white">All Categories</option>
+            <option value="ALL" class="bg-white text-surface-900">All Categories</option>
             @for (cat of allCategories(); track cat) {
-              <option [value]="cat" class="bg-surface-900 text-white">{{ cat }}</option>
+              <option [value]="cat" class="bg-white text-surface-900">{{ cat }}</option>
             }
           </select>
         </div>
@@ -143,7 +143,7 @@ import { AdminService, PlanResponse, AdminOperatorResponse, CreatePlanRequest } 
                 @for (plan of filteredPlans(); track plan.id) {
                   <tr class="hover:bg-white/[0.02] transition-colors group">
                     <td class="px-5 py-3.5">
-                      <div class="font-medium text-white text-[13px]">{{ plan.planName }}</div>
+                      <div class="font-medium text-surface-900 text-[13px]">{{ plan.planName }}</div>
                       <div class="text-[11px] text-surface-500 mt-0.5 flex items-center gap-2">
                         @if (plan.dataLimit) {
                           <span class="flex items-center gap-1">
@@ -163,10 +163,10 @@ import { AdminService, PlanResponse, AdminOperatorResponse, CreatePlanRequest } 
                       </a>
                     </td>
                     <td class="px-4 py-3.5">
-                      <span class="text-white font-bold text-base">₹{{ plan.price }}</span>
+                      <span class="text-surface-900 font-bold text-base">₹{{ plan.price }}</span>
                     </td>
                     <td class="px-4 py-3.5">
-                      <span class="text-surface-300 font-medium">{{ plan.validityDays }}d</span>
+                      <span class="text-surface-600 font-medium">{{ plan.validityDays }}d</span>
                     </td>
                     <td class="px-4 py-3.5">
                       <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider" [class]="getCategoryBadge(plan.category)">
@@ -187,7 +187,7 @@ import { AdminService, PlanResponse, AdminOperatorResponse, CreatePlanRequest } 
                       }
                     </td>
                     <td class="px-4 py-3.5">
-                      <div class="text-[11px] text-surface-400">{{ plan.lastModifiedDate ? formatDate(plan.lastModifiedDate) : '—' }}</div>
+                      <div class="text-[11px] text-surface-500">{{ plan.lastModifiedDate ? formatDate(plan.lastModifiedDate) : '—' }}</div>
                     </td>
                     <td class="px-4 py-3.5 text-right">
                       <div class="flex items-center justify-end gap-2">
@@ -207,7 +207,7 @@ import { AdminService, PlanResponse, AdminOperatorResponse, CreatePlanRequest } 
                         </button>
                         <!-- Edit Button -->
                         <button (click)="openEditModal(plan)"
-                                class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-white/10 text-surface-300 hover:text-white hover:bg-white/[0.06] transition-all duration-200 flex items-center gap-1.5 opacity-0 group-hover:opacity-100">
+                                class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-surface-200 text-surface-600 hover:text-surface-900 hover:bg-white/[0.06] transition-all duration-200 flex items-center gap-1.5 opacity-0 group-hover:opacity-100">
                           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                           Edit
                         </button>
@@ -223,7 +223,7 @@ import { AdminService, PlanResponse, AdminOperatorResponse, CreatePlanRequest } 
                 <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white/[0.03] flex items-center justify-center">
                   <svg class="w-8 h-8 text-surface-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 </div>
-                <p class="text-surface-400 font-medium">No plans match your filters</p>
+                <p class="text-surface-500 font-medium">No plans match your filters</p>
                 <p class="text-xs text-surface-600 mt-1">Try adjusting search, operator, or category filters</p>
               </div>
             }
@@ -231,18 +231,18 @@ import { AdminService, PlanResponse, AdminOperatorResponse, CreatePlanRequest } 
             <!-- ═══════ PAGINATION FOOTER ═══════ -->
             @if (totalPages() > 1) {
               <div class="flex items-center justify-between px-6 py-4 border-t border-white/[0.05] bg-white/[0.01]">
-                <div class="text-xs text-surface-400 font-medium">
-                  Showing page <span class="text-white">{{ currentPage() + 1 }}</span> of <span class="text-white">{{ totalPages() }}</span>
+                <div class="text-xs text-surface-500 font-medium">
+                  Showing page <span class="text-surface-900">{{ currentPage() + 1 }}</span> of <span class="text-surface-900">{{ totalPages() }}</span>
                 </div>
                 <div class="flex gap-2">
                   <button (click)="prevPage()"
                           [disabled]="currentPage() === 0"
-                          class="px-3 py-1.5 rounded-md text-xs font-semibold bg-white/[0.05] hover:bg-white/[0.1] text-surface-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                          class="px-3 py-1.5 rounded-md text-xs font-semibold bg-white/[0.05] hover:bg-white/[0.1] text-surface-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                     Previous
                   </button>
                   <button (click)="nextPage()"
                           [disabled]="currentPage() >= totalPages() - 1"
-                          class="px-3 py-1.5 rounded-md text-xs font-semibold bg-white/[0.05] hover:bg-white/[0.1] text-surface-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                          class="px-3 py-1.5 rounded-md text-xs font-semibold bg-white/[0.05] hover:bg-white/[0.1] text-surface-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                     Next
                   </button>
                 </div>
@@ -258,62 +258,62 @@ import { AdminService, PlanResponse, AdminOperatorResponse, CreatePlanRequest } 
           <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
           <div class="relative glass-card p-6 sm:p-8 w-full max-w-lg border-omni-500/10 animate-scale-in" (click)="$event.stopPropagation()">
             <div class="flex items-center justify-between mb-6">
-              <h2 class="text-lg font-display font-bold text-white">{{ editPlanId ? 'Edit Plan' : 'Add New Plan' }}</h2>
-              <button (click)="showEditModal.set(false)" class="w-8 h-8 rounded-lg flex items-center justify-center text-surface-400 hover:text-white hover:bg-white/[0.05] transition">
+              <h2 class="text-lg font-display font-bold text-surface-900">{{ editPlanId ? 'Edit Plan' : 'Add New Plan' }}</h2>
+              <button (click)="showEditModal.set(false)" class="w-8 h-8 rounded-lg flex items-center justify-center text-surface-500 hover:text-surface-900 hover:bg-white/[0.05] transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
             </div>
             <div class="space-y-4">
               <div>
-                <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Plan Name</label>
+                <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Plan Name</label>
                 <input type="text" [(ngModel)]="editForm.planName" class="input-field" />
               </div>
               @if (!editPlanId) {
                 <div>
-                  <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Operator</label>
+                  <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Operator</label>
                   <select [(ngModel)]="editForm.operatorId" class="input-field">
                     @for (op of operators(); track op.id) {
-                      <option [value]="op.id" class="bg-surface-900 text-white">{{ op.name }}</option>
+                      <option [value]="op.id" class="bg-white text-surface-900">{{ op.name }}</option>
                     }
                   </select>
                 </div>
               }
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Price (₹)</label>
+                  <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Price (₹)</label>
                   <input type="number" [(ngModel)]="editForm.price" class="input-field" />
                 </div>
                 <div>
-                  <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Validity (Days)</label>
+                  <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Validity (Days)</label>
                   <input type="number" [(ngModel)]="editForm.validityDays" class="input-field" />
                 </div>
               </div>
               <div>
-                <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Category</label>
+                <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Category</label>
                 <select [(ngModel)]="editForm.category" class="input-field">
-                  <option value="RECOMMENDED" class="bg-surface-900 text-white">Recommended</option>
-                  <option value="DATA" class="bg-surface-900 text-white">Data</option>
-                  <option value="UNLIMITED" class="bg-surface-900 text-white">Unlimited</option>
-                  <option value="TALKTIME" class="bg-surface-900 text-white">Talktime</option>
+                  <option value="RECOMMENDED" class="bg-white text-surface-900">Recommended</option>
+                  <option value="DATA" class="bg-white text-surface-900">Data</option>
+                  <option value="UNLIMITED" class="bg-white text-surface-900">Unlimited</option>
+                  <option value="TALKTIME" class="bg-white text-surface-900">Talktime</option>
                 </select>
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Data Limit</label>
+                  <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Data Limit</label>
                   <input type="text" [(ngModel)]="editForm.dataLimit" class="input-field" placeholder="e.g. 2GB/day" />
                 </div>
                 <div>
-                  <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Call Benefit</label>
+                  <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Call Benefit</label>
                   <input type="text" [(ngModel)]="editForm.callBenefit" class="input-field" placeholder="e.g. Unlimited" />
                 </div>
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">SMS Benefit</label>
+                  <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">SMS Benefit</label>
                   <input type="text" [(ngModel)]="editForm.smsBenefit" class="input-field" placeholder="e.g. 100 SMS/day" />
                 </div>
                 <div>
-                  <label class="text-xs font-semibold text-surface-400 mb-1.5 block uppercase tracking-wider">Extra Benefits</label>
+                  <label class="text-xs font-semibold text-surface-500 mb-1.5 block uppercase tracking-wider">Extra Benefits</label>
                   <input type="text" [(ngModel)]="editForm.additionalBenefits" class="input-field" placeholder="Optional" />
                 </div>
               </div>
@@ -608,7 +608,7 @@ export class AdminPlansComponent implements OnInit {
       case 'DATA': return 'bg-sky-500/15 text-sky-400 border border-sky-500/20';
       case 'UNLIMITED': return 'bg-accent-emerald/15 text-accent-emerald border border-accent-emerald/20';
       case 'TALKTIME': return 'bg-violet-500/15 text-violet-400 border border-violet-500/20';
-      default: return 'bg-white/[0.05] text-surface-300 border border-white/10';
+      default: return 'bg-white/[0.05] text-surface-600 border border-surface-200';
     }
   }
 

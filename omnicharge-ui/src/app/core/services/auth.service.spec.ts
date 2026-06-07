@@ -76,7 +76,7 @@ describe('AuthService', () => {
 
   describe('login()', () => {
     it('should initialize login via email/password successfully', fakeAsync(() => {
-      const credentials = { email: 'vishnuvardhanreddythornala@gmail.com', password: 'Login@630' };
+      const credentials = { email: 'vishnuvardhanreddythornala@gmail.com', password: 'dummy_password' };
 
       service.login(credentials).subscribe(res => {
         expect(res.success).toBeTrue();

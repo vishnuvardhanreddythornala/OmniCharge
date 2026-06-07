@@ -50,7 +50,7 @@ import { ToastService, Toast } from '../../../core/services/toast.service';
             <span class="text-sm font-medium leading-snug">{{ toast.message }}</span>
             @if (toast.action) {
               <button (click)="toast.action.onClick(); toastService.dismiss(toast.id)"
-                      class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors w-fit border border-white/5 shadow-sm active:scale-95">
+                      class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-surface-100 hover:bg-white/20 transition-colors w-fit border border-white/5 shadow-sm active:scale-95">
                 {{ toast.action.label }}
               </button>
             }
@@ -90,15 +90,15 @@ export class ToastComponent {
   getToastClasses(toast: Toast): string {
     switch (toast.type) {
       case 'success':
-        return 'bg-surface-900/90 border-accent-emerald/25 text-accent-emerald shadow-accent-emerald/10';
+        return 'bg-white/90 border-accent-emerald/25 text-accent-emerald shadow-accent-emerald/10';
       case 'error':
-        return 'bg-surface-900/90 border-accent-rose/25 text-accent-rose shadow-accent-rose/10';
+        return 'bg-white/90 border-accent-rose/25 text-accent-rose shadow-accent-rose/10';
       case 'warning':
-        return 'bg-surface-900/90 border-accent-amber/25 text-accent-amber shadow-accent-amber/10';
+        return 'bg-white/90 border-accent-amber/25 text-accent-amber shadow-accent-amber/10';
       case 'info':
-        return 'bg-surface-900/90 border-omni-500/25 text-omni-300 shadow-omni-500/10';
+        return 'bg-white/90 border-omni-500/25 text-omni-300 shadow-omni-500/10';
       default:
-        return 'bg-surface-900/90 border-white/10 text-white';
+        return 'bg-white/90 border-surface-200 text-surface-900';
     }
   }
 }
