@@ -127,7 +127,7 @@ import { AdminService, PlanResponse, AdminOperatorResponse, CreatePlanRequest } 
         } @else {
           <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
-              <thead class="text-[11px] uppercase bg-white/[0.025] text-surface-500 border-b border-white/[0.05] tracking-wider">
+              <thead class="text-[11px] uppercase bg-surface-50 text-surface-500 border-b border-surface-200 tracking-wider">
                 <tr>
                   <th class="px-5 py-3.5 font-semibold">Plan Name</th>
                   <th class="px-4 py-3.5 font-semibold">Operator</th>
@@ -139,9 +139,9 @@ import { AdminService, PlanResponse, AdminOperatorResponse, CreatePlanRequest } 
                   <th class="px-4 py-3.5 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-white/[0.04]">
+              <tbody class="divide-y divide-surface-200">
                 @for (plan of filteredPlans(); track plan.id) {
-                  <tr class="hover:bg-white/[0.02] transition-colors group">
+                  <tr class="hover:bg-surface-50 transition-colors group">
                     <td class="px-5 py-3.5">
                       <div class="font-medium text-surface-900 text-[13px]">{{ plan.planName }}</div>
                       <div class="text-[11px] text-surface-500 mt-0.5 flex items-center gap-2">
@@ -207,7 +207,7 @@ import { AdminService, PlanResponse, AdminOperatorResponse, CreatePlanRequest } 
                         </button>
                         <!-- Edit Button -->
                         <button (click)="openEditModal(plan)"
-                                class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-surface-200 text-surface-600 hover:text-surface-900 hover:bg-white/[0.06] transition-all duration-200 flex items-center gap-1.5 opacity-0 group-hover:opacity-100">
+                                class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-surface-200 text-surface-600 hover:text-surface-900 hover:bg-surface-50 transition-all duration-200 flex items-center gap-1.5 opacity-0 group-hover:opacity-100">
                           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                           Edit
                         </button>
@@ -220,7 +220,7 @@ import { AdminService, PlanResponse, AdminOperatorResponse, CreatePlanRequest } 
 
             @if (filteredPlans().length === 0) {
               <div class="p-16 text-center">
-                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white/[0.03] flex items-center justify-center">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-surface-50 flex items-center justify-center">
                   <svg class="w-8 h-8 text-surface-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 </div>
                 <p class="text-surface-500 font-medium">No plans match your filters</p>
@@ -230,19 +230,19 @@ import { AdminService, PlanResponse, AdminOperatorResponse, CreatePlanRequest } 
 
             <!-- ═══════ PAGINATION FOOTER ═══════ -->
             @if (totalPages() > 1) {
-              <div class="flex items-center justify-between px-6 py-4 border-t border-white/[0.05] bg-white/[0.01]">
+              <div class="flex items-center justify-between px-6 py-4 border-t border-surface-200 bg-surface-50">
                 <div class="text-xs text-surface-500 font-medium">
                   Showing page <span class="text-surface-900">{{ currentPage() + 1 }}</span> of <span class="text-surface-900">{{ totalPages() }}</span>
                 </div>
                 <div class="flex gap-2">
                   <button (click)="prevPage()"
                           [disabled]="currentPage() === 0"
-                          class="px-3 py-1.5 rounded-md text-xs font-semibold bg-white/[0.05] hover:bg-white/[0.1] text-surface-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                          class="px-3 py-1.5 rounded-md text-xs font-semibold bg-surface-50 hover:bg-surface-50 text-surface-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                     Previous
                   </button>
                   <button (click)="nextPage()"
                           [disabled]="currentPage() >= totalPages() - 1"
-                          class="px-3 py-1.5 rounded-md text-xs font-semibold bg-white/[0.05] hover:bg-white/[0.1] text-surface-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                          class="px-3 py-1.5 rounded-md text-xs font-semibold bg-surface-50 hover:bg-surface-50 text-surface-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                     Next
                   </button>
                 </div>
@@ -259,7 +259,7 @@ import { AdminService, PlanResponse, AdminOperatorResponse, CreatePlanRequest } 
           <div class="relative glass-card p-6 sm:p-8 w-full max-w-lg border-omni-500/10 animate-scale-in" (click)="$event.stopPropagation()">
             <div class="flex items-center justify-between mb-6">
               <h2 class="text-lg font-display font-bold text-surface-900">{{ editPlanId ? 'Edit Plan' : 'Add New Plan' }}</h2>
-              <button (click)="showEditModal.set(false)" class="w-8 h-8 rounded-lg flex items-center justify-center text-surface-500 hover:text-surface-900 hover:bg-white/[0.05] transition">
+              <button (click)="showEditModal.set(false)" class="w-8 h-8 rounded-lg flex items-center justify-center text-surface-500 hover:text-surface-900 hover:bg-surface-50 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
             </div>
@@ -318,7 +318,7 @@ import { AdminService, PlanResponse, AdminOperatorResponse, CreatePlanRequest } 
                 </div>
               </div>
             </div>
-            <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-white/[0.06]">
+            <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-surface-200">
               <button (click)="showEditModal.set(false)" class="btn-secondary text-sm !py-2.5 !px-5">Cancel</button>
               <button (click)="savePlan()" [disabled]="actionLoading()" class="btn-primary text-sm !py-2.5 !px-5">
                 {{ actionLoading() ? 'Saving...' : 'Save Changes' }}
@@ -608,7 +608,7 @@ export class AdminPlansComponent implements OnInit {
       case 'DATA': return 'bg-sky-500/15 text-sky-400 border border-sky-500/20';
       case 'UNLIMITED': return 'bg-accent-emerald/15 text-accent-emerald border border-accent-emerald/20';
       case 'TALKTIME': return 'bg-violet-500/15 text-violet-400 border border-violet-500/20';
-      default: return 'bg-white/[0.05] text-surface-600 border border-surface-200';
+      default: return 'bg-surface-50 text-surface-600 border border-surface-200';
     }
   }
 

@@ -26,7 +26,7 @@ import { AdminService, AdminOperatorResponse, CreateOperatorRequest, CreatePlanR
 
       <!-- Stat Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 animate-slide-up">
-        <div class="glass-card p-5 flex flex-col justify-between border border-white/[0.05]">
+        <div class="glass-card p-5 flex flex-col justify-between border border-surface-200">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-8 h-8 rounded-lg bg-omni-500/10 flex items-center justify-center border border-omni-500/20">
               <svg class="w-4 h-4 text-omni-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
@@ -35,7 +35,7 @@ import { AdminService, AdminOperatorResponse, CreateOperatorRequest, CreatePlanR
           </div>
           <span class="text-3xl font-display font-bold text-surface-900">{{ operators().length }}</span>
         </div>
-        <div class="glass-card p-5 flex flex-col justify-between border border-white/[0.05]">
+        <div class="glass-card p-5 flex flex-col justify-between border border-surface-200">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-8 h-8 rounded-lg bg-accent-emerald/10 flex items-center justify-center border border-accent-emerald/20">
               <svg class="w-4 h-4 text-accent-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
@@ -44,9 +44,9 @@ import { AdminService, AdminOperatorResponse, CreateOperatorRequest, CreatePlanR
           </div>
           <span class="text-3xl font-display font-bold text-surface-900">{{ activeOperatorCount() }}</span>
         </div>
-        <div class="glass-card p-5 flex flex-col justify-between border border-white/[0.05]">
+        <div class="glass-card p-5 flex flex-col justify-between border border-surface-200">
           <div class="flex items-center gap-2 mb-2">
-            <div class="w-8 h-8 rounded-lg bg-surface-100/50 flex items-center justify-center border border-white/[0.08]">
+            <div class="w-8 h-8 rounded-lg bg-surface-100/50 flex items-center justify-center border border-surface-200">
               <svg class="w-4 h-4 text-surface-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
             </div>
             <p class="text-[10px] text-surface-500 font-bold uppercase tracking-wider">Inactive</p>
@@ -84,7 +84,7 @@ import { AdminService, AdminOperatorResponse, CreateOperatorRequest, CreatePlanR
         } @else {
           <div class="overflow-x-auto">
             <table class="w-full text-left text-sm text-surface-600">
-              <thead class="text-xs uppercase bg-white/[0.03] text-surface-500 border-b border-white/[0.05]">
+              <thead class="text-xs uppercase bg-surface-50 text-surface-500 border-b border-surface-200">
                 <tr>
                   <th scope="col" class="px-6 py-4 font-semibold">Operator</th>
                   <th scope="col" class="px-6 py-4 font-semibold">Code</th>
@@ -95,9 +95,9 @@ import { AdminService, AdminOperatorResponse, CreateOperatorRequest, CreatePlanR
                   <th scope="col" class="px-6 py-4 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-white/[0.05]">
+              <tbody class="divide-y divide-surface-200">
                 @for (op of operators(); track op.id) {
-                  <tr class="hover:bg-white/[0.02] transition-colors">
+                  <tr class="hover:bg-surface-50 transition-colors">
                     <td class="px-6 py-4">
                       <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-omni-600/30 to-accent-teal/30 border border-surface-200 flex items-center justify-center text-surface-900 text-xs font-bold uppercase">
@@ -107,7 +107,7 @@ import { AdminService, AdminOperatorResponse, CreateOperatorRequest, CreatePlanR
                       </div>
                     </td>
                     <td class="px-6 py-4">
-                      <span class="px-2 py-1 rounded bg-white/[0.05] text-xs font-mono border border-surface-200 text-surface-600">{{ op.code || 'N/A' }}</span>
+                      <span class="px-2 py-1 rounded bg-surface-50 text-xs font-mono border border-surface-200 text-surface-600">{{ op.code || 'N/A' }}</span>
                     </td>
                     <td class="px-6 py-4">
                       @if (op.category) {
@@ -184,9 +184,9 @@ import { AdminService, AdminOperatorResponse, CreateOperatorRequest, CreatePlanR
       @if (showCreateOperator()) {
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4" (click)="showCreateOperator.set(false)">
           <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-          <div class="relative w-full max-w-lg glass-card p-0 border border-white/[0.08] shadow-2xl animate-scale-in" (click)="$event.stopPropagation()">
+          <div class="relative w-full max-w-lg glass-card p-0 border border-surface-200 shadow-2xl animate-scale-in" (click)="$event.stopPropagation()">
             <!-- Modal Header -->
-            <div class="flex items-center justify-between px-6 py-5 border-b border-white/[0.05]">
+            <div class="flex items-center justify-between px-6 py-5 border-b border-surface-200">
               <h2 class="text-lg font-display font-bold text-surface-900">Create New Operator</h2>
               <button (click)="showCreateOperator.set(false)" class="text-surface-500 hover:text-surface-900 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -197,18 +197,18 @@ import { AdminService, AdminOperatorResponse, CreateOperatorRequest, CreatePlanR
               <div>
                 <label class="block text-xs font-semibold text-surface-500 uppercase tracking-wider mb-2">Operator Name *</label>
                 <input type="text" [(ngModel)]="newOperator.name" placeholder="e.g. Jio"
-                       class="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
+                       class="w-full px-4 py-3 rounded-xl bg-surface-50 border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-xs font-semibold text-surface-500 uppercase tracking-wider mb-2">Code *</label>
                   <input type="text" [(ngModel)]="newOperator.code" placeholder="e.g. JIO"
-                         class="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
+                         class="w-full px-4 py-3 rounded-xl bg-surface-50 border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-surface-500 uppercase tracking-wider mb-2">Category *</label>
                   <select [(ngModel)]="newOperator.category"
-                          class="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-surface-200 text-surface-900 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all appearance-none cursor-pointer">
+                          class="w-full px-4 py-3 rounded-xl bg-surface-50 border border-surface-200 text-surface-900 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all appearance-none cursor-pointer">
                     <option value="" disabled class="bg-omni-950">Select Category</option>
                     @for (cat of operatorCategories; track cat) {
                       <option [value]="cat" class="bg-omni-950">{{ cat }}</option>
@@ -219,12 +219,12 @@ import { AdminService, AdminOperatorResponse, CreateOperatorRequest, CreatePlanR
               <div>
                 <label class="block text-xs font-semibold text-surface-500 uppercase tracking-wider mb-2">Logo URL (optional)</label>
                 <input type="text" [(ngModel)]="newOperator.logoUrl" placeholder="https://..."
-                       class="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
+                       class="w-full px-4 py-3 rounded-xl bg-surface-50 border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
               </div>
             </div>
             <!-- Modal Footer -->
-            <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/[0.05]">
-              <button (click)="showCreateOperator.set(false)" class="px-4 py-2.5 rounded-xl text-sm font-medium text-surface-500 hover:text-surface-900 hover:bg-white/[0.04] transition-all">Cancel</button>
+            <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-surface-200">
+              <button (click)="showCreateOperator.set(false)" class="px-4 py-2.5 rounded-xl text-sm font-medium text-surface-500 hover:text-surface-900 hover:bg-surface-50 transition-all">Cancel</button>
               <button (click)="createOperator()" [disabled]="creatingOperator()"
                       class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-omni-600 to-omni-500 text-surface-900 hover:from-omni-500 hover:to-omni-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                 {{ creatingOperator() ? 'Creating...' : 'Create Operator' }}
@@ -238,9 +238,9 @@ import { AdminService, AdminOperatorResponse, CreateOperatorRequest, CreatePlanR
       @if (showEditOperator()) {
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4" (click)="showEditOperator.set(false)">
           <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-          <div class="relative w-full max-w-lg glass-card p-0 border border-white/[0.08] shadow-2xl animate-scale-in" (click)="$event.stopPropagation()">
+          <div class="relative w-full max-w-lg glass-card p-0 border border-surface-200 shadow-2xl animate-scale-in" (click)="$event.stopPropagation()">
             <!-- Modal Header -->
-            <div class="flex items-center justify-between px-6 py-5 border-b border-white/[0.05]">
+            <div class="flex items-center justify-between px-6 py-5 border-b border-surface-200">
               <h2 class="text-lg font-display font-bold text-surface-900">Edit Operator</h2>
               <button (click)="showEditOperator.set(false)" class="text-surface-500 hover:text-surface-900 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -251,18 +251,18 @@ import { AdminService, AdminOperatorResponse, CreateOperatorRequest, CreatePlanR
               <div>
                 <label class="block text-xs font-semibold text-surface-500 uppercase tracking-wider mb-2">Operator Name *</label>
                 <input type="text" [(ngModel)]="editOperator.name" placeholder="e.g. Jio"
-                       class="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
+                       class="w-full px-4 py-3 rounded-xl bg-surface-50 border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-xs font-semibold text-surface-500 uppercase tracking-wider mb-2">Code *</label>
                   <input type="text" [(ngModel)]="editOperator.code" placeholder="e.g. JIO"
-                         class="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
+                         class="w-full px-4 py-3 rounded-xl bg-surface-50 border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-surface-500 uppercase tracking-wider mb-2">Category *</label>
                   <select [(ngModel)]="editOperator.category"
-                          class="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-surface-200 text-surface-900 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all appearance-none cursor-pointer">
+                          class="w-full px-4 py-3 rounded-xl bg-surface-50 border border-surface-200 text-surface-900 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all appearance-none cursor-pointer">
                     <option value="" disabled class="bg-omni-950">Select Category</option>
                     @for (cat of operatorCategories; track cat) {
                       <option [value]="cat" class="bg-omni-950">{{ cat }}</option>
@@ -273,12 +273,12 @@ import { AdminService, AdminOperatorResponse, CreateOperatorRequest, CreatePlanR
               <div>
                 <label class="block text-xs font-semibold text-surface-500 uppercase tracking-wider mb-2">Logo URL (optional)</label>
                 <input type="text" [(ngModel)]="editOperator.logoUrl" placeholder="https://..."
-                       class="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
+                       class="w-full px-4 py-3 rounded-xl bg-surface-50 border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
               </div>
             </div>
             <!-- Modal Footer -->
-            <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/[0.05]">
-              <button (click)="showEditOperator.set(false)" class="px-4 py-2.5 rounded-xl text-sm font-medium text-surface-500 hover:text-surface-900 hover:bg-white/[0.04] transition-all">Cancel</button>
+            <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-surface-200">
+              <button (click)="showEditOperator.set(false)" class="px-4 py-2.5 rounded-xl text-sm font-medium text-surface-500 hover:text-surface-900 hover:bg-surface-50 transition-all">Cancel</button>
               <button (click)="updateOperator()" [disabled]="updatingOperator()"
                       class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-omni-600 to-omni-500 text-surface-900 hover:from-omni-500 hover:to-omni-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                 {{ updatingOperator() ? 'Updating...' : 'Update Operator' }}
@@ -294,7 +294,7 @@ import { AdminService, AdminOperatorResponse, CreateOperatorRequest, CreatePlanR
           <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
           <div class="relative w-full max-w-md glass-card p-0 border border-accent-rose/20 shadow-2xl animate-scale-in" (click)="$event.stopPropagation()">
             <!-- Modal Header -->
-            <div class="flex items-center gap-3 px-6 py-5 border-b border-white/[0.05]">
+            <div class="flex items-center gap-3 px-6 py-5 border-b border-surface-200">
               <div class="w-10 h-10 rounded-xl bg-accent-rose/10 border border-accent-rose/20 flex items-center justify-center">
                 <svg class="w-5 h-5 text-accent-rose" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
               </div>
@@ -311,8 +311,8 @@ import { AdminService, AdminOperatorResponse, CreateOperatorRequest, CreatePlanR
               </p>
             </div>
             <!-- Modal Footer -->
-            <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/[0.05]">
-              <button (click)="showDeleteConfirm.set(false)" class="px-4 py-2.5 rounded-xl text-sm font-medium text-surface-500 hover:text-surface-900 hover:bg-white/[0.04] transition-all">Cancel</button>
+            <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-surface-200">
+              <button (click)="showDeleteConfirm.set(false)" class="px-4 py-2.5 rounded-xl text-sm font-medium text-surface-500 hover:text-surface-900 hover:bg-surface-50 transition-all">Cancel</button>
               <button (click)="deleteOperator()" [disabled]="deletingOperator()"
                       class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-accent-rose text-surface-900 hover:bg-accent-rose/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                 {{ deletingOperator() ? 'Deleting...' : 'Delete Operator' }}
@@ -326,9 +326,9 @@ import { AdminService, AdminOperatorResponse, CreateOperatorRequest, CreatePlanR
       @if (showAddPlan()) {
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4" (click)="showAddPlan.set(false)">
           <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-          <div class="relative w-full max-w-2xl glass-card p-0 border border-white/[0.08] shadow-2xl animate-scale-in max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+          <div class="relative w-full max-w-2xl glass-card p-0 border border-surface-200 shadow-2xl animate-scale-in max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
             <!-- Modal Header -->
-            <div class="flex items-center justify-between px-6 py-5 border-b border-white/[0.05] sticky top-0 bg-omni-950/95 backdrop-blur-xl z-10">
+            <div class="flex items-center justify-between px-6 py-5 border-b border-surface-200 sticky top-0 bg-omni-950/95 backdrop-blur-xl z-10">
               <div>
                 <h2 class="text-lg font-display font-bold text-surface-900">Add Plan</h2>
                 <p class="text-xs text-surface-500 mt-0.5">for <span class="text-omni-400 font-semibold">{{ selectedOperator()?.name }}</span></p>
@@ -343,37 +343,37 @@ import { AdminService, AdminOperatorResponse, CreateOperatorRequest, CreatePlanR
                 <div class="col-span-2">
                   <label class="block text-xs font-semibold text-surface-500 uppercase tracking-wider mb-2">Plan Name *</label>
                   <input type="text" [(ngModel)]="newPlan.planName" placeholder="e.g. Unlimited Data Pack"
-                         class="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
+                         class="w-full px-4 py-3 rounded-xl bg-surface-50 border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-surface-500 uppercase tracking-wider mb-2">Price (₹) *</label>
                   <input type="number" [(ngModel)]="newPlan.price" placeholder="299"
-                         class="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
+                         class="w-full px-4 py-3 rounded-xl bg-surface-50 border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-surface-500 uppercase tracking-wider mb-2">Validity (Days) *</label>
                   <input type="number" [(ngModel)]="newPlan.validityDays" placeholder="28"
-                         class="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
+                         class="w-full px-4 py-3 rounded-xl bg-surface-50 border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-surface-500 uppercase tracking-wider mb-2">Data Limit</label>
                   <input type="text" [(ngModel)]="newPlan.dataLimit" placeholder="e.g. 2GB/day"
-                         class="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
+                         class="w-full px-4 py-3 rounded-xl bg-surface-50 border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-surface-500 uppercase tracking-wider mb-2">Call Benefit</label>
                   <input type="text" [(ngModel)]="newPlan.callBenefit" placeholder="e.g. Unlimited"
-                         class="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
+                         class="w-full px-4 py-3 rounded-xl bg-surface-50 border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-surface-500 uppercase tracking-wider mb-2">SMS Benefit</label>
                   <input type="text" [(ngModel)]="newPlan.smsBenefit" placeholder="e.g. 100 SMS/day"
-                         class="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
+                         class="w-full px-4 py-3 rounded-xl bg-surface-50 border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all"/>
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-surface-500 uppercase tracking-wider mb-2">Category *</label>
                   <select [(ngModel)]="newPlan.category"
-                          class="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-surface-200 text-surface-900 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all appearance-none cursor-pointer">
+                          class="w-full px-4 py-3 rounded-xl bg-surface-50 border border-surface-200 text-surface-900 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all appearance-none cursor-pointer">
                     <option value="" disabled class="bg-omni-950">Select Category</option>
                     @for (cat of planCategories; track cat) {
                       <option [value]="cat" class="bg-omni-950">{{ cat }}</option>
@@ -384,13 +384,13 @@ import { AdminService, AdminOperatorResponse, CreateOperatorRequest, CreatePlanR
                   <label class="block text-xs font-semibold text-surface-500 uppercase tracking-wider mb-2">Additional Benefits</label>
                   <textarea [(ngModel)]="newPlan.additionalBenefits" placeholder="e.g. Free access to JioTV, JioCinema..."
                             rows="3"
-                            class="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all resize-none"></textarea>
+                            class="w-full px-4 py-3 rounded-xl bg-surface-50 border border-surface-200 text-surface-900 placeholder-surface-400 text-sm focus:outline-none focus:border-omni-500/50 focus:ring-1 focus:ring-omni-500/30 transition-all resize-none"></textarea>
                 </div>
               </div>
             </div>
             <!-- Modal Footer -->
-            <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/[0.05] sticky bottom-0 bg-omni-950/95 backdrop-blur-xl">
-              <button (click)="showAddPlan.set(false)" class="px-4 py-2.5 rounded-xl text-sm font-medium text-surface-500 hover:text-surface-900 hover:bg-white/[0.04] transition-all">Cancel</button>
+            <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-surface-200 sticky bottom-0 bg-omni-950/95 backdrop-blur-xl">
+              <button (click)="showAddPlan.set(false)" class="px-4 py-2.5 rounded-xl text-sm font-medium text-surface-500 hover:text-surface-900 hover:bg-surface-50 transition-all">Cancel</button>
               <button (click)="createPlan()" [disabled]="creatingPlan()"
                       class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-accent-teal to-accent-emerald text-surface-900 hover:shadow-lg hover:shadow-accent-teal/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                 {{ creatingPlan() ? 'Creating...' : 'Add Plan' }}
@@ -632,7 +632,7 @@ export class AdminOperatorsComponent implements OnInit {
       case 'ELECTRICITY': return 'bg-accent-emerald/10 text-accent-emerald border border-accent-emerald/20';
       case 'GAS': return 'bg-orange-500/10 text-orange-400 border border-orange-500/20';
       case 'WATER': return 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20';
-      default: return 'bg-white/[0.05] text-surface-600 border border-surface-200';
+      default: return 'bg-surface-50 text-surface-600 border border-surface-200';
     }
   }
 

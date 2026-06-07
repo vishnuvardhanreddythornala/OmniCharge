@@ -169,7 +169,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
               @if (authService.currentUser()?.mobileNumber) {
                 <div class="flex items-center gap-3 animate-fade-in">
                   <div class="relative flex-1">
-                    <input type="tel" [value]="authService.currentUser()?.mobileNumber || ''" class="input-field !bg-white/[0.02] cursor-not-allowed text-surface-500" disabled />
+                    <input type="tel" [value]="authService.currentUser()?.mobileNumber || ''" class="input-field !bg-surface-50 cursor-not-allowed text-surface-500" disabled />
                   </div>
                   <span class="text-xs text-accent-emerald font-semibold whitespace-nowrap">✓ Verified</span>
                 </div>
@@ -221,7 +221,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                                    (keydown)="onMobileOtpKeydown($event, i)"
                                    (paste)="onMobileOtpPaste($event)"
                                    maxlength="1"
-                                   class="w-10 h-12 sm:w-11 sm:h-14 rounded-xl bg-white/60 border border-white/[0.08] text-center text-lg sm:text-xl font-bold font-mono text-surface-900 transition-all outline-none focus:border-omni-500/60 focus:shadow-[0_0_15px_rgba(99,102,241,0.2)]"
+                                   class="w-10 h-12 sm:w-11 sm:h-14 rounded-xl bg-white/60 border border-surface-200 text-center text-lg sm:text-xl font-bold font-mono text-surface-900 transition-all outline-none focus:border-omni-500/60 focus:shadow-[0_0_15px_rgba(99,102,241,0.2)]"
                                    [class.border-omni-500]="mobileOtpDigits()[i]"
                                    placeholder="·" />
                           }
@@ -252,7 +252,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
               @if (authService.currentUser()?.email && !isEditingEmail()) {
                 <div class="flex items-center gap-3 animate-fade-in">
                   <input type="email" [value]="authService.currentUser()?.email" disabled
-                         class="input-field !bg-white/[0.02] !text-surface-500 cursor-not-allowed flex-1" />
+                         class="input-field !bg-surface-50 !text-surface-500 cursor-not-allowed flex-1" />
                   <span class="text-xs text-accent-emerald font-semibold whitespace-nowrap">✓ Verified</span>
                 </div>
               } @else {
@@ -303,7 +303,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                                    (keydown)="onEmailOtpKeydown($event, i)"
                                    (paste)="onEmailOtpPaste($event)"
                                    maxlength="1"
-                                   class="w-10 h-12 sm:w-11 sm:h-14 rounded-xl bg-white/60 border border-white/[0.08] text-center text-lg sm:text-xl font-bold font-mono text-surface-900 transition-all outline-none focus:border-omni-500/60 focus:shadow-[0_0_15px_rgba(99,102,241,0.2)]"
+                                   class="w-10 h-12 sm:w-11 sm:h-14 rounded-xl bg-white/60 border border-surface-200 text-center text-lg sm:text-xl font-bold font-mono text-surface-900 transition-all outline-none focus:border-omni-500/60 focus:shadow-[0_0_15px_rgba(99,102,241,0.2)]"
                                    [class.border-omni-500]="emailOtpDigits()[i]"
                                    placeholder="·" />
                           }
@@ -338,7 +338,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
               </h3>
               
               <div class="space-y-4 relative z-10">
-                <div class="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+                <div class="flex items-center justify-between p-4 rounded-xl bg-surface-50 border border-surface-200">
                   <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-accent-emerald/10 border border-accent-emerald/20">
                       <svg class="w-5 h-5 text-accent-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
@@ -355,7 +355,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                   }
                 </div>
 
-                <div class="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+                <div class="flex items-center justify-between p-4 rounded-xl bg-surface-50 border border-surface-200">
                   <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-omni-500/10 border border-omni-500/20">
                       <svg class="w-5 h-5 text-omni-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
@@ -382,14 +382,14 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                 Quick Actions
               </h3>
               <div class="grid grid-cols-2 gap-3 relative z-10">
-                <button (click)="goToRecharge()" class="p-3 text-left rounded-xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.06] hover:border-white/[0.1] transition-all group/btn cursor-pointer">
+                <button (click)="goToRecharge()" class="p-3 text-left rounded-xl bg-surface-50 border border-surface-200 hover:bg-surface-50 hover:border-surface-200 transition-all group/btn cursor-pointer">
                   <div class="w-8 h-8 rounded-full bg-accent-emerald/10 text-accent-emerald flex items-center justify-center mb-2 group-hover/btn:scale-110 transition-transform">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                   </div>
                   <p class="text-sm font-medium text-surface-900">New Recharge</p>
                   <p class="text-[10px] text-surface-500">Recharge now</p>
                 </button>
-                <button (click)="activeTab.set('notifications')" class="p-3 text-left rounded-xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.06] hover:border-white/[0.1] transition-all group/btn cursor-pointer">
+                <button (click)="activeTab.set('notifications')" class="p-3 text-left rounded-xl bg-surface-50 border border-surface-200 hover:bg-surface-50 hover:border-surface-200 transition-all group/btn cursor-pointer">
                   <div class="w-8 h-8 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center mb-2 group-hover/btn:scale-110 transition-transform">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                   </div>
@@ -436,7 +436,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
           </div>
 
           <!-- Date Range Filter -->
-          <div class="glass-card p-4 mb-6 animate-slide-up flex flex-col sm:flex-row items-stretch sm:items-center gap-3 border border-white/[0.05]" style="animation-delay: 0.15s">
+          <div class="glass-card p-4 mb-6 animate-slide-up flex flex-col sm:flex-row items-stretch sm:items-center gap-3 border border-surface-200" style="animation-delay: 0.15s">
             <div class="flex items-center gap-2 text-xs text-surface-500 font-semibold uppercase tracking-wider shrink-0">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
               Filter by Date
@@ -445,12 +445,12 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
               <div class="flex items-center gap-2 flex-1">
                 <label class="text-[10px] text-surface-500 uppercase tracking-wide font-bold shrink-0">From</label>
                 <input type="date" [(ngModel)]="rechStartDate"
-                       class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-white/60 border border-white/[0.08] text-sm text-surface-900 outline-none transition-all focus:border-omni-500/50 [color-scheme:dark]" />
+                       class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-white/60 border border-surface-200 text-sm text-surface-900 outline-none transition-all focus:border-omni-500/50 [color-scheme:dark]" />
               </div>
               <div class="flex items-center gap-2 flex-1">
                 <label class="text-[10px] text-surface-500 uppercase tracking-wide font-bold shrink-0">To</label>
                 <input type="date" [(ngModel)]="rechEndDate"
-                       class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-white/60 border border-white/[0.08] text-sm text-surface-900 outline-none transition-all focus:border-omni-500/50 [color-scheme:dark]" />
+                       class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-white/60 border border-surface-200 text-sm text-surface-900 outline-none transition-all focus:border-omni-500/50 [color-scheme:dark]" />
               </div>
               <div class="flex gap-2 shrink-0">
                 <button (click)="applyRechDateFilter()" 
@@ -478,7 +478,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
 
           <!-- Stat Cards -->
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 animate-slide-up" style="animation-delay: 0.2s">
-            <div class="glass-card p-6 flex flex-col justify-between border border-white/[0.05]">
+            <div class="glass-card p-6 flex flex-col justify-between border border-surface-200">
               <div class="flex items-center gap-2 mb-2">
                 <div class="w-8 h-8 rounded-lg bg-accent-emerald/10 flex items-center justify-center border border-accent-emerald/20">
                   <svg class="w-4 h-4 text-accent-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
@@ -488,7 +488,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
               <span class="text-3xl font-display font-bold px-1">{{ stats().active }}</span>
             </div>
             
-            <div class="glass-card p-6 flex flex-col justify-between border border-white/[0.05]">
+            <div class="glass-card p-6 flex flex-col justify-between border border-surface-200">
               <div class="flex items-center gap-2 mb-2">
                 <div class="w-8 h-8 rounded-lg bg-accent-amber/10 flex items-center justify-center border border-accent-amber/20">
                   <svg class="w-4 h-4 text-accent-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
@@ -498,7 +498,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
               <span class="text-3xl font-display font-bold px-1">{{ stats().processing }}</span>
             </div>
 
-            <div class="glass-card p-6 flex flex-col justify-between border border-white/[0.05]">
+            <div class="glass-card p-6 flex flex-col justify-between border border-surface-200">
               <div class="flex items-center gap-2 mb-2">
                 <div class="w-8 h-8 rounded-lg bg-surface-500/10 flex items-center justify-center border border-surface-500/20">
                   <svg class="w-4 h-4 text-surface-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -508,7 +508,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
               <span class="text-3xl font-display font-bold px-1">{{ stats().expired }}</span>
             </div>
 
-            <div class="glass-card p-6 flex flex-col justify-between border border-white/[0.05]">
+            <div class="glass-card p-6 flex flex-col justify-between border border-surface-200">
               <div class="flex items-center gap-2 mb-2">
                 <div class="w-8 h-8 rounded-lg bg-accent-rose/10 flex items-center justify-center border border-accent-rose/20">
                   <svg class="w-4 h-4 text-accent-rose" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -529,10 +529,10 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
               </div>
             </div>
           } @else if (filteredRecharges().length > 0) {
-            <div class="glass-card overflow-hidden bg-white/[0.01] animate-slide-up" style="animation-delay: 0.3s">
+            <div class="glass-card overflow-hidden bg-surface-50 animate-slide-up" style="animation-delay: 0.3s">
               
               <!-- Grid Header -->
-              <div class="hidden lg:grid grid-cols-12 gap-2 px-6 py-4 border-b border-white/[0.05] bg-white/[0.03] text-[10px] font-bold text-surface-500 uppercase tracking-wider">
+              <div class="hidden lg:grid grid-cols-12 gap-2 px-6 py-4 border-b border-surface-200 bg-surface-50 text-[10px] font-bold text-surface-500 uppercase tracking-wider">
                 <div class="col-span-1">Date</div>
                 <div class="col-span-2">Mobile</div>
                 <div class="col-span-1">Operator</div>
@@ -544,9 +544,9 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                 <div class="col-span-2 text-right"></div>
               </div>
 
-              <div class="divide-y divide-white/[0.05]">
+              <div class="divide-y divide-surface-200">
                 @for (r of filteredRecharges(); track r.rechargeId) {
-                  <div class="px-6 py-4 hover:bg-white/[0.02] transition-colors group">
+                  <div class="px-6 py-4 hover:bg-surface-50 transition-colors group">
                     <div class="flex flex-col lg:grid lg:grid-cols-12 gap-3 lg:gap-2 lg:items-center">
                       <div class="col-span-1 text-xs font-semibold text-surface-600">
                         {{ r.createdDate | date:'dd MMM yyyy, h:mm a' }}
@@ -583,7 +583,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                       </div>
 
                       <div class="col-span-1">
-                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border bg-white/[0.02]"
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border bg-surface-50"
                              [class]="getPackStatus(r).type === 'active' ? 'border-accent-emerald/20 text-accent-emerald' : 
                                       getPackStatus(r).type === 'expired' ? 'border-surface-600/30 text-surface-500' : 
                                       getPackStatus(r).type === 'failed' ? 'border-accent-rose/20 text-accent-rose' :
@@ -616,7 +616,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
 
               <!-- Pagination -->
               @if (rechTotalPages() > 1 && packCategory() === 'ALL') {
-                <div class="flex justify-between items-center px-6 py-4 border-t border-white/[0.05] bg-white/[0.01]">
+                <div class="flex justify-between items-center px-6 py-4 border-t border-surface-200 bg-surface-50">
                   <span class="text-xs text-surface-500 font-medium">Page {{ rechPage() + 1 }} of {{ rechTotalPages() }}</span>
                   <div class="flex gap-2">
                     <button (click)="loadRecharges(rechPage() - 1)" [disabled]="rechPage() === 0" class="btn-ghost text-xs group">
@@ -631,7 +631,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
             </div>
           } @else {
             <div class="glass-card p-16 text-center border-dashed border-2 border-surface-200">
-              <div class="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-surface-800 to-surface-900 flex items-center justify-center border border-white/[0.06]">
+              <div class="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-surface-800 to-surface-900 flex items-center justify-center border border-surface-200">
                 <svg class="w-10 h-10 text-surface-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
                 </svg>
@@ -683,7 +683,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
             </div>
 
             <!-- Date Range Filter -->
-            <div class="glass-card p-4 mb-6 animate-slide-up flex flex-col sm:flex-row items-stretch sm:items-center gap-3 border border-white/[0.05]">
+            <div class="glass-card p-4 mb-6 animate-slide-up flex flex-col sm:flex-row items-stretch sm:items-center gap-3 border border-surface-200">
               <div class="flex items-center gap-2 text-xs text-surface-500 font-semibold uppercase tracking-wider shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 Filter by Date
@@ -692,12 +692,12 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                 <div class="flex items-center gap-2 flex-1">
                   <label class="text-[10px] text-surface-500 uppercase tracking-wide font-bold shrink-0">From</label>
                   <input type="date" [(ngModel)]="payStartDate"
-                         class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-white/60 border border-white/[0.08] text-sm text-surface-900 outline-none transition-all focus:border-omni-500/50 [color-scheme:dark]" />
+                         class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-white/60 border border-surface-200 text-sm text-surface-900 outline-none transition-all focus:border-omni-500/50 [color-scheme:dark]" />
                 </div>
                 <div class="flex items-center gap-2 flex-1">
                   <label class="text-[10px] text-surface-500 uppercase tracking-wide font-bold shrink-0">To</label>
                   <input type="date" [(ngModel)]="payEndDate"
-                         class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-white/60 border border-white/[0.08] text-sm text-surface-900 outline-none transition-all focus:border-omni-500/50 [color-scheme:dark]" />
+                         class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-white/60 border border-surface-200 text-sm text-surface-900 outline-none transition-all focus:border-omni-500/50 [color-scheme:dark]" />
                 </div>
                 <div class="flex gap-2 shrink-0">
                   <button (click)="applyPayDateFilter()" 
@@ -725,16 +725,16 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
 
             <div class="glass-card overflow-hidden">
               <!-- Table Header -->
-              <div class="hidden sm:grid grid-cols-12 gap-4 px-6 py-4 border-b border-white/[0.05] bg-white/[0.02] text-xs font-semibold text-surface-500 uppercase tracking-wider">
+              <div class="hidden sm:grid grid-cols-12 gap-4 px-6 py-4 border-b border-surface-200 bg-surface-50 text-xs font-semibold text-surface-500 uppercase tracking-wider">
                 <div class="col-span-3">Transaction ID</div>
                 <div class="col-span-3">Date / Time</div>
                 <div class="col-span-2 text-right">Amount</div>
                 <div class="col-span-4 text-right">Status</div>
               </div>
               
-              <div class="divide-y divide-white/[0.05]">
+              <div class="divide-y divide-surface-200">
                 @for (p of filteredPayments(); track p.transactionId) {
-                  <div class="p-4 sm:px-6 hover:bg-white/[0.02] transition-colors">
+                  <div class="p-4 sm:px-6 hover:bg-surface-50 transition-colors">
                     <div class="flex flex-col sm:grid sm:grid-cols-12 gap-2 sm:gap-4 items-start sm:items-center">
                       
                       <!-- Transaction ID -->
@@ -783,7 +783,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
 
               <!-- Pagination -->
               @if (payTotalPages() > 1) {
-                <div class="flex items-center justify-between px-6 py-4 border-t border-white/[0.05]">
+                <div class="flex items-center justify-between px-6 py-4 border-t border-surface-200">
                   <span class="text-xs text-surface-500">
                     Showing {{ (payPage() * 10) + 1 }}–{{ mathMin((payPage() + 1) * 10, payTotalElements()) }} of {{ payTotalElements() }}
                   </span>
@@ -794,7 +794,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                     </button>
                     @for (pg of getPayPageNumbers(); track pg) {
                       <button (click)="loadPayments(pg)" 
-                              [class]="pg === payPage() ? 'bg-omni-600 text-surface-900' : 'text-surface-500 hover:bg-white/[0.06]'"
+                              [class]="pg === payPage() ? 'bg-omni-600 text-surface-900' : 'text-surface-500 hover:bg-surface-50'"
                               class="w-8 h-8 rounded-lg text-xs font-medium transition-colors">
                         {{ pg + 1 }}
                       </button>
@@ -809,7 +809,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
             </div>
           } @else {
             <div class="glass-card p-16 text-center">
-              <div class="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-surface-800 to-surface-900 flex items-center justify-center border border-white/[0.06]">
+              <div class="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-surface-800 to-surface-900 flex items-center justify-center border border-surface-200">
                 <svg class="w-10 h-10 text-surface-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0119.5 16.5h-2.25m-9 0h9l-3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"/>
                 </svg>
@@ -852,7 +852,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
 
             <div class="space-y-3">
               @for (n of filteredNotifications(); track n.id) {
-                <div class="glass-card group p-5 cursor-pointer border-l-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.3)] hover:shadow-omni-500/10 hover:bg-white/[0.04]"
+                <div class="glass-card group p-5 cursor-pointer border-l-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.3)] hover:shadow-omni-500/10 hover:bg-surface-50"
                      [class.border-l-omni-500]="!n.isRead"
                      [class.border-l-transparent]="n.isRead"
                      (click)="markRead(n)">
@@ -906,7 +906,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                   </button>
                   @for (pg of getNotifPageNumbers(); track pg) {
                     <button (click)="loadNotifications(pg)" 
-                            [class]="pg === notifPage() ? 'bg-omni-600 text-surface-900' : 'text-surface-500 hover:bg-white/[0.06]'"
+                            [class]="pg === notifPage() ? 'bg-omni-600 text-surface-900' : 'text-surface-500 hover:bg-surface-50'"
                             class="w-8 h-8 rounded-lg text-xs font-medium transition-colors">
                       {{ pg + 1 }}
                     </button>
@@ -937,7 +937,7 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
                  [style.border-color]="faqOpen() === i ? 'rgba(99,102,241,0.4)' : ''"
                  [style.background]="faqOpen() === i ? 'rgba(255,255,255,0.04)' : ''"
                  [style.box-shadow]="faqOpen() === i ? '0 0 20px rgba(99,102,241,0.1)' : ''">
-              <button (click)="toggleFaq(i)" class="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-white/[0.02] transition-colors focus:outline-none rounded-2xl">
+              <button (click)="toggleFaq(i)" class="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-surface-50 transition-colors focus:outline-none rounded-2xl">
                 <span class="font-medium text-[15px] transition-colors duration-300" [class.text-surface-900]="faqOpen() === i" [class.text-surface-600]="faqOpen() !== i">{{ faq.q }}</span>
                 <span class="transform transition-transform duration-300 flex items-center justify-center w-8 h-8 rounded-full border border-surface-200" 
                       [class.rotate-180]="faqOpen() === i" [class.bg-omni-500]="faqOpen() === i" [class.text-surface-900]="faqOpen() === i" [class.text-surface-500]="faqOpen() !== i">
@@ -963,31 +963,31 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
     .dash-splash {
       position: fixed; inset: 0; z-index: 9999;
       display: flex; align-items: center; justify-content: center;
-      background: radial-gradient(ellipse at center, #0f1729 0%, #070d1a 60%, #030810 100%);
+      background: radial-gradient(ellipse at center, #ffffff 0%, #f9fafb 60%, #f3f4f6 100%);
       animation: dsFade 0.5s ease 1.8s forwards;
     }
     .ds-content { text-align: center; animation: dsIn 0.7s cubic-bezier(0.16,1,0.3,1) 0.15s both; }
     .ds-icon {
       width: 72px; height: 72px; margin: 0 auto 20px; border-radius: 20px;
-      background: linear-gradient(135deg, #3b82f6, #14b8a6);
+      background: linear-gradient(135deg, #C65D3B, #e06f5c);
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 50px rgba(59,130,246,0.4), 0 0 100px rgba(20,184,166,0.15);
-      animation: dsGlow 2s ease-in-out infinite;
+      box-shadow: 0 0 50px rgba(198,93,59,0.3), 0 0 100px rgba(224,111,92,0.15);
+      animation: dsGlow 2s ease-in-out infinite; color: white;
     }
-    .ds-title { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 300; color: rgba(255,255,255,0.55); line-height: 1.3; margin-bottom: 6px; }
-    .ds-title span { display: block; font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #60a5fa, #5eead4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .ds-sub { font-size: 13px; color: rgba(255,255,255,0.3); font-weight: 500; margin-bottom: 28px; }
-    .ds-bar { width: 160px; height: 3px; margin: 0 auto; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
-    .ds-bar-fill { height: 100%; width: 0; background: linear-gradient(90deg, #3b82f6, #14b8a6); border-radius: 99px; animation: dsBarFill 1.6s ease 0.3s forwards; }
+    .ds-title { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 300; color: #6B7280; line-height: 1.3; margin-bottom: 6px; }
+    .ds-title span { display: block; font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #C65D3B, #A94E32); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .ds-sub { font-size: 13px; color: #9CA3AF; font-weight: 500; margin-bottom: 28px; }
+    .ds-bar { width: 160px; height: 3px; margin: 0 auto; background: rgba(0,0,0,0.06); border-radius: 99px; overflow: hidden; }
+    .ds-bar-fill { height: 100%; width: 0; background: linear-gradient(90deg, #C65D3B, #A94E32); border-radius: 99px; animation: dsBarFill 1.6s ease 0.3s forwards; }
     .ds-particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
     .dp { position: absolute; border-radius: 50%; opacity: 0; animation: dpFloat 2.5s ease forwards; }
-    .dp1 { width: 5px; height: 5px; background: #3b82f6; top: 35%; left: 20%; animation-delay: 0.2s; }
-    .dp2 { width: 4px; height: 4px; background: #14b8a6; top: 55%; left: 75%; animation-delay: 0.5s; }
-    .dp3 { width: 6px; height: 6px; background: #60a5fa; top: 25%; left: 65%; animation-delay: 0.8s; }
-    .dp4 { width: 3px; height: 3px; background: #5eead4; top: 70%; left: 30%; animation-delay: 0.4s; }
+    .dp1 { width: 5px; height: 5px; background: #C65D3B; top: 35%; left: 20%; animation-delay: 0.2s; }
+    .dp2 { width: 4px; height: 4px; background: #e06f5c; top: 55%; left: 75%; animation-delay: 0.5s; }
+    .dp3 { width: 6px; height: 6px; background: #eb8f81; top: 25%; left: 65%; animation-delay: 0.8s; }
+    .dp4 { width: 3px; height: 3px; background: #A94E32; top: 70%; left: 30%; animation-delay: 0.4s; }
     @keyframes dsFade { to { opacity: 0; pointer-events: none; } }
     @keyframes dsIn { from { opacity: 0; transform: translateY(25px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
-    @keyframes dsGlow { 0%,100% { box-shadow: 0 0 50px rgba(59,130,246,0.4); } 50% { box-shadow: 0 0 70px rgba(59,130,246,0.6), 0 0 120px rgba(20,184,166,0.25); } }
+    @keyframes dsGlow { 0%,100% { box-shadow: 0 0 50px rgba(198,93,59,0.3); } 50% { box-shadow: 0 0 70px rgba(198,93,59,0.5), 0 0 120px rgba(224,111,92,0.25); } }
     @keyframes dsBarFill { to { width: 100%; } }
     @keyframes dpFloat { 0% { opacity: 0; transform: translateY(0) scale(0); } 30% { opacity: 0.5; transform: translateY(-15px) scale(1); } 100% { opacity: 0; transform: translateY(-60px) scale(0.5); } }
   `]

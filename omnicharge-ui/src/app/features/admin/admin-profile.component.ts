@@ -43,7 +43,7 @@ import { AuthService } from '../../core/services/auth.service';
               <label>Email Address</label>
               <div class="flex items-center gap-3">
                 <div class="relative flex-1">
-                  <input type="email" [value]="authService.currentUser()?.email" class="input-field !bg-white/[0.02] cursor-not-allowed text-surface-500" disabled />
+                  <input type="email" [value]="authService.currentUser()?.email" class="input-field !bg-surface-50 cursor-not-allowed text-surface-500" disabled />
                 </div>
                 <span class="text-xs text-accent-emerald font-semibold whitespace-nowrap">✓ Verified</span>
               </div>
@@ -74,7 +74,7 @@ import { AuthService } from '../../core/services/auth.service';
           </div>
 
           <div class="space-y-4">
-            <div class="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+            <div class="flex items-center justify-between p-4 rounded-xl bg-surface-50 border border-surface-200">
               <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-lg bg-accent-emerald/10 flex items-center justify-center border border-accent-emerald/20">
                   <svg class="w-4 h-4 text-accent-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -87,7 +87,7 @@ import { AuthService } from '../../core/services/auth.service';
               <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-accent-emerald/10 text-accent-emerald border border-accent-emerald/20">Active</span>
             </div>
 
-            <div class="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+            <div class="flex items-center justify-between p-4 rounded-xl bg-surface-50 border border-surface-200">
               <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-lg bg-omni-500/10 flex items-center justify-center border border-omni-500/20">
                   <svg class="w-4 h-4 text-omni-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
@@ -100,7 +100,7 @@ import { AuthService } from '../../core/services/auth.service';
               <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-omni-500/10 text-omni-400 border border-omni-500/20">Administrator</span>
             </div>
 
-            <div class="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+            <div class="flex items-center justify-between p-4 rounded-xl bg-surface-50 border border-surface-200">
               <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-lg bg-accent-sky/10 flex items-center justify-center border border-accent-sky/20">
                   <svg class="w-4 h-4 text-accent-sky" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>

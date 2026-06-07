@@ -35,9 +35,9 @@ import { AdminService, NotificationResponse } from '../../core/services/admin.se
             }
           </div>
         } @else {
-          <div class="divide-y divide-white/[0.05]">
+          <div class="divide-y divide-surface-200">
             @for (notification of notifications(); track notification.id) {
-              <div class="p-6 hover:bg-white/[0.02] transition-colors">
+              <div class="p-6 hover:bg-surface-50 transition-colors">
                 <div class="flex items-start gap-4">
                   <!-- Icon based on category -->
                   <div class="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
@@ -108,7 +108,7 @@ import { AdminService, NotificationResponse } from '../../core/services/admin.se
           
           <!-- Pagination -->
           @if (totalPages() > 1) {
-            <div class="flex items-center justify-between px-6 py-4 border-t border-white/[0.05]">
+            <div class="flex items-center justify-between px-6 py-4 border-t border-surface-200">
               <span class="text-xs text-surface-500">
                 Showing {{ (currentPage() * pageSize()) + 1 }} - {{ Math.min((currentPage() + 1) * pageSize(), totalElements()) }} of {{ totalElements() }}
               </span>
@@ -121,7 +121,7 @@ import { AdminService, NotificationResponse } from '../../core/services/admin.se
                 <div class="flex items-center gap-1">
                   @for (page of getPageNumbers(); track page) {
                     <button (click)="loadNotifications(page)" 
-                            [class]="page === currentPage() ? 'bg-omni-600 text-surface-900' : 'text-surface-500 hover:bg-white/[0.06]'"
+                            [class]="page === currentPage() ? 'bg-omni-600 text-surface-900' : 'text-surface-500 hover:bg-surface-50'"
                             class="w-8 h-8 rounded-lg text-xs font-medium transition-colors">
                       {{ page + 1 }}
                     </button>
@@ -203,7 +203,7 @@ export class AdminNotificationsComponent implements OnInit {
     if (category.includes('SUCCESS')) return 'bg-accent-emerald/15 text-accent-emerald border border-accent-emerald/20';
     if (category.includes('FAILED')) return 'bg-accent-rose/15 text-accent-rose border border-accent-rose/20';
     if (category.includes('PLAN')) return 'bg-accent-amber/15 text-accent-amber border border-accent-amber/20';
-    return 'bg-white/[0.05] text-surface-500 border border-surface-200';
+    return 'bg-surface-50 text-surface-500 border border-surface-200';
   }
 
   getCategoryIcon(category: string): string {
@@ -221,7 +221,7 @@ export class AdminNotificationsComponent implements OnInit {
       case 'SENT': return 'bg-accent-emerald/15 text-accent-emerald';
       case 'FAILED': return 'bg-accent-rose/15 text-accent-rose';
       case 'PENDING': return 'bg-accent-amber/15 text-accent-amber';
-      default: return 'bg-white/[0.05] text-surface-500';
+      default: return 'bg-surface-50 text-surface-500';
     }
   }
 

@@ -115,7 +115,7 @@ import { AuthService } from '../../core/services/auth.service';
       <!-- Main Content -->
       <main class="flex-1 flex flex-col min-w-0 overflow-hidden relative ml-[260px]">
         <!-- Universal Top Header -->
-        <header class="h-16 border-b border-white/[0.05] flex items-center justify-between px-4 sm:px-8 bg-surface/80 backdrop-blur-md sticky top-0 z-40">
+        <header class="h-16 border-b border-surface-200 flex items-center justify-between px-4 sm:px-8 bg-surface/80 backdrop-blur-md sticky top-0 z-40">
           <!-- Mobile Brand -->
           <div class="flex items-center gap-2 md:hidden">
             <span class="text-surface-900 font-bold text-sm bg-gradient-to-br from-omni-500 to-omni-700 w-7 h-7 rounded-lg flex items-center justify-center">⚡</span>
@@ -129,10 +129,10 @@ import { AuthService } from '../../core/services/auth.service';
 
           <!-- Right Actions -->
           <div class="flex items-center gap-3">
-            <a routerLink="/admin/notifications" class="p-2 text-surface-500 hover:text-surface-900 hover:bg-white/[0.06] rounded-xl transition-all relative">
+            <a routerLink="/admin/notifications" class="p-2 text-surface-500 hover:text-surface-900 hover:bg-surface-50 rounded-xl transition-all relative">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
             </a>
-            <a routerLink="/admin/profile" class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-white/[0.06] transition-all cursor-pointer">
+            <a routerLink="/admin/profile" class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-surface-50 transition-all cursor-pointer">
               <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-omni-500 to-accent-teal flex items-center justify-center text-surface-900 text-xs font-bold shadow-md">
                 {{ authService.userInitials() }}
               </div>

@@ -58,7 +58,7 @@ import { ToastService, Toast } from '../../../core/services/toast.service';
 
           <!-- Close Button -->
           <button (click)="toastService.dismiss(toast.id)"
-                  class="shrink-0 opacity-50 hover:opacity-100 transition-opacity -mt-0.5 -mr-1 p-1 rounded-lg hover:bg-white/[0.06]"
+                  class="shrink-0 opacity-50 hover:opacity-100 transition-opacity -mt-0.5 -mr-1 p-1 rounded-lg hover:bg-surface-50"
                   aria-label="Close notification">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>

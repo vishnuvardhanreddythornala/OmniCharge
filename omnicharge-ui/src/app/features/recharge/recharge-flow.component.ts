@@ -39,10 +39,10 @@ type FlowStep = 'input' | 'plans' | 'processing' | 'receipt';
           <div class="flex items-center gap-2">
             <div class="flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-300"
                  [class]="currentStep() === s.key ? 'bg-omni-500/20 border border-omni-500/30' :
-                          (stepIndex(s.key) < stepIndex(currentStep()) ? 'bg-accent-emerald/10' : 'bg-white/[0.03]')">
+                          (stepIndex(s.key) < stepIndex(currentStep()) ? 'bg-accent-emerald/10' : 'bg-surface-50')">
               <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
                    [class]="stepIndex(s.key) < stepIndex(currentStep()) ? 'bg-accent-emerald text-surface-900' :
-                            currentStep() === s.key ? 'bg-omni-500 text-surface-900' : 'bg-white/[0.08] text-surface-500'">
+                            currentStep() === s.key ? 'bg-omni-500 text-surface-900' : 'bg-surface-50 text-surface-500'">
                 @if (stepIndex(s.key) < stepIndex(currentStep())) {
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                 } @else {
@@ -54,7 +54,7 @@ type FlowStep = 'input' | 'plans' | 'processing' | 'receipt';
             </div>
             @if (i < stepsConfig.length - 1) {
               <div class="w-6 sm:w-10 h-0.5 rounded"
-                   [class]="stepIndex(s.key) < stepIndex(currentStep()) ? 'bg-accent-emerald' : 'bg-white/[0.06]'"></div>
+                   [class]="stepIndex(s.key) < stepIndex(currentStep()) ? 'bg-accent-emerald' : 'bg-surface-50'"></div>
             }
           </div>
         }
@@ -88,7 +88,7 @@ type FlowStep = 'input' | 'plans' | 'processing' | 'receipt';
 
             <!-- Detection State -->
             @if (mobileNumber.length === 10 && operatorService.isDetecting()) {
-              <div class="flex items-center gap-3 p-4 rounded-xl bg-white/[0.03] mb-5 animate-fade-in">
+              <div class="flex items-center gap-3 p-4 rounded-xl bg-surface-50 mb-5 animate-fade-in">
                 <div class="w-10 h-10 rounded-xl bg-omni-500/20 flex items-center justify-center">
                   <div class="w-5 h-5 border-2 border-omni-400 border-t-transparent rounded-full animate-spin"></div>
                 </div>
@@ -144,7 +144,7 @@ type FlowStep = 'input' | 'plans' | 'processing' | 'receipt';
                             class="p-3 rounded-xl border transition-all duration-200 text-left group"
                             [class]="operatorService.selectedOperator()?.operatorId === op.id
                               ? 'bg-omni-500/10 border-omni-500/40 shadow-[0_0_12px_rgba(139,92,246,0.15)]'
-                              : 'bg-white/[0.02] border-white/[0.06] hover:border-surface-300 hover:bg-white/[0.04]'">
+                              : 'bg-surface-50 border-surface-200 hover:border-surface-300 hover:bg-surface-50'">
                       <p class="text-sm font-semibold text-surface-900">{{ op.name }}</p>
                       <p class="text-[10px] text-surface-500 uppercase tracking-wider">{{ op.type }}</p>
                     </button>
@@ -307,7 +307,7 @@ type FlowStep = 'input' | 'plans' | 'processing' | 'receipt';
                   <!-- Category Badge -->
                   <div class="flex items-center justify-between">
                     <span class="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-md
-                                 bg-white/[0.05] text-surface-500">{{ plan.category }}</span>
+                                 bg-surface-50 text-surface-500">{{ plan.category }}</span>
                   </div>
                 </div>
               }
@@ -381,7 +381,7 @@ type FlowStep = 'input' | 'plans' | 'processing' | 'receipt';
 
             <!-- Transaction details -->
             @if (paymentService.currentTransaction(); as txn) {
-              <div class="bg-white/[0.03] rounded-xl p-4 text-left space-y-3 mb-6">
+              <div class="bg-surface-50 rounded-xl p-4 text-left space-y-3 mb-6">
                 <div class="flex justify-between text-sm">
                   <span class="text-surface-500">Transaction ID</span>
                   <span class="font-mono text-xs text-surface-800">{{ txn.transactionId }}</span>
@@ -466,7 +466,7 @@ type FlowStep = 'input' | 'plans' | 'processing' | 'receipt';
                          (input)="onOtpInput($index, $event)"
                          (keydown)="onOtpKeydown($index, $event)"
                          (paste)="onOtpPaste($event)"
-                         class="w-12 h-14 sm:w-14 sm:h-16 text-center font-mono text-2xl font-bold bg-white/[0.03] border border-surface-200 rounded-xl focus:border-omni-500 focus:bg-omni-500/10 transition-colors outline-none text-surface-900"
+                         class="w-12 h-14 sm:w-14 sm:h-16 text-center font-mono text-2xl font-bold bg-surface-50 border border-surface-200 rounded-xl focus:border-omni-500 focus:bg-omni-500/10 transition-colors outline-none text-surface-900"
                          [disabled]="isVerifying()"
                          id="otp-input-{{$index}}" />
                 }
@@ -512,7 +512,7 @@ type FlowStep = 'input' | 'plans' | 'processing' | 'receipt';
 
             <!-- Selected plan summary -->
             @if (selectedPlan(); as plan) {
-              <div class="mb-6 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center gap-3">
+              <div class="mb-6 p-3 rounded-xl bg-surface-50 border border-surface-200 flex items-center gap-3">
                 <div class="w-10 h-10 rounded-lg bg-omni-500/15 flex items-center justify-center shrink-0">
                   <span class="text-sm font-bold text-omni-400">₹</span>
                 </div>

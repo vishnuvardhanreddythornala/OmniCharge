@@ -25,7 +25,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
                  [(ngModel)]="searchQuery"
                  (ngModelChange)="onSearchChange($event)"
                  placeholder="Search by name, email, or mobile..."
-                 class="w-full pl-10 pr-10 py-2.5 rounded-xl bg-white/60 border border-white/[0.08] text-sm text-surface-900 placeholder-surface-400 outline-none transition-all focus:border-omni-500/50 focus:shadow-[0_0_12px_rgba(99,102,241,0.1)]" />
+                 class="w-full pl-10 pr-10 py-2.5 rounded-xl bg-white/60 border border-surface-200 text-sm text-surface-900 placeholder-surface-400 outline-none transition-all focus:border-omni-500/50 focus:shadow-[0_0_12px_rgba(99,102,241,0.1)]" />
           @if (searchQuery) {
             <button (click)="clearSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 text-surface-500 hover:text-surface-900 transition-colors">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,7 +39,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
       <!-- Stat Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 animate-slide-up">
         
-        <div class="glass-card p-6 flex flex-col justify-between border border-white/[0.05]">
+        <div class="glass-card p-6 flex flex-col justify-between border border-surface-200">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-8 h-8 rounded-lg bg-omni-500/10 flex items-center justify-center border border-omni-500/20">
               <svg class="w-4 h-4 text-omni-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
@@ -49,7 +49,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
           <span class="text-3xl font-display font-bold px-1 text-surface-900">{{ totalUsersCount() }}</span>
         </div>
 
-        <div class="glass-card p-6 flex flex-col justify-between border border-white/[0.05]">
+        <div class="glass-card p-6 flex flex-col justify-between border border-surface-200">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-8 h-8 rounded-lg bg-accent-emerald/10 flex items-center justify-center border border-accent-emerald/20">
               <svg class="w-4 h-4 text-accent-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
@@ -59,7 +59,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
           <span class="text-3xl font-display font-bold px-1 text-surface-900">{{ activeUsersCount() }}</span>
         </div>
 
-        <div class="glass-card p-6 flex flex-col justify-between border border-white/[0.05]">
+        <div class="glass-card p-6 flex flex-col justify-between border border-surface-200">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-8 h-8 rounded-lg bg-accent-rose/10 flex items-center justify-center border border-accent-rose/20">
               <svg class="w-4 h-4 text-accent-rose" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -92,7 +92,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
           <!-- Desktop Table (hidden on mobile) -->
           <div class="hidden sm:block overflow-x-auto">
             <table class="w-full text-left text-sm text-surface-600">
-              <thead class="text-xs uppercase bg-white/[0.03] text-surface-500 border-b border-white/[0.05]">
+              <thead class="text-xs uppercase bg-surface-50 text-surface-500 border-b border-surface-200">
                 <tr>
                   <th scope="col" class="px-6 py-4 font-semibold">User ID</th>
                   <th scope="col" class="px-6 py-4 font-semibold">User</th>
@@ -103,9 +103,9 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
                   <th scope="col" class="px-6 py-4 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-white/[0.05]">
+              <tbody class="divide-y divide-surface-200">
                 @for (user of users(); track user.id) {
-                  <tr class="hover:bg-white/[0.02] transition-colors">
+                  <tr class="hover:bg-surface-50 transition-colors">
                     <td class="px-6 py-4 font-mono text-xs text-surface-900">
                       USR-{{ ('00000' + user.id).slice(-5) }}
                     </td>
@@ -122,7 +122,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
                       <div class="text-xs text-surface-500">{{ user.email }}</div>
                     </td>
                     <td class="px-6 py-4">
-                      <span class="px-2 py-1 rounded bg-white/[0.05] text-xs font-mono border border-surface-200"
+                      <span class="px-2 py-1 rounded bg-surface-50 text-xs font-mono border border-surface-200"
                             [class.text-omni-400]="user.role === 'ROLE_ADMIN'">
                         {{ user.role.replace('ROLE_', '') }}
                       </span>
@@ -160,7 +160,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
           </div>
 
           <!-- Mobile Card Layout (shown only on mobile) -->
-          <div class="sm:hidden divide-y divide-white/[0.05]">
+          <div class="sm:hidden divide-y divide-surface-200">
             @for (user of users(); track user.id) {
               <div class="p-4 space-y-3">
                 <div class="flex items-center justify-between">
@@ -173,7 +173,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
                       <div class="font-mono text-[10px] text-surface-500">USR-{{ ('00000' + user.id).slice(-5) }}</div>
                     </div>
                   </div>
-                  <span class="px-2 py-0.5 rounded bg-white/[0.05] text-[10px] font-mono border border-surface-200"
+                  <span class="px-2 py-0.5 rounded bg-surface-50 text-[10px] font-mono border border-surface-200"
                         [class.text-omni-400]="user.role === 'ROLE_ADMIN'">
                     {{ user.role.replace('ROLE_', '') }}
                   </span>
@@ -197,7 +197,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
                 </div>
 
                 @if (user.role !== 'ROLE_ADMIN') {
-                  <div class="pt-2 border-t border-white/[0.05]">
+                  <div class="pt-2 border-t border-surface-200">
                     <button (click)="toggleStatus(user)"
                             [disabled]="togglingUser() === user.id"
                             class="w-full py-2 rounded-lg text-xs font-medium border transition-colors disabled:opacity-50 flex justify-center items-center h-8"
@@ -218,7 +218,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
             
             @if (users().length === 0) {
               <div class="p-16 text-center">
-                <div class="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-surface-800 to-surface-900 flex items-center justify-center border border-white/[0.06]">
+                <div class="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-surface-800 to-surface-900 flex items-center justify-center border border-surface-200">
                   <svg class="w-10 h-10 text-surface-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                   </svg>
@@ -238,7 +238,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
           
           <!-- Pagination -->
           @if (totalPages() > 1) {
-            <div class="flex items-center justify-between px-6 py-4 border-t border-white/[0.05]">
+            <div class="flex items-center justify-between px-6 py-4 border-t border-surface-200">
               <span class="text-xs text-surface-500">
                 Showing {{ (currentPage() * 10) + 1 }}–{{ Math.min((currentPage() + 1) * 10, totalElements()) }} of {{ totalElements() }}
               </span>
@@ -249,7 +249,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
                 </button>
                 @for (page of getPageNumbers(); track page) {
                   <button (click)="loadUsers(page)" 
-                          [class]="page === currentPage() ? 'bg-omni-600 text-surface-900' : 'text-surface-500 hover:bg-white/[0.06]'"
+                          [class]="page === currentPage() ? 'bg-omni-600 text-surface-900' : 'text-surface-500 hover:bg-surface-50'"
                           class="w-8 h-8 rounded-lg text-xs font-medium transition-colors">
                     {{ page + 1 }}
                   </button>

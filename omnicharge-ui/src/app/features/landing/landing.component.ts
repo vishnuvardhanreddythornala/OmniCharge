@@ -113,7 +113,7 @@ import { OperatorService } from '../../core/services/operator.service';
 
                   <!-- Operator Detection Status -->
                   @if (mobileNumber.length === 10 && operatorService.isDetecting()) {
-                    <div class="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] mb-4 animate-fade-in">
+                    <div class="flex items-center gap-3 p-3 rounded-xl bg-surface-50 mb-4 animate-fade-in">
                       <div class="w-8 h-8 rounded-lg bg-omni-500/20 flex items-center justify-center">
                         <div class="w-4 h-4 border-2 border-omni-400 border-t-transparent rounded-full animate-spin"></div>
                       </div>
@@ -165,7 +165,7 @@ import { OperatorService } from '../../core/services/operator.service';
                         @for (op of operatorService.operators(); track op.id) {
                           <button (click)="selectManualOperator(op)"
                                   class="flex items-center gap-2.5 p-2.5 rounded-xl border transition-all duration-300"
-                                  [class]="operatorService.selectedOperator()?.operatorId === op.id ? 'bg-omni-500/10 border-omni-500 shadow-glow' : 'glass-card border-white/[0.05] hover:bg-white/[0.08]'">
+                                  [class]="operatorService.selectedOperator()?.operatorId === op.id ? 'bg-omni-500/10 border-omni-500 shadow-glow' : 'glass-card border-surface-200 hover:bg-surface-50'">
                             <span class="text-xs font-bold font-display tracking-wide text-surface-900">{{ op.name }}</span>
                           </button>
                         }

@@ -14,7 +14,7 @@ import { NotificationService } from '../../../core/services/notification.service
   imports: [CommonModule, RouterLink, RouterLinkActive],
   template: `
     <nav class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
-         [class]="scrolled() ? 'bg-white/80 backdrop-blur-xl border-b border-white/[0.06] shadow-lg' : 'bg-transparent'">
+         [class]="scrolled() ? 'bg-white/80 backdrop-blur-xl border-b border-surface-200 shadow-sm' : 'bg-transparent'">
       <div class="w-full max-w-full px-4 sm:px-8">
         <div class="flex items-center justify-between h-16">
 
@@ -26,13 +26,13 @@ import { NotificationService } from '../../../core/services/notification.service
           <!-- Desktop Nav Links -->
           <div class="hidden md:flex items-center gap-1">
             @if (!authService.isAdmin()) {
-              <a routerLink="/" routerLinkActive="text-surface-900 bg-white/[0.06]" [routerLinkActiveOptions]="{exact: true}"
-                 class="btn-ghost text-sm">Home</a>
-              <a routerLink="/recharge" routerLinkActive="text-surface-900 bg-white/[0.06]"
-                 class="btn-ghost text-sm">Recharge</a>
+              <a routerLink="/" routerLinkActive="text-surface-900 bg-surface-100" [routerLinkActiveOptions]="{exact: true}"
+                 class="btn-ghost text-sm hover:bg-surface-50 text-surface-600">Home</a>
+              <a routerLink="/recharge" routerLinkActive="text-surface-900 bg-surface-100"
+                 class="btn-ghost text-sm hover:bg-surface-50 text-surface-600">Recharge</a>
               @if (authService.isAuthenticated()) {
-                <a routerLink="/dashboard" routerLinkActive="text-surface-900 bg-white/[0.06]"
-                   class="btn-ghost text-sm">Dashboard</a>
+                <a routerLink="/dashboard" routerLinkActive="text-surface-900 bg-surface-100"
+                   class="btn-ghost text-sm hover:bg-surface-50 text-surface-600">Dashboard</a>
               }
             }
           </div>
@@ -41,7 +41,7 @@ import { NotificationService } from '../../../core/services/notification.service
           <div class="flex items-center gap-3">
             @if (authService.isAuthenticated()) {
               <!-- Notification Bell -->
-              <button (click)="toggleNotifications()" class="relative p-2 rounded-lg hover:bg-white/[0.06] transition-colors">
+              <button (click)="toggleNotifications()" class="relative p-2 rounded-lg hover:bg-surface-100 transition-colors">
                 <svg class="w-5 h-5 text-surface-500 hover:text-surface-900 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/>
                 </svg>
@@ -55,7 +55,7 @@ import { NotificationService } from '../../../core/services/notification.service
 
               <!-- User Avatar Menu -->
               <div class="relative">
-                <button (click)="toggleMenu()" class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-white/[0.06] transition-colors">
+                <button (click)="toggleMenu()" class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-surface-100 transition-colors">
                   <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-omni-500 to-accent-teal
                               flex items-center justify-center text-surface-900 text-xs font-bold">
                     {{ authService.userInitials() }}
@@ -77,11 +77,11 @@ import { NotificationService } from '../../../core/services/notification.service
                         <p class="text-xs text-surface-500 truncate">{{ authService.currentUser()?.mobileNumber }}</p>
                       }
                     </div>
-                    <div class="border-t border-white/[0.06] my-1"></div>
+                    <div class="border-t border-surface-200 my-1"></div>
                       <a *ngIf="authService.isAdmin()" routerLink="/admin/profile" 
                          (click)="menuOpen.set(false)"
                          class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-surface-600
-                                hover:bg-white/[0.06] hover:text-surface-900 transition-colors cursor-pointer">
+                                hover:bg-surface-100 hover:text-surface-900 transition-colors cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
                         </svg>
@@ -89,7 +89,7 @@ import { NotificationService } from '../../../core/services/notification.service
                       </a>
                       <button *ngIf="!authService.isAdmin()" (click)="menuOpen.set(false); navigateToProfile()"
                          class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-surface-600
-                                hover:bg-white/[0.06] hover:text-surface-900 transition-colors cursor-pointer text-left">
+                                hover:bg-surface-100 hover:text-surface-900 transition-colors cursor-pointer text-left">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
                         </svg>
@@ -113,7 +113,7 @@ import { NotificationService } from '../../../core/services/notification.service
 
             <!-- Mobile Hamburger -->
             <button (click)="mobileMenuOpen.set(!mobileMenuOpen())"
-                    class="md:hidden p-2 rounded-lg hover:bg-white/[0.06] transition-colors">
+                    class="md:hidden p-2 rounded-lg hover:bg-surface-100 transition-colors">
               <svg class="w-5 h-5 text-surface-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 @if (mobileMenuOpen()) {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -131,23 +131,23 @@ import { NotificationService } from '../../../core/services/notification.service
             <div class="glass-card p-3 mt-2 space-y-1">
               @if (!authService.isAdmin()) {
                 <a routerLink="/" (click)="mobileMenuOpen.set(false)"
-                   class="block px-3 py-2.5 rounded-lg text-sm text-surface-600 hover:bg-white/[0.06] hover:text-surface-900 transition">Home</a>
+                   class="block px-3 py-2.5 rounded-lg text-sm text-surface-600 hover:bg-surface-100 hover:text-surface-900 transition">Home</a>
                 <a routerLink="/recharge" (click)="mobileMenuOpen.set(false)"
-                   class="block px-3 py-2.5 rounded-lg text-sm text-surface-600 hover:bg-white/[0.06] hover:text-surface-900 transition">Recharge</a>
+                   class="block px-3 py-2.5 rounded-lg text-sm text-surface-600 hover:bg-surface-100 hover:text-surface-900 transition">Recharge</a>
               }
               @if (authService.isAuthenticated()) {
                 @if (authService.isAdmin()) {
                   <a routerLink="/admin" (click)="mobileMenuOpen.set(false)"
-                     class="block px-3 py-2.5 rounded-lg text-sm text-surface-600 hover:bg-white/[0.06] hover:text-surface-900 transition">Admin Panel</a>
+                     class="block px-3 py-2.5 rounded-lg text-sm text-surface-600 hover:bg-surface-100 hover:text-surface-900 transition">Admin Panel</a>
                   <a routerLink="/admin/profile" (click)="mobileMenuOpen.set(false)"
-                     class="block px-3 py-2.5 rounded-lg text-sm text-surface-600 hover:bg-white/[0.06] hover:text-surface-900 transition">Settings</a>
+                     class="block px-3 py-2.5 rounded-lg text-sm text-surface-600 hover:bg-surface-100 hover:text-surface-900 transition">Settings</a>
                 } @else {
                   <a routerLink="/dashboard" (click)="mobileMenuOpen.set(false)"
-                     class="block px-3 py-2.5 rounded-lg text-sm text-surface-600 hover:bg-white/[0.06] hover:text-surface-900 transition">Dashboard</a>
+                     class="block px-3 py-2.5 rounded-lg text-sm text-surface-600 hover:bg-surface-100 hover:text-surface-900 transition">Dashboard</a>
                 }
               } @else {
                 <a routerLink="/login" (click)="mobileMenuOpen.set(false)"
-                   class="block px-3 py-2.5 rounded-lg text-sm text-surface-600 hover:bg-white/[0.06] hover:text-surface-900 transition">Sign In</a>
+                   class="block px-3 py-2.5 rounded-lg text-sm text-surface-600 hover:bg-surface-100 hover:text-surface-900 transition">Sign In</a>
               }
             </div>
           </div>

@@ -41,7 +41,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 
       <!-- Stat Cards -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 animate-slide-up">
-        <div class="glass-card p-5 flex flex-col justify-between border border-white/[0.05]">
+        <div class="glass-card p-5 flex flex-col justify-between border border-surface-200">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-8 h-8 rounded-lg bg-omni-500/10 flex items-center justify-center border border-omni-500/20">
               <svg class="w-4 h-4 text-omni-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
@@ -50,7 +50,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
           </div>
           <span class="text-2xl font-display font-bold text-surface-900">{{ totalElements() }}</span>
         </div>
-        <div class="glass-card p-5 flex flex-col justify-between border border-white/[0.05]">
+        <div class="glass-card p-5 flex flex-col justify-between border border-surface-200">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-8 h-8 rounded-lg bg-accent-emerald/10 flex items-center justify-center border border-accent-emerald/20">
               <svg class="w-4 h-4 text-accent-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
@@ -59,7 +59,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
           </div>
           <span class="text-2xl font-display font-bold text-surface-900">{{ successCount() }}</span>
         </div>
-        <div class="glass-card p-5 flex flex-col justify-between border border-white/[0.05]">
+        <div class="glass-card p-5 flex flex-col justify-between border border-surface-200">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-8 h-8 rounded-lg bg-accent-rose/10 flex items-center justify-center border border-accent-rose/20">
               <svg class="w-4 h-4 text-accent-rose" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -68,7 +68,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
           </div>
           <span class="text-2xl font-display font-bold text-surface-900">{{ failedCount() }}</span>
         </div>
-        <div class="glass-card p-5 flex flex-col justify-between border border-white/[0.05]">
+        <div class="glass-card p-5 flex flex-col justify-between border border-surface-200">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-8 h-8 rounded-lg bg-accent-amber/10 flex items-center justify-center border border-accent-amber/20">
               <svg class="w-4 h-4 text-accent-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -83,11 +83,11 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
       <div class="flex flex-col md:flex-row items-stretch gap-3 mb-6 animate-slide-up">
         
         <!-- Status Filter Tabs -->
-        <div class="flex-1 flex overflow-x-auto p-1 bg-white border border-white/[0.05] rounded-xl hide-scrollbar min-w-0">
+        <div class="flex-1 flex overflow-x-auto p-1 bg-white border border-surface-200 rounded-xl hide-scrollbar min-w-0">
           <div class="flex items-center gap-1 w-full">
             @for (filter of statusFilters; track filter.key) {
               <button (click)="setCategory(filter.key)"
-                      [class]="transactionCategory() === filter.key ? 'bg-surface-100 text-surface-900 shadow-sm' : 'text-surface-500 hover:text-surface-900 hover:bg-white/[0.02]'"
+                      [class]="transactionCategory() === filter.key ? 'bg-surface-100 text-surface-900 shadow-sm' : 'text-surface-500 hover:text-surface-900 hover:bg-surface-50'"
                       class="flex-1 px-4 py-2.5 rounded-lg text-xs font-bold tracking-wider transition-all whitespace-nowrap text-center">
                 {{ filter.label }}
               </button>
@@ -96,7 +96,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
         </div>
 
         <!-- Date Range Filter -->
-        <div class="flex-1 glass-card p-1 flex items-center border border-white/[0.05] rounded-xl min-w-0">
+        <div class="flex-1 glass-card p-1 flex items-center border border-surface-200 rounded-xl min-w-0">
           <div class="flex items-center gap-2 text-[10px] text-surface-500 font-semibold uppercase tracking-wider px-4 shrink-0 border-r border-white/5">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
             Date Range
@@ -139,7 +139,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
           <!-- Desktop Table (hidden on mobile) -->
           <div class="hidden sm:block overflow-x-auto">
             <table class="w-full text-left text-sm text-surface-600">
-              <thead class="text-xs uppercase bg-white/[0.03] text-surface-500 border-b border-white/[0.05]">
+              <thead class="text-xs uppercase bg-surface-50 text-surface-500 border-b border-surface-200">
                 <tr>
                   <th scope="col" class="px-6 py-4 font-semibold">Txn ID</th>
                   <th scope="col" class="px-6 py-4 font-semibold">Recharge ID</th>
@@ -148,9 +148,9 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
                   <th scope="col" class="px-6 py-4 font-semibold">Date</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-white/[0.05]">
+              <tbody class="divide-y divide-surface-200">
             @for (txn of transactions(); track txn.transactionId) {
-              <tr class="hover:bg-white/[0.02] transition-colors">
+              <tr class="hover:bg-surface-50 transition-colors">
                 <td class="px-6 py-4 font-mono text-xs text-surface-900">
                   {{ txn.transactionId }}
                 </td>
@@ -161,7 +161,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
                   ₹{{ txn.amount }}
                 </td>
                 <td class="px-6 py-4">
-                  <span class="px-2 py-1 rounded bg-white/[0.05] text-[10px] font-bold uppercase tracking-wider border border-surface-200"
+                  <span class="px-2 py-1 rounded bg-surface-50 text-[10px] font-bold uppercase tracking-wider border border-surface-200"
                         [class]="txn.status === 'SUCCESS' ? 'text-accent-emerald border-accent-emerald/20 bg-accent-emerald/5' : 
                                  txn.status === 'FAILED' ? 'text-accent-rose border-accent-rose/20 bg-accent-rose/5' : 
                                  'text-accent-amber border-accent-amber/20 bg-accent-amber/5'">
@@ -181,7 +181,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
           </div>
 
           <!-- Mobile Card Layout (shown only on mobile) -->
-          <div class="sm:hidden divide-y divide-white/[0.05]">
+          <div class="sm:hidden divide-y divide-surface-200">
             @for (txn of transactions(); track txn.transactionId) {
               <div class="p-4 space-y-2.5">
                 <div class="flex items-center justify-between">
@@ -207,7 +207,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
             
         @if (transactions().length === 0) {
               <div class="p-16 text-center">
-                <div class="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-surface-800 to-surface-900 flex items-center justify-center border border-white/[0.06]">
+                <div class="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-surface-800 to-surface-900 flex items-center justify-center border border-surface-200">
                   <svg class="w-10 h-10 text-surface-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                   </svg>
@@ -226,7 +226,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
           
           <!-- Pagination -->
           @if (totalPages() > 1) {
-            <div class="flex items-center justify-between px-6 py-4 border-t border-white/[0.05]">
+            <div class="flex items-center justify-between px-6 py-4 border-t border-surface-200">
               <span class="text-xs text-surface-500">
                 Showing {{ (currentPage() * 10) + 1 }}–{{ Math.min((currentPage() + 1) * 10, totalElements()) }} of {{ totalElements() }}
               </span>
@@ -237,7 +237,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
                 </button>
                 @for (page of getPageNumbers(); track page) {
                   <button (click)="loadTransactions(page)" 
-                          [class]="page === currentPage() ? 'bg-omni-600 text-surface-900' : 'text-surface-500 hover:bg-white/[0.06]'"
+                          [class]="page === currentPage() ? 'bg-omni-600 text-surface-900' : 'text-surface-500 hover:bg-surface-50'"
                           class="w-8 h-8 rounded-lg text-xs font-medium transition-colors">
                     {{ page + 1 }}
                   </button>

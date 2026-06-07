@@ -66,7 +66,7 @@ import { ToastComponent } from './shared/components/toast/toast.component';
 
         @if (!isAdminRoute()) {
           <!-- Footer -->
-          <footer class="relative z-10 border-t border-white/[0.06] mt-20">
+          <footer class="relative z-10 border-t border-surface-200 mt-20">
             <div class="section-container py-12">
               <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <!-- Brand -->
@@ -104,7 +104,7 @@ import { ToastComponent } from './shared/components/toast/toast.component';
                   </ul>
                 </div>
               </div>
-              <div class="mt-10 pt-6 border-t border-white/[0.06] flex flex-col sm:flex-row justify-between items-center gap-4">
+              <div class="mt-10 pt-6 border-t border-surface-200 flex flex-col sm:flex-row justify-between items-center gap-4">
                 <p class="text-xs text-surface-500">&copy; 2026 OmniCharge. All rights reserved.</p>
                 <div class="flex items-center gap-4">
                   <span class="text-xs text-surface-600">Terms of Service</span>

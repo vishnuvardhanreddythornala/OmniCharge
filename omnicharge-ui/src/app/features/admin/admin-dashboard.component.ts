@@ -21,7 +21,7 @@ import { AdminService, PaymentStatsResponse, RechargeStatsResponse, UserProfileR
           [disabled]="rebuildingCache()"
           class="group relative flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 border overflow-hidden"
           [class]="rebuildingCache()
-            ? 'bg-white/[0.03] border-surface-200 text-surface-500 cursor-not-allowed'
+            ? 'bg-surface-50 border-surface-200 text-surface-500 cursor-not-allowed'
             : 'bg-gradient-to-r from-accent-amber/10 to-accent-amber/5 border-accent-amber/25 text-accent-amber hover:border-accent-amber/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.1)]'"
         >
           <!-- Animated spinning gears icon -->
@@ -114,7 +114,7 @@ import { AdminService, PaymentStatsResponse, RechargeStatsResponse, UserProfileR
                 <span class="text-surface-500 text-xs font-semibold uppercase tracking-wider">Success Rate</span>
               </div>
               <div class="text-3xl font-display font-bold text-accent-teal">{{ getSuccessRate() }}%</div>
-              <div class="mt-2 w-full h-1.5 bg-white/[0.05] rounded-full overflow-hidden">
+              <div class="mt-2 w-full h-1.5 bg-surface-50 rounded-full overflow-hidden">
                 <div class="h-full bg-gradient-to-r from-accent-teal to-accent-emerald rounded-full transition-all duration-1000"
                      [style.width.%]="getSuccessRate()"></div>
               </div>
@@ -208,7 +208,7 @@ import { AdminService, PaymentStatsResponse, RechargeStatsResponse, UserProfileR
         <div class="grid lg:grid-cols-2 gap-4">
 
           <!-- Avg Transaction & Pending -->
-          <div class="glass-card p-6 border border-white/[0.05]">
+          <div class="glass-card p-6 border border-surface-200">
             <h3 class="text-sm font-semibold text-surface-900 mb-4 flex items-center gap-2">
               <svg class="w-4 h-4 text-omni-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
               Transaction Breakdown
@@ -218,17 +218,17 @@ import { AdminService, PaymentStatsResponse, RechargeStatsResponse, UserProfileR
                 <span class="text-sm text-surface-500">Avg. Transaction</span>
                 <span class="text-sm font-semibold text-surface-900">₹{{ formatNumber(paymentStats()?.averageTransactionAmount) }}</span>
               </div>
-              <div class="w-full h-px bg-white/[0.05]"></div>
+              <div class="w-full h-px bg-surface-50"></div>
               <div class="flex items-center justify-between">
                 <span class="text-sm text-surface-500">Pending Transactions</span>
                 <span class="text-sm font-semibold text-accent-amber">{{ paymentStats()?.pendingTransactions || 0 }}</span>
               </div>
-              <div class="w-full h-px bg-white/[0.05]"></div>
+              <div class="w-full h-px bg-surface-50"></div>
               <div class="flex items-center justify-between">
                 <span class="text-sm text-surface-500">Success Amount</span>
                 <span class="text-sm font-semibold text-accent-emerald">₹{{ formatNumber(paymentStats()?.successAmount) }}</span>
               </div>
-              <div class="w-full h-px bg-white/[0.05]"></div>
+              <div class="w-full h-px bg-surface-50"></div>
               <div class="flex items-center justify-between">
                 <span class="text-sm text-surface-500">Failed Amount</span>
                 <span class="text-sm font-semibold text-accent-rose">₹{{ formatNumber(paymentStats()?.failedAmount) }}</span>
@@ -237,7 +237,7 @@ import { AdminService, PaymentStatsResponse, RechargeStatsResponse, UserProfileR
           </div>
 
           <!-- Top Users -->
-          <div class="glass-card p-6 border border-white/[0.05]">
+          <div class="glass-card p-6 border border-surface-200">
             <h3 class="text-sm font-semibold text-surface-900 mb-4 flex items-center gap-2">
               <svg class="w-4 h-4 text-accent-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
               Top Users by Spend

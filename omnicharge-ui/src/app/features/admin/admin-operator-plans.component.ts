@@ -124,8 +124,8 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
             <button (click)="categoryFilter.set('ALL')"
                     class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200"
                     [class]="categoryFilter() === 'ALL'
-                      ? 'bg-white/[0.1] text-surface-900 border border-surface-300'
-                      : 'bg-white/[0.03] text-surface-500 border border-transparent hover:border-surface-200'">
+                      ? 'bg-surface-50 text-surface-900 border border-surface-300'
+                      : 'bg-surface-50 text-surface-500 border border-transparent hover:border-surface-200'">
               All
             </button>
             @for (cat of allCategories(); track cat) {
@@ -133,7 +133,7 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
                       class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200"
                       [class]="categoryFilter() === cat
                         ? getCategoryActiveClass(cat)
-                        : 'bg-white/[0.03] text-surface-500 border border-transparent hover:border-surface-200'">
+                        : 'bg-surface-50 text-surface-500 border border-transparent hover:border-surface-200'">
                 {{ cat }}
               </button>
             }
@@ -181,7 +181,7 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
         } @else {
           <div class="overflow-x-auto">
             <table class="w-full text-left text-sm" id="plans-table">
-              <thead class="text-[11px] uppercase bg-white/[0.025] text-surface-500 border-b border-white/[0.05] tracking-wider">
+              <thead class="text-[11px] uppercase bg-surface-50 text-surface-500 border-b border-surface-200 tracking-wider">
                 <tr>
                   <th class="pl-5 pr-2 py-3.5 w-10">
                     <input type="checkbox"
@@ -198,9 +198,9 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
                   <th class="px-4 py-3.5 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-white/[0.04]">
+              <tbody class="divide-y divide-surface-200">
                 @for (plan of filteredPlans(); track plan.id) {
-                  <tr class="hover:bg-white/[0.02] transition-colors group"
+                  <tr class="hover:bg-surface-50 transition-colors group"
                       [ngClass]="{'selected-row': selectedIds().has(plan.id)}">
                     <td class="pl-5 pr-2 py-3.5">
                       <input type="checkbox"
@@ -279,12 +279,12 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
                         <!-- Three-dot menu -->
                         <div class="relative">
                           <button (click)="toggleMenu(plan.id)"
-                                  class="w-8 h-8 rounded-lg flex items-center justify-center text-surface-500 hover:text-surface-900 hover:bg-white/[0.06] transition opacity-0 group-hover:opacity-100">
+                                  class="w-8 h-8 rounded-lg flex items-center justify-center text-surface-500 hover:text-surface-900 hover:bg-surface-50 transition opacity-0 group-hover:opacity-100">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="4" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="16" r="1.5"/></svg>
                           </button>
                           @if (openMenuId() === plan.id) {
                             <div class="absolute right-0 top-10 z-30 w-40 rounded-xl border border-surface-200 bg-white/95 backdrop-blur-xl shadow-2xl py-1.5 animate-scale-in">
-                              <button (click)="openEditModal(plan)" class="w-full px-4 py-2 text-left text-xs text-surface-600 hover:text-surface-900 hover:bg-white/[0.05] transition flex items-center gap-2">
+                              <button (click)="openEditModal(plan)" class="w-full px-4 py-2 text-left text-xs text-surface-600 hover:text-surface-900 hover:bg-surface-50 transition flex items-center gap-2">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 Edit Plan
                               </button>
@@ -304,7 +304,7 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
 
             @if (filteredPlans().length === 0) {
               <div class="p-16 text-center">
-                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white/[0.03] flex items-center justify-center">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-surface-50 flex items-center justify-center">
                   <svg class="w-8 h-8 text-surface-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 </div>
                 <p class="text-surface-500 font-medium">No plans match your filters</p>
@@ -327,7 +327,7 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
                   class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-200"
                   [class]="statusFilter() === 'ACTIVE'
                     ? 'bg-accent-emerald/10 border-accent-emerald/30 text-accent-emerald'
-                    : 'bg-white/[0.02] border-white/[0.06] text-surface-500 hover:border-accent-emerald/20'">
+                    : 'bg-surface-50 border-surface-200 text-surface-500 hover:border-accent-emerald/20'">
             <span class="w-2 h-2 rounded-full bg-accent-emerald"></span>
             Active — visible to users
           </button>
@@ -335,7 +335,7 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
                   class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-200"
                   [class]="statusFilter() === 'MANUAL'
                     ? 'bg-accent-rose/10 border-accent-rose/30 text-accent-rose'
-                    : 'bg-white/[0.02] border-white/[0.06] text-surface-500 hover:border-accent-rose/20'">
+                    : 'bg-surface-50 border-surface-200 text-surface-500 hover:border-accent-rose/20'">
             <span class="w-2 h-2 rounded-full bg-accent-rose"></span>
             Manual — admin deactivated
           </button>
@@ -343,7 +343,7 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
                   class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-200"
                   [class]="statusFilter() === 'AUTO'
                     ? 'bg-accent-amber/10 border-accent-amber/30 text-accent-amber'
-                    : 'bg-white/[0.02] border-white/[0.06] text-surface-500 hover:border-accent-amber/20'">
+                    : 'bg-surface-50 border-surface-200 text-surface-500 hover:border-accent-amber/20'">
             <span class="w-2 h-2 rounded-full bg-accent-amber"></span>
             Auto — operator toggle
           </button>
@@ -357,7 +357,7 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
           <div class="relative glass-card p-6 sm:p-8 w-full max-w-lg border-omni-500/10 animate-scale-in" (click)="$event.stopPropagation()">
             <div class="flex items-center justify-between mb-6">
               <h2 class="text-lg font-display font-bold text-surface-900">Edit Plan</h2>
-              <button (click)="showEditModal.set(false)" class="w-8 h-8 rounded-lg flex items-center justify-center text-surface-500 hover:text-surface-900 hover:bg-white/[0.05] transition">
+              <button (click)="showEditModal.set(false)" class="w-8 h-8 rounded-lg flex items-center justify-center text-surface-500 hover:text-surface-900 hover:bg-surface-50 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
             </div>
@@ -406,7 +406,7 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
                 </div>
               </div>
             </div>
-            <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-white/[0.06]">
+            <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-surface-200">
               <button (click)="showEditModal.set(false)" class="btn-secondary text-sm !py-2.5 !px-5">Cancel</button>
               <button (click)="saveEditPlan()" [disabled]="actionLoading()" class="btn-primary text-sm !py-2.5 !px-5">
                 {{ actionLoading() ? 'Saving...' : 'Save Changes' }}
@@ -423,7 +423,7 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
           <div class="relative glass-card p-6 sm:p-8 w-full max-w-lg border-omni-500/10 animate-scale-in" (click)="$event.stopPropagation()">
             <div class="flex items-center justify-between mb-6">
               <h2 class="text-lg font-display font-bold text-surface-900">Add New Plan</h2>
-              <button (click)="showAddModal.set(false)" class="w-8 h-8 rounded-lg flex items-center justify-center text-surface-500 hover:text-surface-900 hover:bg-white/[0.05] transition">
+              <button (click)="showAddModal.set(false)" class="w-8 h-8 rounded-lg flex items-center justify-center text-surface-500 hover:text-surface-900 hover:bg-surface-50 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
             </div>
@@ -473,7 +473,7 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'MANUAL' | 'AUTO';
                 </div>
               </div>
             </div>
-            <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-white/[0.06]">
+            <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-surface-200">
               <button (click)="showAddModal.set(false)" class="btn-secondary text-sm !py-2.5 !px-5">Cancel</button>
               <button (click)="saveNewPlan()" [disabled]="actionLoading() || !addForm.planName || !addForm.price || !addForm.category" class="btn-primary text-sm !py-2.5 !px-5">
                 {{ actionLoading() ? 'Creating...' : 'Create Plan' }}
@@ -862,7 +862,7 @@ export class AdminOperatorPlansComponent implements OnInit {
       case 'DATA': return 'bg-sky-500/15 text-sky-400 border border-sky-500/20';
       case 'UNLIMITED': return 'bg-accent-emerald/15 text-accent-emerald border border-accent-emerald/20';
       case 'TALKTIME': return 'bg-violet-500/15 text-violet-400 border border-violet-500/20';
-      default: return 'bg-white/[0.05] text-surface-600 border border-surface-200';
+      default: return 'bg-surface-50 text-surface-600 border border-surface-200';
     }
   }
 
@@ -872,7 +872,7 @@ export class AdminOperatorPlansComponent implements OnInit {
       case 'DATA': return 'bg-sky-500/15 text-sky-400 border border-sky-500/30';
       case 'UNLIMITED': return 'bg-accent-emerald/15 text-accent-emerald border border-accent-emerald/30';
       case 'TALKTIME': return 'bg-violet-500/15 text-violet-400 border border-violet-500/30';
-      default: return 'bg-white/[0.1] text-surface-900 border border-surface-300';
+      default: return 'bg-surface-50 text-surface-900 border border-surface-300';
     }
   }
 
