@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <title>OmniCharge — Instant Mobile Recharge</title>
   <meta name="description" content="Recharge any mobile number instantly. Browse plans, detect operators automatically, and pay securely with Razorpay.">
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
-  <meta name="theme-color" content="#0b0f1a">
+  <meta name="theme-color" content="#FCFCFB">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <!-- Preconnect for performance -->
@@ -26,27 +26,27 @@
   <!-- Google Identity Services — For Google Sign-In -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
-<body class="bg-surface text-white antialiased">
+<body class="bg-surface text-surface-900 antialiased">
   <app-root>
     <style>
       .global-app-loader {
         display: flex; flex-direction: column; align-items: center; justify-content: center;
-        height: 100vh; width: 100vw; background: #0b0f1a; color: #fff; font-family: 'Outfit', sans-serif;
+        height: 100vh; width: 100vw; background: #FCFCFB; color: #1F2937; font-family: 'Outfit', sans-serif;
       }
       .global-app-loader-icon {
-        width: 60px; height: 60px; border-radius: 16px; background: linear-gradient(135deg, #6366f1, #818cf8);
-        display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: bold;
-        animation: pulse 1.5s infinite; margin-bottom: 24px; box-shadow: 0 0 40px rgba(99,102,241,0.4);
+        width: 60px; height: 60px; border-radius: 16px; background: linear-gradient(135deg, #C65D3B, #e06f5c);
+        display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: bold; color: white;
+        animation: pulse 1.5s infinite; margin-bottom: 24px; box-shadow: 0 0 40px rgba(198, 93, 59, 0.4);
       }
       .global-app-loader-bars { display: flex; gap: 8px; }
       .global-app-loader-bar {
-        width: 4px; height: 16px; background: #818cf8; border-radius: 4px;
+        width: 4px; height: 16px; background: #e06f5c; border-radius: 4px;
         animation: bounce 1.2s infinite ease-in-out;
       }
       .global-app-loader-bar:nth-child(1) { animation-delay: -0.24s; }
       .global-app-loader-bar:nth-child(2) { animation-delay: -0.12s; }
       @keyframes bounce { 0%, 80%, 100% { transform: scaleY(0.4); opacity: 0.5; } 40% { transform: scaleY(1); opacity: 1; } }
-      @keyframes pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(99,102,241,0.4); } 50% { transform: scale(1.05); box-shadow: 0 0 60px rgba(99,102,241,0.6); } }
+      @keyframes pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(198, 93, 59, 0.4); } 50% { transform: scale(1.05); box-shadow: 0 0 60px rgba(198, 93, 59, 0.6); } }
     </style>
     <div class="global-app-loader">
       <div class="global-app-loader-icon">⚡</div>

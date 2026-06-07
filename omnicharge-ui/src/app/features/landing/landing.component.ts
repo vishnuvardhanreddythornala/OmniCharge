@@ -28,9 +28,9 @@ import { OperatorService } from '../../core/services/operator.service';
             <!-- Left: Copy -->
             <div class="animate-slide-up">
               <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full
-                          bg-omni-500/10 border border-omni-500/20 mb-6">
+                          bg-omni-50 border border-omni-200 mb-6 shadow-sm">
                 <span class="w-2 h-2 rounded-full bg-accent-emerald animate-pulse"></span>
-                <span class="text-xs font-medium text-omni-300">Instant Recharge • Live Now</span>
+                <span class="text-xs font-medium text-omni-600 tracking-wide">Instant Recharge • Live Now</span>
               </div>
 
               <h1 class="text-4xl sm:text-5xl lg:text-6xl font-display font-bold leading-[1.1] mb-6">

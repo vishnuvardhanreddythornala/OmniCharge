@@ -57,8 +57,8 @@ module.exports = {
         'glow':      '0 0 20px rgba(198, 93, 59, 0.25)',
         'glow-lg':   '0 0 40px rgba(198, 93, 59, 0.2)',
         'glow-teal': '0 0 20px rgba(45, 212, 191, 0.3)',
-        'elevated':  '0 8px 32px rgba(0, 0, 0, 0.08)',
-        'card':      '0 4px 12px rgba(0, 0, 0, 0.06)',
+        'elevated':  '0 12px 40px rgba(0, 0, 0, 0.12)',
+        'card':      '0 8px 30px rgba(0, 0, 0, 0.08)',
       },
       animation: {
         'fade-in':       'fadeIn 0.5s ease-out',
