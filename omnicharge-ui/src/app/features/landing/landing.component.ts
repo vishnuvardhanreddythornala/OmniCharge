@@ -35,7 +35,7 @@ import { OperatorService } from '../../core/services/operator.service';
 
               <h1 class="text-5xl sm:text-6xl lg:text-[4.5rem] font-display font-extrabold leading-[1.05] tracking-tight mb-6 text-surface-900">
                 Recharge in
-                <span class="text-gradient">seconds,</span><br>
+                <span class="text-omni-600">seconds,</span><br>
                 not minutes.
               </h1>
 
@@ -87,12 +87,9 @@ import { OperatorService } from '../../core/services/operator.service';
 
             <!-- Right: Quick Recharge Card -->
             <div class="animate-slide-up" style="animation-delay: 0.15s">
-              <div class="glass-card p-6 sm:p-8 relative overflow-hidden">
-                <!-- Card shine overlay -->
-                <div class="absolute inset-0 bg-card-shine pointer-events-none"></div>
-
-                <div class="relative">
-                  <h2 class="text-lg font-display font-semibold mb-1">Quick Recharge</h2>
+              <div class="bg-white rounded-2xl p-8 sm:p-10 relative overflow-hidden shadow-card border border-surface-200 ring-1 ring-surface-900/5">
+                <div class="relative z-10">
+                  <h2 class="text-2xl font-display font-bold text-surface-900 mb-2">Quick Recharge</h2>
                   <p class="text-sm text-surface-500 mb-6">Enter a mobile number to get started</p>
 
                   <!-- Mobile Number Input -->
@@ -252,8 +249,7 @@ import { OperatorService } from '../../core/services/operator.service';
       <!-- ═══════════ CTA SECTION ═══════════ -->
       <section class="py-20">
         <div class="section-container">
-          <div class="glass-card relative overflow-hidden p-8 sm:p-12 text-center bg-gradient-to-br from-surface-50 to-white">
-            <div class="absolute inset-0 bg-mesh opacity-30 pointer-events-none"></div>
+          <div class="bg-surface-50 rounded-[32px] relative overflow-hidden p-8 sm:p-12 text-center border border-surface-200 shadow-sm">
             <div class="relative">
               <h2 class="text-3xl sm:text-4xl font-display font-bold mb-4">
                 Ready to recharge?

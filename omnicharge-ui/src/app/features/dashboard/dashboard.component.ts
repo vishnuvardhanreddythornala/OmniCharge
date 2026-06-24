@@ -974,20 +974,20 @@ type DashTab = 'profile' | 'recharges' | 'payments' | 'notifications';
       box-shadow: 0 0 50px rgba(0,0,0,0.1), 0 0 100px rgba(0,0,0,0.05);
       animation: dsGlow 2s ease-in-out infinite; color: white;
     }
-    .ds-title { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 300; color: #6B7280; line-height: 1.3; margin-bottom: 6px; }
-    .ds-title span { display: block; font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #111827, #374151); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .ds-sub { font-size: 13px; color: #9CA3AF; font-weight: 500; margin-bottom: 28px; }
+    .ds-title { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 300; color: #64748B; line-height: 1.3; margin-bottom: 6px; }
+    .ds-title span { display: block; font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #4F46E5, #4338CA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .ds-sub { font-size: 13px; color: #94A3B8; font-weight: 500; margin-bottom: 28px; }
     .ds-bar { width: 160px; height: 3px; margin: 0 auto; background: rgba(0,0,0,0.06); border-radius: 99px; overflow: hidden; }
-    .ds-bar-fill { height: 100%; width: 0; background: #111827; border-radius: 99px; animation: dsBarFill 1.6s ease 0.3s forwards; }
+    .ds-bar-fill { height: 100%; width: 0; background: linear-gradient(90deg, #4F46E5, #4338CA); border-radius: 99px; animation: dsBarFill 1.6s ease 0.3s forwards; }
     .ds-particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
     .dp { position: absolute; border-radius: 50%; opacity: 0; animation: dpFloat 2.5s ease forwards; }
-    .dp1 { width: 5px; height: 5px; background: #111827; top: 35%; left: 20%; animation-delay: 0.2s; }
-    .dp2 { width: 4px; height: 4px; background: #374151; top: 55%; left: 75%; animation-delay: 0.5s; }
-    .dp3 { width: 6px; height: 6px; background: #4B5563; top: 25%; left: 65%; animation-delay: 0.8s; }
-    .dp4 { width: 3px; height: 3px; background: #1F2937; top: 70%; left: 30%; animation-delay: 0.4s; }
+    .dp1 { width: 5px; height: 5px; background: #4F46E5; top: 35%; left: 20%; animation-delay: 0.2s; }
+    .dp2 { width: 4px; height: 4px; background: #6366F1; top: 55%; left: 75%; animation-delay: 0.5s; }
+    .dp3 { width: 6px; height: 6px; background: #818CF8; top: 25%; left: 65%; animation-delay: 0.8s; }
+    .dp4 { width: 3px; height: 3px; background: #4338CA; top: 70%; left: 30%; animation-delay: 0.4s; }
     @keyframes dsFade { to { opacity: 0; pointer-events: none; } }
     @keyframes dsIn { from { opacity: 0; transform: translateY(25px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
-    @keyframes dsGlow { 0%,100% { box-shadow: 0 0 50px rgba(0,0,0,0.1); } 50% { box-shadow: 0 0 70px rgba(0,0,0,0.15), 0 0 120px rgba(0,0,0,0.05); } }
+    @keyframes dsGlow { 0%,100% { box-shadow: 0 0 50px rgba(79,70,229,0.2); } 50% { box-shadow: 0 0 70px rgba(79,70,229,0.3), 0 0 120px rgba(79,70,229,0.1); } }
     @keyframes dsBarFill { to { width: 100%; } }
     @keyframes dpFloat { 0% { opacity: 0; transform: translateY(0) scale(0); } 30% { opacity: 0.5; transform: translateY(-15px) scale(1); } 100% { opacity: 0; transform: translateY(-60px) scale(0.5); } }
   `]
