@@ -75,14 +75,14 @@
     @apply border-surface-300 shadow-[0_20px_50px_rgba(0,0,0,0.06)] -translate-y-1;
   }
 
-  /* Gradient Buttons */
+  /* Solid Monochrome Buttons */
   .btn-primary {
     @apply px-6 py-3 rounded-xl font-semibold text-white
-           bg-gradient-to-r from-omni-600 to-omni-500
-           shadow-[0_8px_20px_rgba(198,93,59,0.25)] transition-all duration-300
-           hover:shadow-[0_12px_25px_rgba(198,93,59,0.35)] hover:brightness-110 hover:-translate-y-0.5
-           active:scale-[0.98] disabled:from-surface-200 disabled:to-surface-200 disabled:text-surface-400 disabled:cursor-not-allowed
-           disabled:hover:shadow-none disabled:shadow-none disabled:hover:-translate-y-0 disabled:hover:brightness-100;
+           bg-omni-600
+           shadow-[0_8px_20px_rgba(0,0,0,0.15)] transition-all duration-300
+           hover:shadow-[0_12px_25px_rgba(0,0,0,0.2)] hover:bg-omni-700 hover:-translate-y-0.5
+           active:scale-[0.98] disabled:bg-surface-200 disabled:text-surface-400 disabled:cursor-not-allowed
+           disabled:hover:shadow-none disabled:shadow-none disabled:hover:-translate-y-0 disabled:hover:bg-surface-200;
   }
 
   .btn-secondary {
@@ -172,7 +172,7 @@
 @layer utilities {
   .text-gradient {
     @apply bg-clip-text text-transparent
-           bg-gradient-to-r from-omni-600 to-omni-400;
+           bg-gradient-to-br from-surface-900 to-surface-500;
   }
 
   .text-gradient-warm {
@@ -181,7 +181,7 @@
   }
 
   .border-gradient {
-    border-image: linear-gradient(135deg, rgba(198, 93, 59, 0.5), rgba(253, 232, 230, 1)) 1;
+    border-image: linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(250, 250, 250, 1)) 1;
   }
 
   .bg-mesh {

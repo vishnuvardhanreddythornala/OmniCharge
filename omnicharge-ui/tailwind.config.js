@@ -7,19 +7,19 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // OmniCharge Brand Palette — premium terracotta fintech aesthetic
+        // OmniCharge Brand Palette — High Contrast Monochrome
         omni: {
-          50:  '#FDE8E6', // Light Accent Background
-          100: '#f9d2cc',
-          200: '#f3b4ab',
-          300: '#eb8f81',
-          400: '#e06f5c',
-          500: '#C65D3B', // Primary Accent (Terracotta Red)
-          600: '#A94E32', // Primary Hover
-          700: '#8b4028',
-          800: '#733725',
-          900: '#603123',
-          950: '#34170f',
+          50:  '#FAFAFA',
+          100: '#F5F5F5',
+          200: '#E5E5E5',
+          300: '#D4D4D4',
+          400: '#A3A3A3',
+          500: '#737373',
+          600: '#171717', // Primary Accent (Pitch Black)
+          700: '#0A0A0A', // Primary Hover
+          800: '#000000',
+          900: '#000000',
+          950: '#000000',
         },
         surface: {
           DEFAULT: '#FCFCFB',  // Page Background
@@ -54,8 +54,8 @@ module.exports = {
         'card-shine': 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, transparent 50%, rgba(255,255,255,0.5) 100%)',
       },
       boxShadow: {
-        'glow':      '0 0 20px rgba(198, 93, 59, 0.25)',
-        'glow-lg':   '0 0 40px rgba(198, 93, 59, 0.2)',
+        'glow':      '0 0 20px rgba(0, 0, 0, 0.1)',
+        'glow-lg':   '0 0 40px rgba(0, 0, 0, 0.15)',
         'glow-teal': '0 0 20px rgba(45, 212, 191, 0.3)',
         'elevated':  '0 12px 40px rgba(0, 0, 0, 0.12)',
         'card':      '0 8px 30px rgba(0, 0, 0, 0.08)',
@@ -96,8 +96,8 @@ module.exports = {
           '50%':      { transform: 'translateY(-10px)' },
         },
         glowPulse: {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(198, 93, 59, 0.25)' },
-          '50%':      { boxShadow: '0 0 40px rgba(198, 93, 59, 0.5)' },
+          '0%, 100%': { boxShadow: '0 0 20px rgba(0, 0, 0, 0.1)' },
+          '50%':      { boxShadow: '0 0 40px rgba(0, 0, 0, 0.15)' },
         },
       },
       backdropBlur: {
