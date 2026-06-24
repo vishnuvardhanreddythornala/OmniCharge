@@ -20,7 +20,12 @@ import { NotificationService } from '../../../core/services/notification.service
 
           <!-- Brand Logo -->
           <a routerLink="/" class="flex items-center gap-2.5 group">
-            <img src="assets/omnicharge%20logo.png" alt="OmniCharge Logo" class="w-10 h-10 rounded-full object-cover border-[1.5px] border-surface-200 shadow-[0_0_15px_rgba(20,184,166,0.3)] transform group-hover:scale-105 transition-transform duration-300 group-hover:shadow-[0_0_20px_rgba(20,184,166,0.5)]" />
+            <div class="w-10 h-10 rounded-[10px] bg-gradient-to-br from-omni-600 to-omni-400 flex items-center justify-center shadow-md shadow-omni-500/20 group-hover:shadow-lg group-hover:shadow-omni-500/30 transition-all duration-300 group-hover:scale-[1.03]">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+            </div>
+            <span class="text-xl font-display font-bold text-surface-900 tracking-tight">Omni<span class="text-omni-600">Charge</span></span>
           </a>
 
           <!-- Desktop Nav Links -->
